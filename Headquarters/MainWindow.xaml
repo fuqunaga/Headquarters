@@ -33,68 +33,81 @@
             </Grid>
         </materialDesign:ColorZone>
 
-        <!-- IPList -->
-        <DockPanel DockPanel.Dock="Left" Margin="0">
-            <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" DockPanel.Dock="Top">
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="IpNetwork"/>
-                    <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">IP List</TextBlock>
-                </StackPanel>
-            </materialDesign:ColorZone>
+        <Grid DockPanel.Dock="Left">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            
+            <!-- IPList -->
+            <DockPanel Grid.Column="0" Margin="0">
+                <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" DockPanel.Dock="Top">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="IpNetwork"/>
+                        <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">IP List</TextBlock>
+                    </StackPanel>
+                </materialDesign:ColorZone>
 
-            <DataGrid x:Name="dgIPList" 
+                <DataGrid x:Name="dgIPList" 
                       ItemsSource="{Binding Items}" 
                       Margin="8,8,8,8" 
                       VerticalScrollBarVisibility="Auto"
                       DockPanel.Dock="Bottom">
 
-                <DataGrid.Resources>
-                    <DataTemplate x:Key="SelectAll">
-                        <CheckBox IsChecked="{Binding DataContext.IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" />
-                    </DataTemplate>
-                    <DataTemplate x:Key="IsSelected">
-                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    </DataTemplate>
-                </DataGrid.Resources>
+                    <DataGrid.Resources>
+                        <DataTemplate x:Key="SelectAll">
+                            <CheckBox IsChecked="{Binding DataContext.IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" />
+                        </DataTemplate>
+                        <DataTemplate x:Key="IsSelected">
+                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGrid.Resources>
 
-            </DataGrid>
-        </DockPanel>
+                </DataGrid>
+            </DockPanel>
 
-        <StackPanel DockPanel.Dock="Right">
-            <Separator Height="28" Margin="0"/>
 
-            <materialDesign:Transitioner Name="transScripts" SelectedIndex="0" Margin="0">
-                <ScrollViewer>
-                    <ItemsControl Name="ScriptButtons" ItemsSource="{Binding Items}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button 
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+
+            <StackPanel Grid.Column="2">
+                <Separator Height="28" Margin="0"/>
+
+                <materialDesign:Transitioner Name="transScripts" SelectedIndex="0" Margin="0">
+                    <ScrollViewer>
+                        <ItemsControl Name="ScriptButtons" ItemsSource="{Binding Items}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button 
                                     Command="{x:Static local:NavigationCommands.MoveNextCommand}"
                                     CommandParameter="{Binding}"
                                     Content="{Binding Header}" 
                                     HorizontalAlignment="Left" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-                <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
-                    <StackPanel>
-                        <Button Command="{x:Static materialDesign:Transitioner.MovePreviousCommand}" HorizontalAlignment="Left">
-                            Prev
-                        </Button>
-                        <ListBox ItemsSource="{Binding Current.Parameters}">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
+                        <StackPanel>
+                            <Button Command="{x:Static materialDesign:Transitioner.MovePreviousCommand}" HorizontalAlignment="Left">
+                                Prev
+                            </Button>
+                            <ListBox ItemsSource="{Binding Current.Parameters}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
                                         <Label Content="{Binding Name}" Width="100"/>
                                         <TextBox Text="{Binding Value}" MinWidth="100"/>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
 
-                        <Button Content="Run" HorizontalAlignment="Right" Width="106" RenderTransformOrigin="0.613,4.156" Click="Button_Click"/>
-                        <TextBox Name ="tbError"
+                            <Button Content="Run" HorizontalAlignment="Right" Width="106" RenderTransformOrigin="0.613,4.156" Click="Button_Click"/>
+                            <TextBox Name ="tbError"
                                  Style="{StaticResource MaterialDesignOutlinedTextFieldTextBox}"
                                  TextWrapping="Wrap" VerticalAlignment="Top"
                                  IsReadOnly="True"
@@ -102,13 +115,14 @@
                                  VerticalScrollBarVisibility="Auto"     
                                  Margin="8,8,8,8"
                                  />
-                    </StackPanel>
-                </materialDesign:TransitionerSlide>
-            </materialDesign:Transitioner>
+                        </StackPanel>
+                    </materialDesign:TransitionerSlide>
+                </materialDesign:Transitioner>
 
 
 
 
-        </StackPanel>
+            </StackPanel>
+        </Grid>
     </DockPanel>
 </Window>
