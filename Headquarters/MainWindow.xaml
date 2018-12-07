@@ -130,7 +130,7 @@
                                 <DataTemplate>
                                     <TextBlock>
                                         <Label Content="{Binding Name}" Width="100"/>
-                                        <TextBox Text="{Binding Value}" IsReadOnly="{Binding Current.IsDependIP}" MinWidth="100"/>
+                                        <TextBox Text="{Binding Value}" IsReadOnly="{Binding IsDependIP}" MinWidth="100"/>
                                     </TextBlock>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
