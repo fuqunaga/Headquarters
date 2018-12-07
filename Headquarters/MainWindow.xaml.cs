@@ -28,7 +28,7 @@ namespace Headquarters
     public partial class MainWindow : Window
     {
         IPList ipList;
-        ScriptsViewModel scriptVM;
+        ScriptsViewModel scriptsVM;
 
         public MainWindow()
         {
@@ -39,16 +39,16 @@ namespace Headquarters
             tbUserName.DataContext = new Parameter(ParameterManager.SpecialParamName.UserName);
             pbUserPassword.Password = paramManager.userPassword;
             pbUserPassword.PasswordChanged += (o, e) => paramManager.userPassword = pbUserPassword.Password;
-            
+
             ipList = new IPList(".\\iplist.csv");
             ipList.Bind(dgIPList);
 
-            scriptVM = new ScriptsViewModel(".");
-            tsScripts.DataContext = scriptVM;
-            
+            scriptsVM = new ScriptsViewModel(".");
+            tsScripts.DataContext = scriptsVM;
 
-            ScriptButtons.DataContext = scriptVM;
-            
+
+            ScriptButtons.DataContext = scriptsVM;
+
         }
 
         private void OnClickSelectScript(object sender, RoutedEventArgs e)
@@ -61,44 +61,9 @@ namespace Headquarters
             tsScripts.SelectedIndex += 1;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void OnClickRun(object sender, RoutedEventArgs e)
         {
-            RunCurrentScript();
-        }
-
-        void RunCurrentScript()
-        {
-            var script = scriptVM.Current?.script;
-            script.Load();
-
-            tbError.Text = "";
-            ipList.selectedParams.ToList()
-                .ForEach(param =>
-                {
-                    IPAddressRange range;
-                    IPAddressRange.TryParse(param.ipStr, out range);
-
-                    var ipStrList = range?.AsEnumerable().Select(ip => ip.ToString()).ToList() ?? (new[] { param.ipStr }).ToList();
-
-                    var paramIsValid = true;
-                    if (ipStrList.Count > 100)
-                    {
-                        var result = MessageBox.Show($"IP[{param.ipStr}] means {ipStrList.Count} targets.\n Continue?", "Many targets", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                        paramIsValid = (result == MessageBoxResult.OK);
-                    }
-
-                    if (paramIsValid)
-                    {
-                        ipStrList.ForEach(ipStr =>
-                        {
-                            Task.Run(() =>
-                            {
-                                var result = script.Run(ipStr);
-                                tbError.Dispatcher.Invoke(() => tbError.Text += $"{ipStr}:\n{string.Join("\n", result.objs)}\n{string.Join("\n", result.errors)}\n\n");
-                            });
-                        });
-                    }
-                });
+            scriptsVM.Current?.Run(ipList.selectedParams.ToList());
         }
     }
 }

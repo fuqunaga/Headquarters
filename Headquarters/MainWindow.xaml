@@ -98,8 +98,8 @@
                 </StackPanel>
 
                 <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
-                    <StackPanel>
-                        <materialDesign:ColorZone Mode="PrimaryMid" Padding="8">
+                    <DockPanel>
+                        <materialDesign:ColorZone Mode="PrimaryMid" Padding="8" DockPanel.Dock="Top">
                             <StackPanel Orientation="Horizontal">
                                 <Button 
                                     materialDesign:ShadowAssist.ShadowDepth="Depth0"
@@ -110,16 +110,17 @@
 
 
                                 <Label Content="{Binding Current.Header}" VerticalAlignment="Center" />
-                                
+
                                 <Button 
                                     Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
                                     Margin="16,0,0,0"
-                                    HorizontalAlignment="Right" Click="Button_Click">
+                                    HorizontalAlignment="Right" Click="OnClickRun">
                                     <materialDesign:PackIcon Kind="MenuRight" Height="32" Width="32" />
                                 </Button>
                             </StackPanel>
                         </materialDesign:ColorZone>
-                        <ListBox ItemsSource="{Binding Current.Parameters}" MinHeight="200" Margin="0,16,0,0">
+
+                        <ListBox ItemsSource="{Binding Current.Parameters}" MinHeight="200" Margin="0,16,0,0" DockPanel.Dock="Top">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock>
@@ -130,15 +131,16 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
 
-                        <TextBox Name ="tbError"
+                        <TextBox Text="{Binding Current.ResultText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource MaterialDesignOutlinedTextFieldTextBox}"
                                  TextWrapping="Wrap" VerticalAlignment="Top"
                                  IsReadOnly="True"
                                  AcceptsReturn="True"
-                                 VerticalScrollBarVisibility="Auto"     
+                                 VerticalScrollBarVisibility="Auto"
                                  Margin="8,8,8,8"
+                                 MinHeight="50"
                                  />
-                    </StackPanel>
+                    </DockPanel>
                 </materialDesign:TransitionerSlide>
             </materialDesign:Transitioner>
         </Grid>

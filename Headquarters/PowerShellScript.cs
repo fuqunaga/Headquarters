@@ -14,6 +14,8 @@ namespace Headquarters
         {
             public Collection<PSObject> objs;
             public List<ErrorRecord> errors;
+
+            public bool IsSuccessed => !errors.Any();
         }
 
         public readonly string name;
