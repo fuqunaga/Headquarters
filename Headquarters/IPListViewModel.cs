@@ -30,7 +30,7 @@ namespace Headquarters
 
             for (var i = 1; i < lines.Length; ++i)
             {
-                var rows = new[] { (object)false }.Concat(lines[i].Split(',')).ToArray();
+                var rows = new[] { (object)true }.Concat(lines[i].Split(',')).ToArray();
                 Items.Rows.Add(rows);
             }
 

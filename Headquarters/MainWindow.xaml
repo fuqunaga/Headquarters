@@ -100,7 +100,8 @@
                 <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
                     <DockPanel>
                         <materialDesign:ColorZone Mode="PrimaryMid" Padding="8" DockPanel.Dock="Top">
-                            <StackPanel Orientation="Horizontal">
+                            <DockPanel>
+                                <!-- Return Button -->
                                 <Button 
                                     materialDesign:ShadowAssist.ShadowDepth="Depth0"
                                     Command="{x:Static materialDesign:Transitioner.MovePreviousCommand}"
@@ -111,21 +112,25 @@
 
                                 <Label Content="{Binding Current.Header}" VerticalAlignment="Center" />
 
+                                <!-- Run Button -->
                                 <Button 
                                     Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
                                     Margin="16,0,0,0"
-                                    HorizontalAlignment="Right" Click="OnClickRun">
+                                    Click="OnClickRun">
                                     <materialDesign:PackIcon Kind="MenuRight" Height="32" Width="32" />
                                 </Button>
-                            </StackPanel>
+
+                                <ProgressBar Value="10" Margin="16" />
+                            </DockPanel>
                         </materialDesign:ColorZone>
 
+                        <!-- Paramters -->
                         <ListBox ItemsSource="{Binding Current.Parameters}" MinHeight="200" Margin="0,16,0,0" DockPanel.Dock="Top">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock>
                                         <Label Content="{Binding Name}" Width="100"/>
-                                        <TextBox Text="{Binding Value}" MinWidth="100"/>
+                                        <TextBox Text="{Binding Value}" IsReadOnly="{Binding Current.IsDependIP}" MinWidth="100"/>
                                     </TextBlock>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
