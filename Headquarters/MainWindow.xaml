@@ -20,7 +20,7 @@
     </Window.Resources>
 
     <DockPanel>
-        <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth3" Panel.ZIndex="100">
+        <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2" Panel.ZIndex="100">
             <Grid Margin="16,0,0,0">
                 <TextBlock Style="{StaticResource MaterialDesignDisplay1TextBlock}">HQ</TextBlock>
                 <TextBlock HorizontalAlignment="Right">
@@ -42,10 +42,10 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            
+
             <!-- IPList -->
             <DockPanel Grid.Column="0" Margin="0">
-                <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" DockPanel.Dock="Top">
+                <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="IpNetwork"/>
                         <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">IP List</TextBlock>
@@ -54,7 +54,7 @@
 
                 <DataGrid x:Name="dgIPList" 
                       ItemsSource="{Binding Items}" 
-                      Margin="8,8,8,8" 
+                      Margin="0" 
                       VerticalScrollBarVisibility="Auto"
                       DockPanel.Dock="Bottom">
 
@@ -73,41 +73,64 @@
 
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
 
-            <StackPanel Grid.Column="2">
-                <Separator Height="28" Margin="0"/>
+            <materialDesign:Transitioner Name="tsScripts" SelectedIndex="0"  Panel.ZIndex="-10" Grid.Column="2">
 
-                <materialDesign:Transitioner Name="transScripts" SelectedIndex="0" Margin="0">
-                    <ScrollViewer>
+                <!-- Select script -->
+                <StackPanel >
+                    <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth2">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ScriptText"/>
+                            <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">Scripts</TextBlock>
+                        </StackPanel>
+                    </materialDesign:ColorZone>
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"  Margin="8,8,8,8">
                         <ItemsControl Name="ScriptButtons" ItemsSource="{Binding Items}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Button 
-                                    Command="{x:Static local:NavigationCommands.MoveNextCommand}"
-                                    CommandParameter="{Binding}"
-                                    Content="{Binding Header}" 
-                                    HorizontalAlignment="Left" />
+                                    <Button
+                                        Style="{StaticResource MaterialDesignRaisedLightButton}"
+                                        Click="OnClickSelectScript" Content="{Binding Header}" HorizontalAlignment="Left"/>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </ScrollViewer>
-                    <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
-                        <StackPanel>
-                            <Button Command="{x:Static materialDesign:Transitioner.MovePreviousCommand}" HorizontalAlignment="Left">
-                                Prev
-                            </Button>
-                            <ListBox ItemsSource="{Binding Current.Parameters}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock>
+                </StackPanel>
+
+                <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
+                    <StackPanel>
+                        <materialDesign:ColorZone Mode="PrimaryMid" Padding="8">
+                            <StackPanel Orientation="Horizontal">
+                                <Button 
+                                    materialDesign:ShadowAssist.ShadowDepth="Depth0"
+                                    Command="{x:Static materialDesign:Transitioner.MovePreviousCommand}"
+                                    HorizontalAlignment="Left">
+                                    <materialDesign:PackIcon Kind="ArrowLeft" />
+                                </Button>
+
+
+                                <Label Content="{Binding Current.Header}" VerticalAlignment="Center" />
+                                
+                                <Button 
+                                    Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
+                                    Margin="16,0,0,0"
+                                    HorizontalAlignment="Right" Click="Button_Click">
+                                    <materialDesign:PackIcon Kind="MenuRight" Height="32" Width="32" />
+                                </Button>
+                            </StackPanel>
+                        </materialDesign:ColorZone>
+                        <ListBox ItemsSource="{Binding Current.Parameters}" MinHeight="200" Margin="0,16,0,0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
                                         <Label Content="{Binding Name}" Width="100"/>
                                         <TextBox Text="{Binding Value}" MinWidth="100"/>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
 
-                            <Button Content="Run" HorizontalAlignment="Right" Width="106" RenderTransformOrigin="0.613,4.156" Click="Button_Click"/>
-                            <TextBox Name ="tbError"
+                        <TextBox Name ="tbError"
                                  Style="{StaticResource MaterialDesignOutlinedTextFieldTextBox}"
                                  TextWrapping="Wrap" VerticalAlignment="Top"
                                  IsReadOnly="True"
@@ -115,14 +138,9 @@
                                  VerticalScrollBarVisibility="Auto"     
                                  Margin="8,8,8,8"
                                  />
-                        </StackPanel>
-                    </materialDesign:TransitionerSlide>
-                </materialDesign:Transitioner>
-
-
-
-
-            </StackPanel>
+                    </StackPanel>
+                </materialDesign:TransitionerSlide>
+            </materialDesign:Transitioner>
         </Grid>
     </DockPanel>
 </Window>

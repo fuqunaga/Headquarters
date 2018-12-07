@@ -9,8 +9,10 @@ namespace Headquarters
 {
     class IPParams
     {
+        public static string isSelectedPropetyName = "IsSelected";
+
         DataRow dataRow;
-        public bool enable => dataRow.Field<bool>("Enable");
+        public bool isSelected => dataRow.Field<bool>(isSelectedPropetyName);
         public string ipStr => dataRow.Field<string>("IP");
 
         public IPParams(DataRow dataRow)

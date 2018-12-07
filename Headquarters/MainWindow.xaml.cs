@@ -34,8 +34,6 @@ namespace Headquarters
         {
             InitializeComponent();
 
-            CommandManager.RegisterClassCommandBinding(typeof(MainWindow), new CommandBinding(NavigationCommands.MoveNextCommand, MoveNextHandler));
-
             var paramManager = ParameterManager.Instance;
             paramManager.Load(".\\param.json");
             tbUserName.DataContext = new Parameter(ParameterManager.SpecialParamName.UserName);
@@ -46,17 +44,21 @@ namespace Headquarters
             ipList.Bind(dgIPList);
 
             scriptVM = new ScriptsViewModel(".");
-            transScripts.DataContext = scriptVM;
+            tsScripts.DataContext = scriptVM;
             
 
             ScriptButtons.DataContext = scriptVM;
             
         }
 
-        private void MoveNextHandler(object sender, ExecutedRoutedEventArgs e)
+        private void OnClickSelectScript(object sender, RoutedEventArgs e)
         {
-            transScripts.SetCurrentValue(Selector.SelectedIndexProperty, transScripts.SelectedIndex + 1);
+            /*
+            tsScripts.SetCurrentValue(Selector.SelectedIndexProperty, tsScripts.SelectedIndex + 1);
             scriptVM.Current = e.Parameter as ScriptViewModel;
+            */
+            Debug.WriteLine(sender);
+            tsScripts.SelectedIndex += 1;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -70,10 +72,7 @@ namespace Headquarters
             script.Load();
 
             tbError.Text = "";
-            ipList.Items.Rows.OfType<DataRow>()
-                .Select(d => new IPParams(d))
-                .Where(p => p.enable)
-                .ToList()
+            ipList.selectedParams.ToList()
                 .ForEach(param =>
                 {
                     IPAddressRange range;

@@ -25,6 +25,12 @@ namespace Headquarters
             }
 
             AddItemsCallback();
+
+            IPParams.isSelectedPropetyName = selectedPropertyName;
         }
+
+        public IEnumerable<IPParams> ipParams => Items.Rows.OfType<DataRow>().Select(d => new IPParams(d));
+        public IEnumerable<IPParams> selectedParams => ipParams.Where(p => p.isSelected);
+
     }
 }
