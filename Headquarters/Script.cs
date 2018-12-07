@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Management.Automation;
 using System.Management.Automation.Runspaces;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Headquarters
 {
@@ -50,11 +46,10 @@ namespace Headquarters
                 .ToList();
         }
 
-        public PowerShellScript.Result Run(string ipAddress)
+        public PowerShellScript.Result Run(string ipAddress, Dictionary<string, object> parameters)
         {
             PowerShellScript.Result result;
 
-            var dic = new Dictionary<string, object>();
             using (var rs = RunspaceFactory.CreateRunspace())
             {
                 rs.Open();
@@ -67,9 +62,8 @@ namespace Headquarters
                 }
                 else
                 {
-                    dic.Add("session", session);
-
-                    result = psScript.Invoke(rs, dic);
+                    parameters.Add("session", session);
+                    result = psScript.Invoke(rs, parameters);
                 }
             }
 

@@ -65,8 +65,8 @@ namespace Headquarters
 
                     tasks = ipStrList.Select(ipStr =>
                     {
-                        return Task.Run(() => script.Run(ipStr)).ContinueWith(task => UpdateText(ipStr, task.Result));
-
+                        var parameters = Parameters.ToDictionary(p => p.Name, p => (object)p.Get(param));
+                        return Task.Run(() => script.Run(ipStr, parameters)).ContinueWith(task => UpdateText(ipStr, task.Result));
                     })
                     .ToList();
                  }

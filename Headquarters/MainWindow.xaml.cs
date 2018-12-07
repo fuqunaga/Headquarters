@@ -27,7 +27,7 @@ namespace Headquarters
     /// </summary>
     public partial class MainWindow : Window
     {
-        IPList ipList;
+        IPListViewModel ipList;
         ScriptsViewModel scriptsVM;
 
         public MainWindow()
@@ -40,7 +40,8 @@ namespace Headquarters
             pbUserPassword.Password = paramManager.userPassword;
             pbUserPassword.PasswordChanged += (o, e) => paramManager.userPassword = pbUserPassword.Password;
 
-            ipList = new IPList(".\\iplist.csv");
+            ipList = IPListViewModel.Instance;
+            ipList.Load(".\\iplist.csv");
             ipList.Bind(dgIPList);
 
             scriptsVM = new ScriptsViewModel(".");
@@ -48,7 +49,6 @@ namespace Headquarters
 
 
             ScriptButtons.DataContext = scriptsVM;
-
         }
 
         private void OnClickSelectScript(object sender, RoutedEventArgs e)

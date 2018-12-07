@@ -1,10 +1,6 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Headquarters
 {
@@ -18,6 +14,7 @@ namespace Headquarters
 
 
         #region Singleton
+
         public static ParameterManager Instance { get; } = new ParameterManager();
 
         private ParameterManager()
@@ -62,8 +59,7 @@ namespace Headquarters
 
         public string Get(string name)
         {
-            string ret;
-            parameters.TryGetValue(name, out ret);
+            parameters.TryGetValue(name, out string ret);
             return ret;
         }
 

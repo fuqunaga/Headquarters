@@ -8,9 +8,19 @@ using System.Threading.Tasks;
 
 namespace Headquarters
 {
-    class IPList : DataGridWithSelectAll
+    class IPListViewModel : DataGridWithSelectAll
     {
-        public IPList(string filepath)
+        #region Singleton
+
+        public static IPListViewModel Instance { get; } = new IPListViewModel();
+
+        private IPListViewModel() : base()
+        {
+        }
+
+        #endregion
+
+        public void Load(string filepath)
         {
             var lines = File.ReadAllLines(filepath);
 
@@ -32,5 +42,6 @@ namespace Headquarters
         public IEnumerable<IPParams> ipParams => Items.Rows.OfType<DataRow>().Select(d => new IPParams(d));
         public IEnumerable<IPParams> selectedParams => ipParams.Where(p => p.isSelected);
 
+        public bool Contains(string name) => Items.Columns.Contains(name);
     }
 }
