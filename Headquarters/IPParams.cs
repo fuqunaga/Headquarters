@@ -5,11 +5,12 @@ namespace Headquarters
 {
     class IPParams
     {
-        public static string isSelectedPropetyName = "IsSelected";
+        public static string isSelectedPropertyName = "IsSelected";
+        public static string ipPropertyName = "IP";
 
         DataRow dataRow;
-        public bool isSelected => dataRow.Field<bool>(isSelectedPropetyName);
-        public string ipStr => dataRow.Field<string>("IP");
+        public bool isSelected => dataRow.Field<bool>(isSelectedPropertyName);
+        public string ipStr => dataRow.Field<string>(ipPropertyName);
 
 
         public IPParams(DataRow dataRow)

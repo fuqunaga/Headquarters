@@ -46,10 +46,16 @@
             <!-- IPList -->
             <DockPanel Grid.Column="0" Margin="0">
                 <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="IpNetwork"/>
-                        <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">IP List</TextBlock>
-                    </StackPanel>
+                    <DockPanel>
+                        <materialDesign:PackIcon Kind="IpNetwork" DockPanel.Dock="Left" VerticalAlignment="Center"/>
+                        <Label VerticalAlignment="Center" Content="IP List" />
+                        <Button 
+                            Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                            HorizontalAlignment="Right" 
+                            Content="{materialDesign:PackIcon Kind=ContentSave}" 
+                            Click="OnClickSaveIPList"
+                            />
+                    </DockPanel>
                 </materialDesign:ColorZone>
 
                 <DataGrid x:Name="dgIPList" 
@@ -96,7 +102,7 @@
                         </ItemsControl>
                     </ScrollViewer>
                 </StackPanel>
-                
+
                 <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
                     <DockPanel>
                         <materialDesign:ColorZone Mode="PrimaryMid" Padding="8,8,0,0" DockPanel.Dock="Top">
@@ -119,7 +125,7 @@
                                         HorizontalAlignment="Left"
                                         IsEnabled="False"
                                         Content="Select IP" />
-                                    
+
                                     <materialDesign:TransitionerSlide HorizontalAlignment="Left">
                                         <materialDesign:TransitionerSlide.BackwardWipe>
                                             <materialDesign:FadeWipe />
@@ -179,8 +185,8 @@
                                  Margin="8,8,8,8"
                                  MinHeight="50"
                                  />
-                        
-                        
+
+
                     </DockPanel>
                 </materialDesign:TransitionerSlide>
             </materialDesign:Transitioner>

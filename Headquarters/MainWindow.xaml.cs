@@ -69,5 +69,10 @@ namespace Headquarters
             scriptsVM.Current?.Stop();
             RunButtonSelector.SelectedIndex = 1;
         }
+
+        private void OnClickSaveIPList(object sender, RoutedEventArgs e)
+        {
+            ipList.Save();
+        }
     }
 }
