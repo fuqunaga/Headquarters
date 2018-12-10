@@ -96,10 +96,10 @@
                         </ItemsControl>
                     </ScrollViewer>
                 </StackPanel>
-
+                
                 <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
                     <DockPanel>
-                        <materialDesign:ColorZone Mode="PrimaryMid" Padding="8" DockPanel.Dock="Top">
+                        <materialDesign:ColorZone Mode="PrimaryMid" Padding="8,8,0,0" DockPanel.Dock="Top">
                             <DockPanel>
                                 <!-- Return Button -->
                                 <Button 
@@ -113,14 +113,47 @@
                                 <Label Content="{Binding Current.Header}" VerticalAlignment="Center" />
 
                                 <!-- Run Button -->
-                                <Button 
-                                    Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
-                                    Margin="16,0,0,0"
-                                    Click="OnClickRun">
-                                    <materialDesign:PackIcon Kind="MenuRight" Height="32" Width="32" />
-                                </Button>
+                                <materialDesign:Transitioner Name="RunButtonSelector" SelectedIndex="2" Margin="16,4,8,8">
+                                    <Button 
+                                        Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                                        Margin="16,0,0,0"
+                                        HorizontalAlignment="Left"
+                                        Content="Select IP" />
+                                    
+                                    <materialDesign:TransitionerSlide HorizontalAlignment="Left">
+                                        <materialDesign:TransitionerSlide.BackwardWipe>
+                                            <materialDesign:CircleWipe />
+                                        </materialDesign:TransitionerSlide.BackwardWipe>
+                                        <Button 
+                                            Name="RunButton"
+                                            Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
+                                            materialDesign:ShadowAssist.ShadowDepth="Depth3"                                            
+                                            Click="OnClickRun"
+                                            >
+                                            <materialDesign:PackIcon Kind="MenuRight" Height="32" Width="32" />
+                                        </Button>
+                                    </materialDesign:TransitionerSlide>
 
-                                <ProgressBar Value="10" Margin="16" />
+                                    <materialDesign:TransitionerSlide>
+                                        <materialDesign:TransitionerSlide.BackwardWipe>
+                                            <materialDesign:CircleWipe />
+                                        </materialDesign:TransitionerSlide.BackwardWipe>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <ProgressBar Grid.Column="0" IsIndeterminate="True"/>
+                                            <Button 
+                                                Grid.Column="1"
+                                                Margin="16,0,0,0"
+                                                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                                Click="OnClickStop"
+                                                Content="{materialDesign:PackIcon Kind=Stop}"                                           
+                                            />
+                                        </Grid>
+                                    </materialDesign:TransitionerSlide>
+                                </materialDesign:Transitioner>
                             </DockPanel>
                         </materialDesign:ColorZone>
 
@@ -145,6 +178,8 @@
                                  Margin="8,8,8,8"
                                  MinHeight="50"
                                  />
+                        
+                        
                     </DockPanel>
                 </materialDesign:TransitionerSlide>
             </materialDesign:Transitioner>

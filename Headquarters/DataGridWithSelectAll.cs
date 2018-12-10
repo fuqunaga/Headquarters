@@ -17,9 +17,9 @@ namespace Headquarters
         public DataTable Items { get; set; }
 
 
-        protected virtual string selectedPropertyName => "IsSelected";
-        protected virtual string cellTemplateKey => "IsSelected";
-        protected virtual string headerTemplateKey => "SelectAll";
+        public virtual string selectedPropertyName => "IsSelected";
+        public virtual string cellTemplateKey => "IsSelected";
+        public virtual string headerTemplateKey => "SelectAll";
 
 
         protected void AddItemsCallback()
@@ -28,7 +28,7 @@ namespace Headquarters
             {
                 if (e.Column.ColumnName == selectedPropertyName)
                 {
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsSelected"));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(selectedPropertyName));
                 }
             };
         }

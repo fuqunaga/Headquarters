@@ -1,4 +1,5 @@
-﻿using NetTools;
+﻿using MaterialDesignThemes.Wpf.Transitions;
+using NetTools;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -42,10 +43,10 @@ namespace Headquarters
         }
 
 
-
-        public void Run(List<IPParams> ipParams)
+        public Task Run(List<IPParams> ipParams)
         {
-            if (IsRunning) return;
+            Task ret = null;
+            if (IsRunning) return ret;
 
             ipParams.ForEach(param =>
             {
@@ -72,9 +73,21 @@ namespace Headquarters
                         return Task.Run(() => script.Run(ipStr, parameters)).ContinueWith(task => UpdateText(ipStr, task.Result));
                     })
                     .ToList();
+
+                    ret = Task.Run(() => Task.WaitAll(tasks.ToArray()));
                  }
              });
+
+            return ret;
         }
+
+        internal void Stop()
+        {
+            if ( IsRunning)
+            {
+            }
+        }
+
 
         void UpdateText(string ipStr, PowerShellScript.Result result)
         {
@@ -86,6 +99,8 @@ namespace Headquarters
                 ResultText += str;
             }
         }
+
+
 
         string ResultToString(PowerShellScript.Result result)
         {

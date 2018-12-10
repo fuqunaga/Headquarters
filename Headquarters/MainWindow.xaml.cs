@@ -2,6 +2,7 @@
 using NetTools;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
@@ -47,23 +48,44 @@ namespace Headquarters
             scriptsVM = new ScriptsViewModel(".");
             tsScripts.DataContext = scriptsVM;
 
+            ipList.PropertyChanged += (sender, e) =>
+            {
+                if (e.PropertyName == ipList.selectedPropertyName) UpdateRunButton();
+            };
+
+            UpdateRunButton();
 
             ScriptButtons.DataContext = scriptsVM;
         }
 
         private void OnClickSelectScript(object sender, RoutedEventArgs e)
         {
-            /*
-            tsScripts.SetCurrentValue(Selector.SelectedIndexProperty, tsScripts.SelectedIndex + 1);
-            scriptVM.Current = e.Parameter as ScriptViewModel;
-            */
-            Debug.WriteLine(sender);
             tsScripts.SelectedIndex += 1;
         }
 
         private void OnClickRun(object sender, RoutedEventArgs e)
         {
-            scriptsVM.Current?.Run(ipList.selectedParams.ToList());
+            var task = scriptsVM.Current?.Run(ipList.selectedParams.ToList());
+            if (task != null)
+            {
+                RunButtonSelector.SelectedIndex = 2;
+
+                task.ContinueWith((t) =>
+                {
+                    UpdateRunButton();
+                });
+            }
+        }
+
+        void UpdateRunButton()
+        {
+            var selectAny = ipList.IsSelected ?? true;
+            RunButtonSelector.Dispatcher.BeginInvoke(new Action(() => RunButtonSelector.SelectedIndex = selectAny ? 1 : 0));
+        }
+
+        private void OnClickStop(object sender, RoutedEventArgs e)
+        {
+            scriptsVM.Current?.Stop();
         }
     }
 }

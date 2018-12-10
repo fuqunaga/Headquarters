@@ -22,7 +22,7 @@ namespace Headquarters
 
             var scripts = filepaths.Select(path => new Script(path));
 
-            scripts.Select(s => new ScriptViewModel(s)).ToList().ForEach(vm => Items.Add(vm));
+            Items = new ObservableCollection<ScriptViewModel>(scripts.Select(s => new ScriptViewModel(s)));
 
             Current = Items.First();
         }
