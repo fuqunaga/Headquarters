@@ -113,21 +113,22 @@
                                 <Label Content="{Binding Current.Header}" VerticalAlignment="Center" />
 
                                 <!-- Run Button -->
-                                <materialDesign:Transitioner Name="RunButtonSelector" SelectedIndex="2" Margin="16,4,8,8">
+                                <materialDesign:Transitioner Name="RunButtonSelector" SelectedIndex="0" Margin="16,0,8,0">
                                     <Button 
                                         Style="{StaticResource MaterialDesignRaisedAccentButton}"
-                                        Margin="16,0,0,0"
                                         HorizontalAlignment="Left"
+                                        IsEnabled="False"
                                         Content="Select IP" />
                                     
                                     <materialDesign:TransitionerSlide HorizontalAlignment="Left">
                                         <materialDesign:TransitionerSlide.BackwardWipe>
-                                            <materialDesign:CircleWipe />
+                                            <materialDesign:FadeWipe />
                                         </materialDesign:TransitionerSlide.BackwardWipe>
                                         <Button 
                                             Name="RunButton"
                                             Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
-                                            materialDesign:ShadowAssist.ShadowDepth="Depth3"                                            
+                                            materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                                            Margin="8"
                                             Click="OnClickRun"
                                             >
                                             <materialDesign:PackIcon Kind="MenuRight" Height="32" Width="32" />
@@ -136,7 +137,7 @@
 
                                     <materialDesign:TransitionerSlide>
                                         <materialDesign:TransitionerSlide.BackwardWipe>
-                                            <materialDesign:CircleWipe />
+                                            <materialDesign:FadeWipe />
                                         </materialDesign:TransitionerSlide.BackwardWipe>
                                         <Grid>
                                             <Grid.ColumnDefinitions>

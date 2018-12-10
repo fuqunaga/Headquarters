@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Management.Automation;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -32,8 +34,11 @@ namespace Headquarters
 
 
         List<Task> tasks = new List<Task>();
+        CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+
 
         public ScriptViewModel(Script script)
         {
@@ -67,10 +72,16 @@ namespace Headquarters
 
                     script.Load();
 
+                    var cancelToken = cancelTokenSource.Token;
+
                     tasks = ipStrList.Select(ipStr =>
                     {
                         var parameters = Parameters.ToDictionary(p => p.Name, p => (object)p.Get(param));
-                        return Task.Run(() => script.Run(ipStr, parameters)).ContinueWith(task => UpdateText(ipStr, task.Result));
+                        return Task.Run(() =>
+                        {
+                            var result = script.Run(ipStr, parameters, cancelToken);
+                            UpdateText(ipStr, result);
+                        });
                     })
                     .ToList();
 
@@ -83,15 +94,14 @@ namespace Headquarters
 
         internal void Stop()
         {
-            if ( IsRunning)
-            {
-            }
+            cancelTokenSource.Cancel();
         }
 
 
         void UpdateText(string ipStr, PowerShellScript.Result result)
         {
-            var str = (result.IsSuccessed ? "✔" : "⚠") + $"{ipStr}:\n";
+            var prefix = result.IsSuccessed ? "✔" : "⚠";
+            var str =  prefix + ipStr + ":" + (result.canceled ? "canceled" : "") + "\n";
             str += ResultToString(result) +"\n\n";
 
             lock (this)
@@ -104,7 +114,13 @@ namespace Headquarters
 
         string ResultToString(PowerShellScript.Result result)
         {
-            return $"{ string.Join("\n", result.objs)}\n{ string.Join("\n", result.errors)}";
+            var strs = ToStrings(result.errors);
+            return $"{ string.Join("\n", result.objs)}\n{ string.Join("\n", strs)}";
+        }
+
+        IEnumerable<string> ToStrings<T>(List<T> collection)
+        {
+            return collection.Select(item => item.ToString());
         }
     }
 }

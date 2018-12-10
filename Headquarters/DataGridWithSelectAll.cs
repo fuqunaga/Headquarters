@@ -45,10 +45,10 @@ namespace Headquarters
                         Header = e.Column.Header,
                         HeaderTemplate = (DataTemplate)dataGrid.Resources[headerTemplateKey],
                         HeaderStringFormat = e.Column.HeaderStringFormat,
-                        SortMemberPath = e.PropertyName // this is used to index into the DataRowView so it MUST be the property's name (for this implementation anyways)
+                        CanUserSort = false
+//                        SortMemberPath = e.PropertyName // this is used to index into the DataRowView so it MUST be the property's name (for this implementation anyways)
                     };
                     e.Column = c;
-
                 }
             };
 

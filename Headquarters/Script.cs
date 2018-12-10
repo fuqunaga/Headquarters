@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Management.Automation.Runspaces;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Headquarters
 {
@@ -46,7 +47,7 @@ namespace Headquarters
                 .ToList();
         }
 
-        public PowerShellScript.Result Run(string ipAddress, Dictionary<string, object> parameters)
+        public PowerShellScript.Result Run(string ipAddress, Dictionary<string, object> parameters, CancellationToken cancelToken)
         {
             PowerShellScript.Result result;
 
@@ -54,7 +55,7 @@ namespace Headquarters
             {
                 rs.Open();
 
-                var sessionResult = SessionManager.Instance.CreateSession(rs, ipAddress);
+                var sessionResult = SessionManager.Instance.CreateSession(rs, ipAddress, cancelToken);
                 var session = sessionResult.objs.FirstOrDefault()?.BaseObject;
                 if (session == null)
                 {
@@ -63,7 +64,7 @@ namespace Headquarters
                 else
                 {
                     parameters.Add("session", session);
-                    result = psScript.Invoke(rs, parameters);
+                    result = psScript.Invoke(rs, parameters, cancelToken);
                 }
             }
 

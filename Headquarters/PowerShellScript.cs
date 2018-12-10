@@ -1,10 +1,10 @@
 ﻿using System.Management.Automation;
-using System.IO;
 using System.Collections.ObjectModel;
 using System.Collections;
 using System.Linq;
-using System.Collections.Generic;
 using System.Management.Automation.Runspaces;
+using System.Threading;
+using System.Collections.Generic;
 
 namespace Headquarters
 {
@@ -12,10 +12,11 @@ namespace Headquarters
     {
         public class Result
         {
+            public bool canceled;
             public Collection<PSObject> objs;
             public List<ErrorRecord> errors;
 
-            public bool IsSuccessed => !errors.Any();
+            public bool IsSuccessed => !canceled && !errors.Any();
         }
 
         public readonly string name;
@@ -27,7 +28,7 @@ namespace Headquarters
             this.script = script;
         }
 
-        public Result Invoke(Runspace rs, IDictionary param)
+        public Result Invoke(Runspace rs, IDictionary param, CancellationToken cancelToken)
         {
             Result ret;
             using (var ps = PowerShell.Create())
@@ -37,11 +38,12 @@ namespace Headquarters
                 ps.AddScript(script);
                 ps.AddParameters(param);
 
-                ret = new Result()
+                ret = new Result();
+                using (cancelToken.Register(() => { ps.Stop(); ret.canceled = true; }))
                 {
-                    objs = ps.Invoke(),
-                    errors = ps.Streams.Error.ToList()
-                };
+                    ret.objs = ps.Invoke();
+                }
+                ret.errors = ps.Streams.Error.ToList();
             }
 
             return ret;
