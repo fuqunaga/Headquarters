@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         Title="Headquaters" MinHeight="600"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
@@ -45,16 +46,10 @@
 
             <!-- IPList -->
             <DockPanel Grid.Column="0" Margin="0">
-                <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2">
+                <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2" Panel.ZIndex="1">
                     <DockPanel>
                         <materialDesign:PackIcon Kind="IpNetwork" DockPanel.Dock="Left" VerticalAlignment="Center"/>
-                        <Label VerticalAlignment="Center" Content="IP List" />
-                        <Button 
-                            Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                            HorizontalAlignment="Right" 
-                            Content="{materialDesign:PackIcon Kind=ContentSave}" 
-                            Click="OnClickSaveIPList"
-                            />
+                        <TextBlock VerticalAlignment="Center">IP List</TextBlock>
                     </DockPanel>
                 </materialDesign:ColorZone>
 
@@ -84,10 +79,10 @@
                 <!-- Select script -->
                 <StackPanel >
                     <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth2">
-                        <StackPanel Orientation="Horizontal">
+                        <DockPanel>
                             <materialDesign:PackIcon Kind="ScriptText"/>
                             <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">Scripts</TextBlock>
-                        </StackPanel>
+                        </DockPanel>
                     </materialDesign:ColorZone>
 
                     <ScrollViewer VerticalScrollBarVisibility="Auto"  Margin="8,8,8,8">

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Headquarters
 {
@@ -35,12 +36,15 @@ namespace Headquarters
             get => Get(SpecialParamName.UserPassword);
             set => Set(SpecialParamName.UserPassword, value);
         }
-        
+
 
         protected Dictionary<string, string> parameters = new Dictionary<string, string>();
+        protected string filepath;
 
         public void Load(string filepath)
         {
+            this.filepath = filepath;
+
             if (File.Exists(filepath))
             {
                 var str = File.ReadAllText(filepath);
@@ -50,10 +54,13 @@ namespace Headquarters
         }
 
 
-        public void Save(string filepath)
+        public void Save()
         {
-            var str = JsonConvert.SerializeObject(parameters);
-            File.WriteAllText(filepath, str);
+            if (parameters.Any())
+            {
+                var str = JsonConvert.SerializeObject(parameters, Formatting.Indented);
+                File.WriteAllText(filepath, str);
+            }
         }
 
 

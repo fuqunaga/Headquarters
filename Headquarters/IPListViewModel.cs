@@ -18,11 +18,14 @@ namespace Headquarters
 
         private IPListViewModel() : base()
         {
+            IPParams.isSelectedPropertyName = selectedPropertyName;
         }
 
         #endregion
 
         protected string filepath;
+
+
 
         public void Load(string filepath)
         {
@@ -55,8 +58,6 @@ namespace Headquarters
 
 
             AddItemsCallback();
-
-            IPParams.isSelectedPropertyName = selectedPropertyName;
         }
 
         public IEnumerable<IPParams> ipParams => Items.Rows.OfType<DataRow>().Select(d => new IPParams(d));

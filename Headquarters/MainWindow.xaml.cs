@@ -70,9 +70,13 @@ namespace Headquarters
             RunButtonSelector.SelectedIndex = 1;
         }
 
-        private void OnClickSaveIPList(object sender, RoutedEventArgs e)
+
+        protected override void OnClosed(EventArgs e)
         {
             ipList.Save();
+            ParameterManager.Instance.Save();
+
+            base.OnClosed(e);
         }
     }
 }

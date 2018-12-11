@@ -72,6 +72,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AnotherCommandImplementation.cs" />
     <Compile Include="DataGridWithSelectAll.cs" />
     <Compile Include="IPParams.cs" />
     <Compile Include="NavigationCommands.cs" />
