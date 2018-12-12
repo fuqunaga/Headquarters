@@ -1,12 +1,14 @@
-﻿using System;
+﻿using MaterialDesignThemes.Wpf;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 
 namespace Headquarters
 {
@@ -23,9 +25,22 @@ namespace Headquarters
 
         #endregion
 
+
+        protected bool isColumnEditable_;
+        public bool IsColumnEditable
+        {
+            get => isColumnEditable_;
+            protected set
+            {
+                if (isColumnEditable_ != value)
+                {
+                    isColumnEditable_ = value;
+                    OnPropertyChanged(nameof(IsColumnEditable));
+                }
+            }
+        }
+
         protected string filepath;
-
-
 
         public void Load(string filepath)
         {
@@ -85,6 +100,86 @@ namespace Headquarters
 
 
             File.WriteAllText(filepath, csv);
+        }
+
+
+
+        public async void RenameColumn(object sender)
+        {
+            var item = (MenuItem)sender;
+            var contextMenu = (ContextMenu)item.Parent;
+            var header = (DataGridColumnHeader)contextMenu.PlacementTarget;
+            var name = (string)header.Content;
+
+
+            var vm = new NameDialogViewModel()
+            {
+                Title = "Rename Column:",
+                Name = name
+            };
+
+            var view = new NameDialog()
+            {
+                DataContext = vm
+            };
+
+            var result = await DialogHost.Show(view, "RootDialog");
+
+            if ((bool)result)
+            {
+                var column = Items.Columns[name];
+                column.ColumnName = vm.Name;
+
+                RefreshDataGrid();
+            }
+        }
+
+        internal void OnHeaderContextMenuOpen(object sender)
+        {
+            var header = (DataGridColumnHeader)sender;
+            var name = (string)header.Content;
+
+            IsColumnEditable = !((name == selectedPropertyName) || (name == IPParams.ipPropertyName));
+        }
+
+        public async void AddColumn(object o)
+        {
+            var vm = new NameDialogViewModel()
+            {
+                Title = "Add Column:"
+            };
+
+            var view = new NameDialog()
+            {
+                DataContext = vm
+            };
+
+            var result = await DialogHost.Show(view, "RootDialog");
+
+            if ((bool)result)
+            {
+                Items.Columns.Add(vm.Name, typeof(string));
+
+                RefreshDataGrid();
+            }
+        }
+
+        internal void DeleteColumn(object sender)
+        {
+            var item = (MenuItem)sender;
+            var contextMenu = (ContextMenu)item.Parent;
+            var header = (DataGridColumnHeader)contextMenu.PlacementTarget;
+
+            Items.Columns.Remove((string)header.Content);
+            RefreshDataGrid();
+        }
+
+        protected void RefreshDataGrid()
+        {
+            // refresh datagrid
+            // https://code.msdn.microsoft.com/windowsdesktop/How-to-add-the-Column-into-2ad31c47
+            dataGridBinding.DataContext = null;
+            dataGridBinding.DataContext = this;
         }
     }
 }

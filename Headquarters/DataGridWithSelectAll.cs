@@ -22,18 +22,20 @@ namespace Headquarters
         public virtual string headerTemplateKey => "SelectAll";
 
 
+        protected DataGrid dataGridBinding;
+
         protected void AddItemsCallback()
         {
             Items.ColumnChanged += (s, e) =>
             {
                 if (e.Column.ColumnName == selectedPropertyName)
                 {
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(selectedPropertyName));
+                    OnPropertyChanged(selectedPropertyName);
                 }
             };
         }
 
-        public void Bind(DataGrid dataGrid)
+        public virtual void Bind(DataGrid dataGrid)
         {
             dataGrid.AutoGeneratingColumn += (s, e) =>
             {
@@ -46,13 +48,15 @@ namespace Headquarters
                         HeaderTemplate = (DataTemplate)dataGrid.Resources[headerTemplateKey],
                         HeaderStringFormat = e.Column.HeaderStringFormat,
                         CanUserSort = false
-//                        SortMemberPath = e.PropertyName // this is used to index into the DataRowView so it MUST be the property's name (for this implementation anyways)
+                        //                        SortMemberPath = e.PropertyName // this is used to index into the DataRowView so it MUST be the property's name (for this implementation anyways)
                     };
                     e.Column = c;
                 }
             };
 
             dataGrid.DataContext = this;
+
+            dataGridBinding = dataGrid;
         }
 
 
@@ -67,6 +71,13 @@ namespace Headquarters
             {
                 Items.AsEnumerable().ToList().ForEach(row => row[selectedPropertyName] = value);
             }
+        }
+
+
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
         }
     }
 }

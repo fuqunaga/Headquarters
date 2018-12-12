@@ -17,161 +17,173 @@
         FontFamily="{DynamicResource MaterialDesignFont}">
 
     <Window.Resources>
-
     </Window.Resources>
 
-    <DockPanel>
-        <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2" Panel.ZIndex="100">
-            <Grid Margin="16,0,0,0">
-                <TextBlock Style="{StaticResource MaterialDesignDisplay1TextBlock}">HQ</TextBlock>
-                <TextBlock HorizontalAlignment="Right">
+    <materialDesign:DialogHost Identifier="RootDialog">
+        <DockPanel>
+            <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2" Panel.ZIndex="100">
+                <Grid Margin="16,0,0,0">
+                    <TextBlock Style="{StaticResource MaterialDesignDisplay1TextBlock}">HQ</TextBlock>
+                    <TextBlock HorizontalAlignment="Right">
                     <materialDesign:PackIcon Kind="Account" Foreground="{Binding ElementName=tbUserName, Path=BorderBrush}" />
                     <TextBox x:Name="tbUserName" materialDesign:HintAssist.Hint="Name" Width="200"  Text="{Binding Value}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
                 
                     <materialDesign:PackIcon Kind="Key" Foreground="{Binding ElementName=pbUserPassword, Path=BorderBrush}" Margin="16,0,0,0"/>
                     <PasswordBox Name="pbUserPassword" materialDesign:HintAssist.Hint="Password" Width="200" Style="{StaticResource MaterialDesignFloatingHintPasswordBox}" />
-                </TextBlock>
-            </Grid>
-        </materialDesign:ColorZone>
+                    </TextBlock>
+                </Grid>
+            </materialDesign:ColorZone>
 
-        <Grid DockPanel.Dock="Left">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+            <Grid DockPanel.Dock="Left">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-            <!-- IPList -->
-            <DockPanel Grid.Column="0" Margin="0">
-                <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2" Panel.ZIndex="1">
-                    <DockPanel>
-                        <materialDesign:PackIcon Kind="IpNetwork" DockPanel.Dock="Left" VerticalAlignment="Center"/>
-                        <TextBlock VerticalAlignment="Center">IP List</TextBlock>
-                    </DockPanel>
-                </materialDesign:ColorZone>
-
-                <DataGrid x:Name="dgIPList" 
-                      ItemsSource="{Binding Items}" 
-                      Margin="0" 
-                      VerticalScrollBarVisibility="Auto"
-                      DockPanel.Dock="Bottom">
-
-                    <DataGrid.Resources>
-                        <DataTemplate x:Key="SelectAll">
-                            <CheckBox IsChecked="{Binding DataContext.IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" />
-                        </DataTemplate>
-                        <DataTemplate x:Key="IsSelected">
-                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                        </DataTemplate>
-                    </DataGrid.Resources>
-
-                </DataGrid>
-            </DockPanel>
-
-
-            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
-
-            <materialDesign:Transitioner Name="tsScripts" SelectedIndex="0"  Panel.ZIndex="-10" Grid.Column="2">
-
-                <!-- Select script -->
-                <StackPanel >
-                    <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth2">
+                <!-- IPList -->
+                <DockPanel Grid.Column="0" Margin="0">
+                    <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2" Panel.ZIndex="1">
                         <DockPanel>
-                            <materialDesign:PackIcon Kind="ScriptText"/>
-                            <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">Scripts</TextBlock>
+                            <materialDesign:PackIcon Kind="IpNetwork" DockPanel.Dock="Left" VerticalAlignment="Center"/>
+                            <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">IP List</TextBlock>
                         </DockPanel>
                     </materialDesign:ColorZone>
 
-                    <ScrollViewer VerticalScrollBarVisibility="Auto"  Margin="8,8,8,8">
-                        <ItemsControl Name="ScriptButtons" ItemsSource="{Binding Items}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button
+                    <DataGrid x:Name="dgIPList" 
+                              ItemsSource="{Binding Items}" 
+                              Margin="0" 
+                              VerticalScrollBarVisibility="Auto"
+                              DockPanel.Dock="Bottom"
+                              >
+
+                        <DataGrid.Resources>
+                            <DataTemplate x:Key="SelectAll">
+                                <CheckBox IsChecked="{Binding DataContext.IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" />
+                            </DataTemplate>
+                            <DataTemplate x:Key="IsSelected">
+                                <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </DataTemplate>
+
+                            <ContextMenu x:Key="HeaderContextMenu">
+                                <MenuItem Header="Add" Click="OnClickAddColumn" />
+                                <MenuItem Header="Rename" Click="OnClickRenameColumn" IsEnabled="{Binding DataContext.IsColumnEditable,RelativeSource={RelativeSource FindAncestor, AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" />
+                                <MenuItem Header="Delete" Click="OnClickDeleteColumn" IsEnabled="{Binding DataContext.IsColumnEditable,RelativeSource={RelativeSource FindAncestor, AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" />
+                            </ContextMenu>
+
+                            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                <Setter Property="ContextMenu" Value="{StaticResource HeaderContextMenu}" />
+                                <!-- https://stackoverflow.com/questions/24928463/connect-handler-to-contextmenu-in-style-section -->
+                                <EventSetter Event="ContextMenuOpening" Handler="OnHeaderContextMenuOpen" />
+                            </Style>
+                        </DataGrid.Resources>
+                    </DataGrid>
+                </DockPanel>
+
+
+                <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+
+                <materialDesign:Transitioner Name="tsScripts" SelectedIndex="0"  Panel.ZIndex="-10" Grid.Column="2">
+
+                    <!-- Select script -->
+                    <StackPanel >
+                        <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth2">
+                            <DockPanel>
+                                <materialDesign:PackIcon Kind="ScriptText"/>
+                                <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">Scripts</TextBlock>
+                            </DockPanel>
+                        </materialDesign:ColorZone>
+
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"  Margin="8,8,8,8">
+                            <ItemsControl Name="ScriptButtons" ItemsSource="{Binding Items}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button
                                         Style="{StaticResource MaterialDesignRaisedLightButton}"
                                         Click="OnClickSelectScript" Content="{Binding Header}" HorizontalAlignment="Left"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
 
-                <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
-                    <DockPanel>
-                        <materialDesign:ColorZone Mode="PrimaryMid" Padding="8,8,0,0" DockPanel.Dock="Top">
-                            <DockPanel>
-                                <!-- Return Button -->
-                                <Button 
+                    <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
+                        <DockPanel>
+                            <materialDesign:ColorZone Mode="PrimaryMid" Padding="8,8,0,0" DockPanel.Dock="Top">
+                                <DockPanel>
+                                    <!-- Return Button -->
+                                    <Button 
                                     materialDesign:ShadowAssist.ShadowDepth="Depth0"
                                     Command="{x:Static materialDesign:Transitioner.MovePreviousCommand}"
                                     HorizontalAlignment="Left">
-                                    <materialDesign:PackIcon Kind="ArrowLeft" />
-                                </Button>
+                                        <materialDesign:PackIcon Kind="ArrowLeft" />
+                                    </Button>
 
 
-                                <Label Content="{Binding Current.Header}" VerticalAlignment="Center" />
+                                    <Label Content="{Binding Current.Header}" VerticalAlignment="Center" />
 
-                                <!-- Run Button -->
-                                <materialDesign:Transitioner Name="RunButtonSelector" SelectedIndex="0" Margin="16,0,8,0">
-                                    <Button 
+                                    <!-- Run Button -->
+                                    <materialDesign:Transitioner Name="RunButtonSelector" SelectedIndex="0" Margin="16,0,8,0">
+                                        <Button 
                                         Style="{StaticResource MaterialDesignRaisedAccentButton}"
                                         HorizontalAlignment="Left"
                                         IsEnabled="False"
                                         Content="Select IP" />
 
-                                    <materialDesign:TransitionerSlide HorizontalAlignment="Left">
-                                        <materialDesign:TransitionerSlide.BackwardWipe>
-                                            <materialDesign:FadeWipe />
-                                        </materialDesign:TransitionerSlide.BackwardWipe>
-                                        <Button 
+                                        <materialDesign:TransitionerSlide HorizontalAlignment="Left">
+                                            <materialDesign:TransitionerSlide.BackwardWipe>
+                                                <materialDesign:FadeWipe />
+                                            </materialDesign:TransitionerSlide.BackwardWipe>
+                                            <Button 
                                             Name="RunButton"
                                             Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
                                             materialDesign:ShadowAssist.ShadowDepth="Depth3"
                                             Margin="8"
                                             Click="OnClickRun"
                                             >
-                                            <materialDesign:PackIcon Kind="MenuRight" Height="32" Width="32" />
-                                        </Button>
-                                    </materialDesign:TransitionerSlide>
+                                                <materialDesign:PackIcon Kind="MenuRight" Height="32" Width="32" />
+                                            </Button>
+                                        </materialDesign:TransitionerSlide>
 
-                                    <materialDesign:TransitionerSlide>
-                                        <materialDesign:TransitionerSlide.BackwardWipe>
-                                            <materialDesign:FadeWipe />
-                                        </materialDesign:TransitionerSlide.BackwardWipe>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <ProgressBar Grid.Column="0" IsIndeterminate="True"/>
-                                            <Button 
+                                        <materialDesign:TransitionerSlide>
+                                            <materialDesign:TransitionerSlide.BackwardWipe>
+                                                <materialDesign:FadeWipe />
+                                            </materialDesign:TransitionerSlide.BackwardWipe>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <ProgressBar Grid.Column="0" IsIndeterminate="True"/>
+                                                <Button 
                                                 Grid.Column="1"
                                                 Margin="16,0,0,0"
                                                 Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
                                                 Click="OnClickStop"
                                                 Content="{materialDesign:PackIcon Kind=Stop}"                                           
                                             />
-                                        </Grid>
-                                    </materialDesign:TransitionerSlide>
-                                </materialDesign:Transitioner>
-                            </DockPanel>
-                        </materialDesign:ColorZone>
+                                            </Grid>
+                                        </materialDesign:TransitionerSlide>
+                                    </materialDesign:Transitioner>
+                                </DockPanel>
+                            </materialDesign:ColorZone>
 
-                        <!-- Paramters -->
-                        <ListBox ItemsSource="{Binding Current.Parameters}" MinHeight="200" Margin="0,16,0,0" DockPanel.Dock="Top">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock>
+                            <!-- Paramters -->
+                            <ListBox ItemsSource="{Binding Current.Parameters}" MinHeight="200" Margin="0,16,0,0" DockPanel.Dock="Top">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
                                         <Label Content="{Binding Name}" Width="100"/>
                                         <TextBox Text="{Binding Value}" IsReadOnly="{Binding IsDependIP}" MinWidth="100"/>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
 
-                        <TextBox Text="{Binding Current.ResultText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                            <TextBox Text="{Binding Current.ResultText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource MaterialDesignOutlinedTextFieldTextBox}"
                                  TextWrapping="Wrap" VerticalAlignment="Top"
                                  IsReadOnly="True"
@@ -182,9 +194,10 @@
                                  />
 
 
-                    </DockPanel>
-                </materialDesign:TransitionerSlide>
-            </materialDesign:Transitioner>
-        </Grid>
-    </DockPanel>
+                        </DockPanel>
+                    </materialDesign:TransitionerSlide>
+                </materialDesign:Transitioner>
+            </Grid>
+        </DockPanel>
+    </materialDesign:DialogHost>
 </Window>

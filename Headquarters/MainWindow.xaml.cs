@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MaterialDesignThemes.Wpf;
+using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 
@@ -71,12 +73,33 @@ namespace Headquarters
         }
 
 
+
         protected override void OnClosed(EventArgs e)
         {
             ipList.Save();
             ParameterManager.Instance.Save();
 
             base.OnClosed(e);
+        }
+
+        private void OnClickAddColumn(object sender, RoutedEventArgs e)
+        {
+            ipList.AddColumn(sender);
+        }
+
+        private void OnClickDeleteColumn(object sender, RoutedEventArgs e)
+        {
+            ipList.DeleteColumn(sender);
+        }
+
+        private void OnClickRenameColumn(object sender, RoutedEventArgs e)
+        {
+            ipList.RenameColumn(sender);
+        }
+
+        private void OnHeaderContextMenuOpen(object sender, System.Windows.Controls.ContextMenuEventArgs e)
+        {
+            ipList.OnHeaderContextMenuOpen(sender);
         }
     }
 }

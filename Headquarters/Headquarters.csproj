@@ -72,6 +72,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="NameDialog.xaml.cs">
+      <DependentUpon>NameDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddColumnDialogViewModel.cs" />
     <Compile Include="AnotherCommandImplementation.cs" />
     <Compile Include="DataGridWithSelectAll.cs" />
     <Compile Include="IPParams.cs" />
@@ -83,6 +87,10 @@
     <Compile Include="ScriptsViewModel.cs" />
     <Compile Include="ScriptViewModel.cs" />
     <Compile Include="SessionManager.cs" />
+    <Page Include="NameDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
