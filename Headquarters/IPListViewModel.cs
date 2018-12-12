@@ -104,35 +104,7 @@ namespace Headquarters
 
 
 
-        public async void RenameColumn(object sender)
-        {
-            var item = (MenuItem)sender;
-            var contextMenu = (ContextMenu)item.Parent;
-            var header = (DataGridColumnHeader)contextMenu.PlacementTarget;
-            var name = (string)header.Content;
 
-
-            var vm = new NameDialogViewModel()
-            {
-                Title = "Rename Column:",
-                Name = name
-            };
-
-            var view = new NameDialog()
-            {
-                DataContext = vm
-            };
-
-            var result = await DialogHost.Show(view, "RootDialog");
-
-            if ((bool)result)
-            {
-                var column = Items.Columns[name];
-                column.ColumnName = vm.Name;
-
-                RefreshDataGrid();
-            }
-        }
 
         internal void OnHeaderContextMenuOpen(object sender)
         {
@@ -158,9 +130,44 @@ namespace Headquarters
 
             if ((bool)result)
             {
-                Items.Columns.Add(vm.Name, typeof(string));
+                if (!Items.Columns.Contains(vm.Name))
+                {
+                    Items.Columns.Add(vm.Name, typeof(string));
+                    RefreshDataGrid();
+                }
+            }
+        }
 
-                RefreshDataGrid();
+        public async void RenameColumn(object sender)
+        {
+            var item = (MenuItem)sender;
+            var contextMenu = (ContextMenu)item.Parent;
+            var header = (DataGridColumnHeader)contextMenu.PlacementTarget;
+            var name = (string)header.Content;
+
+
+            var vm = new NameDialogViewModel()
+            {
+                Title = "Rename Column:",
+                Name = name
+            };
+
+            var view = new NameDialog()
+            {
+                DataContext = vm
+            };
+
+            var result = await DialogHost.Show(view, "RootDialog");
+
+            if ((bool)result)
+            {
+                if (Items.Columns.Contains(vm.Name))
+                {
+                    var column = Items.Columns[name];
+                    column.ColumnName = vm.Name;
+
+                    RefreshDataGrid();
+                }
             }
         }
 
@@ -180,6 +187,8 @@ namespace Headquarters
             // https://code.msdn.microsoft.com/windowsdesktop/How-to-add-the-Column-into-2ad31c47
             dataGridBinding.DataContext = null;
             dataGridBinding.DataContext = this;
+
+            OnPropertyChanged(nameof(Items));
         }
     }
 }

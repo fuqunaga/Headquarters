@@ -13,7 +13,11 @@
             }
         }
 
+        public bool IsIndependentIP => !IsDependIP;
+
         public bool IsDependIP => IPListViewModel.Instance.Contains(Name);
+
+
 
         public Parameter(string name)
         {

@@ -36,6 +36,15 @@ namespace Headquarters
                 if (e.PropertyName == ipList.selectedPropertyName) UpdateRunButton();
             };
 
+            ipList.PropertyChanged += (sender, e) =>
+            {
+                if (e.PropertyName == nameof(IPListViewModel.Items))
+                {
+                    tsScripts.DataContext = null;
+                    tsScripts.DataContext = scriptsVM;
+                }
+            };
+
             UpdateRunButton();
 
             ScriptButtons.DataContext = scriptsVM;
@@ -82,6 +91,14 @@ namespace Headquarters
             base.OnClosed(e);
         }
 
+
+        #region IPList Context Menu
+
+        private void OnHeaderContextMenuOpen(object sender, System.Windows.Controls.ContextMenuEventArgs e)
+        {
+            ipList.OnHeaderContextMenuOpen(sender);
+        }
+
         private void OnClickAddColumn(object sender, RoutedEventArgs e)
         {
             ipList.AddColumn(sender);
@@ -97,9 +114,6 @@ namespace Headquarters
             ipList.RenameColumn(sender);
         }
 
-        private void OnHeaderContextMenuOpen(object sender, System.Windows.Controls.ContextMenuEventArgs e)
-        {
-            ipList.OnHeaderContextMenuOpen(sender);
-        }
+        #endregion
     }
 }

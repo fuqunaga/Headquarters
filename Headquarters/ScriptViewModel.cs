@@ -1,20 +1,19 @@
-﻿using MaterialDesignThemes.Wpf.Transitions;
-using NetTools;
+﻿using NetTools;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
 
 namespace Headquarters
 {
     class ScriptViewModel : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+
         public string Header => script.name;
         public List<Parameter> Parameters { get; protected set; }
 
@@ -36,14 +35,11 @@ namespace Headquarters
         List<Task> tasks = new List<Task>();
         CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
 
 
         public ScriptViewModel(Script script)
         {
             this.script = script;
-
             Parameters = script.paramNames.Select(p => new Parameter(p)).ToList();
         }
 
@@ -109,8 +105,6 @@ namespace Headquarters
                 ResultText += str;
             }
         }
-
-
 
         string ResultToString(PowerShellScript.Result result)
         {

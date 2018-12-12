@@ -87,30 +87,38 @@
                 <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
 
                 <materialDesign:Transitioner Name="tsScripts" SelectedIndex="0"  Panel.ZIndex="-10" Grid.Column="2">
+                    <materialDesign:TransitionerSlide OpeningEffect="SlideInFromLeft">
+                        <materialDesign:TransitionerSlide.ForwardWipe>
+                            <materialDesign:FadeWipe />
+                        </materialDesign:TransitionerSlide.ForwardWipe>
 
-                    <!-- Select script -->
-                    <StackPanel >
-                        <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth2">
-                            <DockPanel>
-                                <materialDesign:PackIcon Kind="ScriptText"/>
-                                <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">Scripts</TextBlock>
-                            </DockPanel>
-                        </materialDesign:ColorZone>
+                        <!-- Select script -->
+                        <StackPanel >
+                            <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth2">
+                                <DockPanel>
+                                    <materialDesign:PackIcon Kind="ScriptText"/>
+                                    <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">Scripts</TextBlock>
+                                </DockPanel>
+                            </materialDesign:ColorZone>
 
-                        <ScrollViewer VerticalScrollBarVisibility="Auto"  Margin="8,8,8,8">
-                            <ItemsControl Name="ScriptButtons" ItemsSource="{Binding Items}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Button
+                            <ScrollViewer VerticalScrollBarVisibility="Auto"  Margin="8,8,8,8">
+                                <ItemsControl Name="ScriptButtons" ItemsSource="{Binding Items}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button
                                         Style="{StaticResource MaterialDesignRaisedLightButton}"
                                         Click="OnClickSelectScript" Content="{Binding Header}" HorizontalAlignment="Left"/>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </materialDesign:TransitionerSlide>
 
-                    <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect FadeIn}">
+                    <materialDesign:TransitionerSlide OpeningEffect="SlideInFromRight">
+                        <materialDesign:TransitionerSlide.BackwardWipe>
+                            <materialDesign:FadeWipe />
+                        </materialDesign:TransitionerSlide.BackwardWipe>
                         <DockPanel>
                             <materialDesign:ColorZone Mode="PrimaryMid" Padding="8,8,0,0" DockPanel.Dock="Top">
                                 <DockPanel>
@@ -177,7 +185,7 @@
                                     <DataTemplate>
                                         <TextBlock>
                                         <Label Content="{Binding Name}" Width="100"/>
-                                        <TextBox Text="{Binding Value}" IsReadOnly="{Binding IsDependIP}" MinWidth="100"/>
+                                        <TextBox Text="{Binding Value}" IsEnabled="{Binding IsIndependentIP}" MinWidth="100"/>
                                         </TextBlock>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
