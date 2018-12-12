@@ -106,6 +106,7 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Button
+                                                Margin="8"
                                         Style="{StaticResource MaterialDesignRaisedLightButton}"
                                         Click="OnClickSelectScript" Content="{Binding Header}" HorizontalAlignment="Left"/>
                                         </DataTemplate>

@@ -108,13 +108,14 @@ namespace Headquarters
 
         string ResultToString(PowerShellScript.Result result)
         {
-            var strs = ToStrings(result.errors);
-            return $"{ string.Join("\n", result.objs)}\n{ string.Join("\n", strs)}";
+            var objStrs = ToStrings(result.objs);
+            var errStrs = ToStrings(result.errors);
+            return $"{ string.Join("\n", objStrs)}\n{ string.Join("\n", errStrs)}";
         }
 
-        IEnumerable<string> ToStrings<T>(List<T> collection)
+        IEnumerable<string> ToStrings<T>(IEnumerable<T> collection)
         {
-            return collection.Select(item => item.ToString());
+            return collection?.Select(item => item.ToString()) ?? new string[0];
         }
     }
 }

@@ -1,20 +1,40 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 
 namespace Headquarters
 {
-    class ScriptsViewModel
+    class ScriptsViewModel : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+
         public ObservableCollection<ScriptViewModel> Items { get; set; } = new ObservableCollection<ScriptViewModel>();
-        public ScriptViewModel Current { get; set; }
 
-
-        public ScriptsViewModel(string dirpath)
+        protected ScriptViewModel current_;
+        public ScriptViewModel Current
         {
-            var filepaths = Directory.GetFiles(dirpath, "*.ps1")
-                .Where(s => s.EndsWith(".ps1")) // GetFiles includes *.ps1*. (*.ps1~, *.ps1_, etc.)
-                .ToList();
+            get => current_;
+            set
+            {
+                if (current_ != value)
+                {
+                    current_ = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Current)));
+                }
+            }
+        }
+
+
+        public ScriptsViewModel(params string[] dirpaths)
+        {
+            var filepaths = dirpaths.SelectMany(dirpath =>
+            {
+                return Directory.GetFiles(dirpath, "*.ps1")
+                .Where(s => s.EndsWith(".ps1")); // GetFiles includes *.ps1*. (*.ps1~, *.ps1_, etc.)
+            });
 
             var scripts = filepaths.Select(path => new Script(path));
 
@@ -22,5 +42,15 @@ namespace Headquarters
 
             Current = Items.First();
         }
+
+        public void SetCurrent(string name)
+        {
+            var item = Items.Where(svm => svm.Header == name).FirstOrDefault();
+            if (item != null)
+            {
+                Current = item;
+            }
+        }
+
     }
 }

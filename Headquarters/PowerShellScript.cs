@@ -5,6 +5,7 @@ using System.Linq;
 using System.Management.Automation.Runspaces;
 using System.Threading;
 using System.Collections.Generic;
+using System;
 
 namespace Headquarters
 {
@@ -39,14 +40,22 @@ namespace Headquarters
                 ps.AddParameters(param);
 
                 ret = new Result();
-                using (cancelToken.Register(() => { ps.Stop(); ret.canceled = true; }))
+                try
                 {
-                    ret.objs = ps.Invoke();
-                }
-                ret.errors = ps.Streams.Error.ToList();
-            }
 
-            return ret;
+                    using (cancelToken.Register(() => { ps.Stop(); ret.canceled = true; }))
+                    {
+                        ret.objs = ps.Invoke();
+                    }
+                    ret.errors = ps.Streams.Error.ToList();
+                }
+                catch (Exception e)
+                {
+                    ret.errors = (new[] { new ErrorRecord(e, "", ErrorCategory.InvalidData, null) }).ToList();
+                }
+
+                return ret;
+            }
         }
     }
 }

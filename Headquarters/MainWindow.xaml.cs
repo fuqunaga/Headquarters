@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace Headquarters
 {
@@ -28,7 +29,7 @@ namespace Headquarters
             ipList.Load(".\\iplist.csv");
             ipList.Bind(dgIPList);
 
-            scriptsVM = new ScriptsViewModel(".");
+            scriptsVM = new ScriptsViewModel(".", @".\Scripts");
             tsScripts.DataContext = scriptsVM;
 
             ipList.PropertyChanged += (sender, e) =>
@@ -52,6 +53,7 @@ namespace Headquarters
 
         private void OnClickSelectScript(object sender, RoutedEventArgs e)
         {
+            scriptsVM.SetCurrent(((Button)sender).Content.ToString());
             tsScripts.SelectedIndex += 1;
         }
 
