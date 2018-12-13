@@ -42,7 +42,6 @@ namespace Headquarters
                 ret = new Result();
                 try
                 {
-
                     using (cancelToken.Register(() => { ps.Stop(); ret.canceled = true; }))
                     {
                         ret.objs = ps.Invoke();

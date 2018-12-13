@@ -131,7 +131,7 @@
                                         <materialDesign:PackIcon Kind="ArrowLeft" />
                                     </Button>
 
-
+                                    <materialDesign:PackIcon Kind="ScriptText" VerticalAlignment="Center" Margin="8,0,0,0"/>
                                     <Label Content="{Binding Current.Header}" VerticalAlignment="Center" />
 
                                     <!-- Run Button -->
@@ -192,9 +192,11 @@
                                 </ListBox.ItemTemplate>
                             </ListBox>
 
+                            <!-- Output -->
                             <TextBox Text="{Binding Current.ResultText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource MaterialDesignOutlinedTextFieldTextBox}"
-                                 TextWrapping="Wrap" VerticalAlignment="Top"
+                                 TextWrapping="Wrap" 
+                                 VerticalAlignment="Stretch"
                                  IsReadOnly="True"
                                  AcceptsReturn="True"
                                  VerticalScrollBarVisibility="Auto"
