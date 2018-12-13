@@ -30,7 +30,7 @@ namespace Headquarters
 
         public ScriptsViewModel(params string[] dirpaths)
         {
-            var filepaths = dirpaths.SelectMany(dirpath =>
+            var filepaths = dirpaths.Where(dirpath => Directory.Exists(dirpath)).SelectMany(dirpath =>
             {
                 return Directory.GetFiles(dirpath, "*.ps1")
                 .Where(s => s.EndsWith(".ps1")); // GetFiles includes *.ps1*. (*.ps1~, *.ps1_, etc.)
@@ -40,7 +40,7 @@ namespace Headquarters
 
             Items = new ObservableCollection<ScriptViewModel>(scripts.Select(s => new ScriptViewModel(s)));
 
-            Current = Items.First();
+            Current = Items.FirstOrDefault();
         }
 
         public void SetCurrent(string name)
