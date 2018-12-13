@@ -29,11 +29,14 @@ namespace Headquarters
 
         public void Load()
         {
-            var script = File.ReadAllText(filepath);
+            if (File.Exists(filepath))
+            {
+                var script = File.ReadAllText(filepath);
 
-            psScript = new PowerShellScript(name, script);
+                psScript = new PowerShellScript(name, script);
 
-            paramNames = SearchParameters(script);
+                paramNames = SearchParameters(script);
+            }
         }
 
         List<string> SearchParameters(string script)

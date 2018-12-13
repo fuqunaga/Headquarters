@@ -48,6 +48,7 @@ namespace Headquarters
             var item = Items.Where(svm => svm.Header == name).FirstOrDefault();
             if (item != null)
             {
+                item.Load();
                 Current = item;
             }
         }

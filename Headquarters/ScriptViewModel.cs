@@ -1,6 +1,7 @@
 ﻿using NetTools;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
@@ -15,9 +16,9 @@ namespace Headquarters
 
 
         public string Header => script.name;
-        public List<Parameter> Parameters { get; protected set; }
+        public ObservableCollection<Parameter> Parameters { get; protected set; }
 
-        public Script script { get; protected set; }
+        protected Script script { get; set; }
 
         public bool IsRunning => tasks.Any(t => !t.IsCompleted);
 
@@ -40,9 +41,15 @@ namespace Headquarters
         public ScriptViewModel(Script script)
         {
             this.script = script;
-            Parameters = script.paramNames.Select(p => new Parameter(p)).ToList();
         }
 
+        public void Load()
+        {
+            script.Load();
+            Parameters = new ObservableCollection<Parameter>(script.paramNames.Select(p => new Parameter(p)));
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Parameters)));
+        }
 
         public Task Run(List<IPParams> ipParams)
         {

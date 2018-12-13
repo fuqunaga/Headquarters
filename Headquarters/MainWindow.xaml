@@ -116,7 +116,7 @@
                         </StackPanel>
                     </materialDesign:TransitionerSlide>
 
-                    <materialDesign:TransitionerSlide OpeningEffect="SlideInFromRight">
+                    <materialDesign:TransitionerSlide OpeningEffect="SlideInFromRight" DataContext="{Binding Current}">
                         <materialDesign:TransitionerSlide.BackwardWipe>
                             <materialDesign:FadeWipe />
                         </materialDesign:TransitionerSlide.BackwardWipe>
@@ -132,7 +132,7 @@
                                     </Button>
 
                                     <materialDesign:PackIcon Kind="ScriptText" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                                    <Label Content="{Binding Current.Header}" VerticalAlignment="Center" />
+                                    <Label Content="{Binding Header}" VerticalAlignment="Center" />
 
                                     <!-- Run Button -->
                                     <materialDesign:Transitioner Name="RunButtonSelector" SelectedIndex="0" Margin="16,0,8,0">
@@ -181,7 +181,7 @@
                             </materialDesign:ColorZone>
 
                             <!-- Paramters -->
-                            <ListBox ItemsSource="{Binding Current.Parameters}" MinHeight="200" Margin="0,16,0,0" DockPanel.Dock="Top">
+                            <ListBox ItemsSource="{Binding Parameters}" MinHeight="200" Margin="0,16,0,0" DockPanel.Dock="Top" ScrollViewer.VerticalScrollBarVisibility="Auto">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock>
@@ -193,7 +193,7 @@
                             </ListBox>
 
                             <!-- Output -->
-                            <TextBox Text="{Binding Current.ResultText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                            <TextBox Text="{Binding ResultText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource MaterialDesignOutlinedTextFieldTextBox}"
                                  TextWrapping="Wrap" 
                                  VerticalAlignment="Stretch"
