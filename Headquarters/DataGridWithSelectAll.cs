@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -33,6 +30,15 @@ namespace Headquarters
                     OnPropertyChanged(selectedPropertyName);
                 }
             };
+
+            Items.RowChanged += (s, e) =>
+            {
+                if (e.Action == DataRowAction.Add)
+                {
+                    e.Row[selectedPropertyName] = true;
+                    Debug.WriteLine(e);
+                }
+            };
         }
 
         public virtual void Bind(DataGrid dataGrid)
@@ -48,14 +54,12 @@ namespace Headquarters
                         HeaderTemplate = (DataTemplate)dataGrid.Resources[headerTemplateKey],
                         HeaderStringFormat = e.Column.HeaderStringFormat,
                         CanUserSort = false
-                        //                        SortMemberPath = e.PropertyName // this is used to index into the DataRowView so it MUST be the property's name (for this implementation anyways)
                     };
                     e.Column = c;
                 }
             };
 
             dataGrid.DataContext = this;
-
             dataGridBinding = dataGrid;
         }
 
@@ -64,8 +68,15 @@ namespace Headquarters
         {
             get
             {
-                var uniqueList = Items.AsEnumerable().Select(row => row[selectedPropertyName]).Distinct().ToList();
-                return uniqueList.Count() == 1 ? (bool?)uniqueList.First() : null;
+                var list = Items.AsEnumerable().Select(row => row[selectedPropertyName]).Cast<bool>();
+
+                bool? ret = false;
+                if (list.Any())
+                {
+                    var uniqList = list.Distinct().ToList();
+                    ret = (uniqList.Count() == 1) ? (bool?)uniqList.First() : null;
+                }
+                return ret;
             }
             set
             {

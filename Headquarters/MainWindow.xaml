@@ -54,7 +54,7 @@
                     </materialDesign:ColorZone>
 
                     <DataGrid x:Name="dgIPList" 
-                              ItemsSource="{Binding Items}" 
+                              ItemsSource="{Binding Items, Mode=TwoWay}" 
                               Margin="0" 
                               VerticalScrollBarVisibility="Auto"
                               DockPanel.Dock="Bottom"
