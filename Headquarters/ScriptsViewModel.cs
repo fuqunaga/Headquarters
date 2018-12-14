@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -34,7 +33,8 @@ namespace Headquarters
             {
                 return Directory.GetFiles(dirpath, "*.ps1")
                 .Where(s => s.EndsWith(".ps1")); // GetFiles includes *.ps1*. (*.ps1~, *.ps1_, etc.)
-            });
+            })
+            .OrderBy(path => Path.GetFileName(path));
 
             var scripts = filepaths.Select(path => new Script(path));
 

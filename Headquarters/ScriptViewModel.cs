@@ -75,6 +75,7 @@ namespace Headquarters
 
                     script.Load();
 
+                    cancelTokenSource = new CancellationTokenSource();
                     var cancelToken = cancelTokenSource.Token;
                     var parameters = Parameters.Concat(new[]
                     {

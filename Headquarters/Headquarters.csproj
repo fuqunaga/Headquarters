@@ -139,6 +139,12 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="Scripts\StopProccess.ps1" />
+    <None Include="Scripts\CreateStartupShortcut.ps1" />
+    <None Include="Scripts\RestartPC.ps1" />
+    <None Include="Scripts\CopyItem.ps1" />
+    <None Include="Scripts\SampleEcho.ps1" />
+    <None Include="Scripts\SampleInvokeCommand.ps1" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -152,4 +158,7 @@
     <Error Condition="!Exists('..\packages\Fody.3.3.3\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.3.3.3\build\Fody.targets'))" />
     <Error Condition="!Exists('..\packages\Costura.Fody.3.2.1\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.3.2.1\build\Costura.Fody.props'))" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>xcopy $(ProjectDir)Scripts $(TargetDir)Scripts /D/E/C/I/H/Y</PostBuildEvent>
+  </PropertyGroup>
 </Project>

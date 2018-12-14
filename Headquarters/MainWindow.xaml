@@ -135,16 +135,27 @@
                         </materialDesign:TransitionerSlide.ForwardWipe>
 
                         <!-- Select script -->
-                        <StackPanel >
-                            <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth2">
+                        <DockPanel >
+                            <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth2" DockPanel.Dock="Top">
                                 <DockPanel>
                                     <materialDesign:PackIcon Kind="ScriptText"/>
                                     <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">Scripts</TextBlock>
                                 </DockPanel>
                             </materialDesign:ColorZone>
 
-                            <ScrollViewer VerticalScrollBarVisibility="Auto"  Margin="8,8,8,8">
+                            <ScrollViewer DockPanel.Dock="Top"
+                                Margin="8,8,8,8"
+                                VerticalScrollBarVisibility="Disabled"
+                                HorizontalScrollBarVisibility="Auto">
+                                
                                 <ItemsControl Name="ScriptButtons" ItemsSource="{Binding Items}">
+
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel Orientation="Vertical"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Button
@@ -155,7 +166,7 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </ScrollViewer>
-                        </StackPanel>
+                        </DockPanel>
                     </materialDesign:TransitionerSlide>
 
                     <materialDesign:TransitionerSlide OpeningEffect="SlideInFromRight" DataContext="{Binding Current}">
@@ -223,11 +234,18 @@
                             </materialDesign:ColorZone>
 
                             <!-- Paramters -->
-                            <ListBox ItemsSource="{Binding Parameters}" MinHeight="200" Margin="0,16,0,0" DockPanel.Dock="Top" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListBox ItemsSource="{Binding Parameters}" MaxHeight="200" Margin="0,16,0,0" DockPanel.Dock="Top"
+                                     ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel IsItemsHost="True" Orientation="Vertical"/>
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock>
-                                        <Label Content="{Binding Name}" Width="100"/>
+                                        <Label Content="{Binding Name}" MinWidth="100"/>
                                         <TextBox Text="{Binding Value}" IsEnabled="{Binding IsIndependentIP}" MinWidth="100"/>
                                         </TextBlock>
                                     </DataTemplate>
