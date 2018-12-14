@@ -1,15 +1,15 @@
 ﻿namespace Headquarters
 {
-    class Parameter
+    public class Parameter
     {
         public string Name { get; set; }
         public string Value
         {
-            get { return IsDependIP ? "Depends IP List" : ParameterManager.Instance.Get(Name); }
+            get { return IsDependIP ? "On IP List" : ParameterManager.Instance.Get(Name); }
             set
             {
                 if ( !IsDependIP )
-                ParameterManager.Instance.Set(Name, value);
+                    ParameterManager.Instance.Set(Name, value);
             }
         }
 
@@ -21,7 +21,7 @@
 
         public Parameter(string name)
         {
-            this.Name = name;
+            Name = name;
         }
 
         public string Get(IPParams ipParam)

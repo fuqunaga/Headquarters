@@ -1,6 +1,4 @@
-﻿using MaterialDesignThemes.Wpf;
-using System;
-using System.Diagnostics;
+﻿using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,34 +19,38 @@ namespace Headquarters
 
             var paramManager = ParameterManager.Instance;
             paramManager.Load(".\\param.json");
-            tbUserName.DataContext = new Parameter(ParameterManager.SpecialParamName.UserName);
-            pbUserPassword.Password = paramManager.userPassword;
-            pbUserPassword.PasswordChanged += (o, e) => paramManager.userPassword = pbUserPassword.Password;
+            /*
+            UserPassword.Password = paramManager.userPassword;
+            UserPassword.PasswordChanged += (o, e) => paramManager.userPassword = pbUserPassword.Password;
+            */
+            scriptsVM = new ScriptsViewModel(".", @".\Scripts");
+            ScriptButtons.DataContext = scriptsVM;
 
             ipList = IPListViewModel.Instance;
             ipList.Load(".\\iplist.csv");
             ipList.Bind(dgIPList);
 
-            scriptsVM = new ScriptsViewModel(".", @".\Scripts");
-            tsScripts.DataContext = scriptsVM;
-
             ipList.PropertyChanged += (sender, e) =>
             {
                 if (e.PropertyName == ipList.selectedPropertyName) UpdateRunButton();
-            };
 
-            ipList.PropertyChanged += (sender, e) =>
-            {
                 if (e.PropertyName == nameof(IPListViewModel.Items))
                 {
-                    tsScripts.DataContext = null;
-                    tsScripts.DataContext = scriptsVM;
+                    OnChangeIPList();
                 }
             };
 
             UpdateRunButton();
+            OnChangeIPList();
+        }
 
-            ScriptButtons.DataContext = scriptsVM;
+        void OnChangeIPList()
+        {
+            tsScripts.DataContext = null;
+            tsScripts.DataContext = scriptsVM;
+
+            tbUserName.DataContext = ParameterManager.UserName;
+            UserPassword.DataContext = ParameterManager.UserPassword;
         }
 
         private void OnClickSelectScript(object sender, RoutedEventArgs e)
@@ -117,5 +119,13 @@ namespace Headquarters
         }
 
         #endregion
+
+        private void OnTopPasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if ( UserPassword.DataContext is Parameter p)
+            {
+                p.Value = ((PasswordBox)sender).Password;
+            }
+        }
     }
 }

@@ -3,7 +3,7 @@ using System.Data;
 
 namespace Headquarters
 {
-    class IPParams
+    public class IPParams
     {
         public static string isSelectedPropertyName = "IsSelected";
         public static string ipPropertyName = "IP";

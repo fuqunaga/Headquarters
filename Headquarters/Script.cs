@@ -58,7 +58,10 @@ namespace Headquarters
             {
                 rs.Open();
 
-                var sessionResult = SessionManager.Instance.CreateSession(rs, ipAddress, cancelToken);
+                parameters.TryGetValue(ParameterManager.SpecialParamName.UserName, out object userName);
+                parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword, out object userPassword);
+
+                var sessionResult = SessionManager.Instance.CreateSession(rs, ipAddress, (string)userName, (string)userPassword, cancelToken);
                 var session = sessionResult.objs.FirstOrDefault()?.BaseObject;
                 if (session == null)
                 {

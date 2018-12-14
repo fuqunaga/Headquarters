@@ -76,10 +76,17 @@ namespace Headquarters
                     script.Load();
 
                     var cancelToken = cancelTokenSource.Token;
+                    var parameters = Parameters.Concat(new[]
+                    {
+                        ParameterManager.UserName,
+                        ParameterManager.UserPassword,
+                    })
+                    .GroupBy(p => p.Name)
+                    .Select(g => g.First())
+                    .ToDictionary(p => p.Name, p => (object)p.Get(param));
 
                     tasks = ipStrList.Select(ipStr =>
                     {
-                        var parameters = Parameters.ToDictionary(p => p.Name, p => (object)p.Get(param));
                         return Task.Run(() =>
                         {
                             var result = script.Run(ipStr, parameters, cancelToken);

@@ -161,7 +161,7 @@ namespace Headquarters
 
             if ((bool)result)
             {
-                if (Items.Columns.Contains(vm.Name))
+                if (!Items.Columns.Contains(vm.Name))
                 {
                     var column = Items.Columns[name];
                     column.ColumnName = vm.Name;

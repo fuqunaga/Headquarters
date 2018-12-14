@@ -17,7 +17,42 @@
         FontFamily="{DynamicResource MaterialDesignFont}">
 
     <Window.Resources>
+
+        <DataTemplate x:Key="PasswordBoxTemplate">
+            <TextBlock>
+                <materialDesign:PackIcon
+                    Kind="Key" Foreground="{Binding BorderBrush, ElementName=TopPasswordBox}"/>
+                <PasswordBox
+                    Name="TopPasswordBox"
+                    PasswordChanged="OnTopPasswordChanged"
+                    materialDesign:HintAssist.Hint="Password"
+                    Style="{StaticResource MaterialDesignFloatingHintPasswordBox}" 
+                    Width="200"
+                />
+            </TextBlock>
+        </DataTemplate>
+
+        <DataTemplate x:Key="PasswordTextBoxTemplate">
+            <TextBlock>
+                <materialDesign:PackIcon Grid.Column="0"
+                    Kind="Key" Foreground="{Binding BorderBrush, ElementName=TopPasswordBox}"/>
+                <TextBox Grid.Column="1"
+                    Name="TopPasswordBox"
+                    Text="{Binding Value}"
+                    IsEnabled="{Binding IsIndependentIP}"
+                    materialDesign:HintAssist.Hint="Password"
+                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                         Width="200"/>
+            </TextBlock>
+        </DataTemplate>
+
+        <local:BoolDataTemplateSelector x:Key="passwordBoxTemplateSelector"
+                                        BoolPropertyName="IsIndependentIP"
+                                        TrueTemplate="{StaticResource PasswordBoxTemplate}"
+                                        FalseTemplate="{StaticResource PasswordTextBoxTemplate}"/>
     </Window.Resources>
+
+
 
     <materialDesign:DialogHost Identifier="RootDialog">
         <DockPanel>
@@ -25,12 +60,19 @@
                 <Grid Margin="16,0,0,0">
                     <TextBlock Style="{StaticResource MaterialDesignDisplay1TextBlock}">HQ</TextBlock>
                     <TextBlock HorizontalAlignment="Right">
-                    <materialDesign:PackIcon Kind="Account" Foreground="{Binding ElementName=tbUserName, Path=BorderBrush}" />
-                    <TextBox x:Name="tbUserName" materialDesign:HintAssist.Hint="Name" Width="200"  Text="{Binding Value}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
+                        <materialDesign:PackIcon Kind="Account" Foreground="{Binding ElementName=tbUserName, Path=BorderBrush}" />
+                        <TextBox x:Name="tbUserName"
+                                 Text="{Binding Value}"
+                                 IsEnabled="{Binding IsIndependentIP}"
+                                 materialDesign:HintAssist.Hint="Name" Width="200"  
+                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
                 
-                    <materialDesign:PackIcon Kind="Key" Foreground="{Binding ElementName=pbUserPassword, Path=BorderBrush}" Margin="16,0,0,0"/>
-                    <PasswordBox Name="pbUserPassword" materialDesign:HintAssist.Hint="Password" Width="200" Style="{StaticResource MaterialDesignFloatingHintPasswordBox}" />
+                        <ContentControl Name="UserPassword" Margin="16,0,0,0"
+                               Content="{Binding}"
+                               ContentTemplateSelector="{StaticResource passwordBoxTemplateSelector}"
+                               />
                     </TextBlock>
+
                 </Grid>
             </materialDesign:ColorZone>
 

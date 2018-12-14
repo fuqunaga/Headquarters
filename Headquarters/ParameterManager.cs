@@ -24,18 +24,8 @@ namespace Headquarters
 
         #endregion
 
-
-        public string userName
-        {
-            get => Get(SpecialParamName.UserName);
-            set => Set(SpecialParamName.UserPassword, value);
-        }
-
-        public string userPassword
-        {
-            get => Get(SpecialParamName.UserPassword);
-            set => Set(SpecialParamName.UserPassword, value);
-        }
+        public static Parameter UserName => new Parameter(SpecialParamName.UserName);
+        public static Parameter UserPassword => new Parameter(SpecialParamName.UserPassword);
 
 
         protected Dictionary<string, string> parameters = new Dictionary<string, string>();
