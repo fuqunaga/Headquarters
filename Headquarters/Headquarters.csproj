@@ -142,12 +142,11 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="Scripts\InvokeCommandTest.ps1" />
     <None Include="Scripts\StopProccess.ps1" />
     <None Include="Scripts\CreateStartupShortcut.ps1" />
     <None Include="Scripts\RestartPC.ps1" />
     <None Include="Scripts\CopyItem.ps1" />
-    <None Include="Scripts\SampleEcho.ps1" />
-    <None Include="Scripts\SampleInvokeCommand.ps1" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

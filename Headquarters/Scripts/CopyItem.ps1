@@ -1,3 +1,3 @@
-param($session,$path,$destination)
+param($session,localPath,$remotePath)
 
-Copy-Item -ToSession $session -Path $path -Destination $destination
+Copy-Item -ToSession $session -Path localPath -Destination $remotePath

@@ -273,7 +273,7 @@
                                  IsReadOnly="True"
                                  AcceptsReturn="True"
                                  VerticalScrollBarVisibility="Auto"
-                                 Margin="8,8,8,8"
+                                 Margin="8,32,8,8"
                                  MinHeight="50"
                                  />
 
