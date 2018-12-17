@@ -59,7 +59,19 @@
         <DockPanel>
             <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2" Panel.ZIndex="100">
                 <Grid Margin="16,0,0,0">
-                    <TextBlock Style="{StaticResource MaterialDesignDisplay1TextBlock}">HQ</TextBlock>
+                    <TextBlock Style="{StaticResource MaterialDesignDisplay1TextBlock}">
+                       <Hyperlink
+                           NavigateUri="https://github.com/fuqunaga/Headquaters"
+                           RequestNavigate="Hyperlink_RequestNavigate"
+                           >
+                           <Hyperlink.Style>
+                               <Style TargetType="Hyperlink">
+                                   <Setter Property="Foreground" Value="{Binding Foreground,RelativeSource={RelativeSource FindAncestor,AncestorType=TextBlock}}"/>
+                                   <Setter Property="TextDecorations" Value=""/>
+                               </Style>
+                           </Hyperlink.Style>                       
+                           HQ</Hyperlink>
+                    </TextBlock>
                     <TextBlock HorizontalAlignment="Right">
                         <materialDesign:PackIcon Kind="Account" Foreground="{Binding ElementName=tbUserName, Path=BorderBrush}" />
                         <TextBox x:Name="tbUserName"
@@ -148,7 +160,7 @@
                                 Margin="8,8,8,8"
                                 VerticalScrollBarVisibility="Disabled"
                                 HorizontalScrollBarVisibility="Auto">
-                                
+
                                 <ItemsControl Name="ScriptButtons" ItemsSource="{Binding Items}">
 
                                     <ItemsControl.ItemsPanel>
@@ -156,7 +168,7 @@
                                             <WrapPanel Orientation="Vertical"/>
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
-                                    
+
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Button
