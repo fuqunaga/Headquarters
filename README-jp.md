@@ -1,15 +1,20 @@
 # HQ(Headquaters)
+
+<img src="Documents/top.png" height="500"/> 
+
 HQはPowerShellを用いて複数のPCをリモートで操作するためのGUIツールです  
 
 
-![alt top](Documents/top.png)
-
 # クイックスタート
-1. リモートPC上でリモート操作の許可
-   1. PowerShellを管理者として起動
-   1. `Enable-PSRemoting`を実行
-        ![alt top](Documents/enablePSRemoting.gif)
-1. [Release]ページからダウンロード
+### リモートPC
+1. リモートPC上でパワーシェルのリモート操作を許可
+   1. PowerShellを管理者として起動し、`Enable-PSRemoting`を実行  
+        <img src="Documents/psadmin.jpg" />
+        <img src="Documents/enablePSRemoting.png" height="200"/>
+
+
+### ローカルPC
+1. [Release]ページからHQをダウンロード
 1. 解凍し、HQを起動
 1. リモートPCのユーザ名、パスワードを入力
 1. Scriptsから使用するスクリプトを選んでクリック
@@ -19,6 +24,7 @@ HQはPowerShellを用いて複数のPCをリモートで操作するためのGUI
 1. 画面下部の枠に出力が表示されます  
    正常終了時は`☑[IPアドレス]:` のように表示されます
   
+![alt throuth](Documents/throuth.gif)
   
 # スクリプト
 場所
@@ -27,12 +33,13 @@ HQはPowerShellを用いて複数のPCをリモートで操作するためのGUI
 .\Scripts\*.ps1
 ```
 
+ * 上記場所にファイルを置くことでユーザ独自のスクリプトを追加できます
  * IP ListのIPごとにスクリプトが呼ばれます
- * $session でリモートPCのPSSessionを受け取れます
- * param() で指定した変数がHQ上で表示され編集できます
+ * `$session`でリモートPCのPSSessionを受け取れます
+ * `param()`で指定した変数がHQ上で表示され編集できます
 
 ## 例
-#### Copy-Item.ps1
+#### CopyItem.ps1
  ```
 param($session,localPath,$remotePath)
 
@@ -53,7 +60,7 @@ Invoke-Command $session -ScriptBlock {
   
 # IP List
 対象となるPCのIPアドレスと、対象ごとのパラメータを記したデータ  
-HQ上で編集可能  
+HQ上で編集可能です
 
 ![alt editIPList](Documents/editIPList.gif)
 
@@ -70,11 +77,10 @@ HQ上で編集可能
 * ユーザ名とパスワードも保存される
 
 
-
 # TIPS
 ### PCごとにアカウントが異なる場合
 IPListに`UserName`、`UserPassword`というパラメータを用意するとそちらが反映される
 
-### セキュリティに注意
+### ⚠セキュリティに注意
 パスワードは平文で保存される。扱いに注意
 
