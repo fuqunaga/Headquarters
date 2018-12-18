@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Headquarters
 {
@@ -19,10 +21,7 @@ namespace Headquarters
 
             var paramManager = ParameterManager.Instance;
             paramManager.Load(".\\param.json");
-            /*
-            UserPassword.Password = paramManager.userPassword;
-            UserPassword.PasswordChanged += (o, e) => paramManager.userPassword = pbUserPassword.Password;
-            */
+
             scriptsVM = new ScriptsViewModel(".", @".\Scripts");
             ScriptButtons.DataContext = scriptsVM;
 
@@ -39,6 +38,9 @@ namespace Headquarters
                     OnChangeIPList();
                 }
             };
+
+            var pb = Resources["TopPasswordBox"] as PasswordBox;
+            pb.Password = ParameterManager.UserPassword.Value;
 
             UpdateRunButton();
             OnChangeIPList();
@@ -130,7 +132,7 @@ namespace Headquarters
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
-            System.Diagnostics.Process.Start(e.Uri.ToString());
+            Process.Start(e.Uri.ToString());
         }
     }
 }

@@ -19,17 +19,27 @@
 
     <Window.Resources>
 
+        <PasswordBox
+            x:Key="TopPasswordBox"
+            PasswordChanged="OnTopPasswordChanged"
+            materialDesign:HintAssist.Hint="Password"
+            Width="200"
+            >
+            <!-- For stange font color,size when delete "UserPassword" column at IPList -->
+            <PasswordBox.Style>
+                <Style TargetType="PasswordBox" BasedOn="{StaticResource MaterialDesignFloatingHintPasswordBox}" >
+                    <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialDesignBody}" />
+                    <Setter Property="FontFamily" Value="{DynamicResource MaterialDesignFont}" />
+                </Style>
+            </PasswordBox.Style>
+        </PasswordBox>
+
+
         <DataTemplate x:Key="PasswordBoxTemplate">
             <TextBlock>
                 <materialDesign:PackIcon
-                    Kind="Key" Foreground="{Binding BorderBrush, ElementName=TopPasswordBox}"/>
-                <PasswordBox
-                    Name="TopPasswordBox"
-                    PasswordChanged="OnTopPasswordChanged"
-                    materialDesign:HintAssist.Hint="Password"
-                    Style="{StaticResource MaterialDesignFloatingHintPasswordBox}" 
-                    Width="200"
-                />
+                    Kind="Key" Foreground="{Binding Content.BorderBrush, ElementName=TopPasswordBox}"/>
+                <ContentControl Content="{StaticResource TopPasswordBox}" Name="TopPasswordBox" />
             </TextBlock>
         </DataTemplate>
 
