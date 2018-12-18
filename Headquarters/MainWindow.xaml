@@ -39,7 +39,7 @@
             <TextBlock>
                 <materialDesign:PackIcon
                     Kind="Key" Foreground="{Binding Content.BorderBrush, ElementName=TopPasswordBox}"/>
-                <ContentControl Content="{StaticResource TopPasswordBox}" Name="TopPasswordBox" />
+                <ContentControl Content="{StaticResource TopPasswordBox}" Name="TopPasswordBox" IsTabStop="False"/>
             </TextBlock>
         </DataTemplate>
 
@@ -90,10 +90,12 @@
                                  materialDesign:HintAssist.Hint="Name" Width="200"  
                                  Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
                 
-                        <ContentControl Name="UserPassword" Margin="16,0,0,0"
-                               Content="{Binding}"
-                               ContentTemplateSelector="{StaticResource passwordBoxTemplateSelector}"
-                               />
+                        <ContentControl 
+                            Name="UserPassword" Margin="16,0,0,0"
+                            IsTabStop="False"
+                            Content="{Binding}"
+                            ContentTemplateSelector="{StaticResource passwordBoxTemplateSelector}"
+                            />
                     </TextBlock>
 
                 </Grid>
@@ -258,6 +260,7 @@
 
                             <!-- Paramters -->
                             <ListBox ItemsSource="{Binding Parameters}" MaxHeight="200" Margin="0,16,0,0" DockPanel.Dock="Top"
+                                     KeyboardNavigation.TabNavigation="Continue"
                                      ScrollViewer.VerticalScrollBarVisibility="Disabled"
                                      ScrollViewer.HorizontalScrollBarVisibility="Auto">
                                 <ListBox.ItemsPanel>
@@ -269,10 +272,15 @@
                                     <DataTemplate>
                                         <TextBlock>
                                         <Label Content="{Binding Name}" MinWidth="100"/>
-                                        <TextBox Text="{Binding Value}" IsEnabled="{Binding IsIndependentIP}" MinWidth="100"/>
+                                        <TextBox Text="{Binding Value}" IsEnabled="{Binding IsIndependentIP}" MinWidth="100" IsTabStop="True"/>
                                         </TextBlock>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                        <Setter Property="IsTabStop" Value="False" />
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
                             </ListBox>
 
                             <!-- Output -->
