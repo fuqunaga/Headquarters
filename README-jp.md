@@ -1,8 +1,8 @@
 # HQ(Headquaters)
 
-<img src="Documents/top.png" height="500"/> 
-
 HQはPowerShellを用いて複数のPCをリモートで操作するためのGUIツールです  
+
+<img src="Documents/top.png" height="500px" />
 
 
 # クイックスタート
@@ -10,16 +10,16 @@ HQはPowerShellを用いて複数のPCをリモートで操作するためのGUI
 1. PowerShellを管理者として起動、以下のコマンドを実行  
 ```Enable-PSRemoting```  
 
-<img src="Documents/psadmin.jpg" />
-<img src="Documents/enablePSRemoting.png" height="200"/>
+<img src="Documents/psadmin.jpg" height="300px"/>
+<img src="Documents/EnablePSRemoting.png" height="200px"/>
 
 
 ### ローカルPC
 1. PowerShellを管理者として起動し、以下のコマンドを実行  
 `Set-Item WSMan:\localhost\Client\TrustedHosts -Value *`
-<img src="Documents/trustedhosts.png" />
+<img src="Documents/trustedhosts.png" height="200px" />
 
-1. [Release]ページからHQをダウンロード
+1. [Release](https://github.com/fuqunaga/Headquaters/releases)ページからHQをダウンロード
 1. 解凍し、HQを起動（管理者権限が必要です）
 1. リモートPCのユーザ名、パスワードを入力
 1. Scriptsから使用するスクリプトを選んでクリック
@@ -46,9 +46,9 @@ HQはPowerShellを用いて複数のPCをリモートで操作するためのGUI
 ## 例
 #### CopyItem.ps1
  ```
-param($session,localPath,$remotePath)
+param($session,$localPath,$remotePath)
 
-Copy-Item -ToSession $session -Path localPath -Destination $remotePath
+Copy-Item -ToSession $session -Path $localPath -Destination $remotePath
 ```
 
 
