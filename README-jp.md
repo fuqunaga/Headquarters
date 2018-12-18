@@ -7,15 +7,20 @@ HQはPowerShellを用いて複数のPCをリモートで操作するためのGUI
 
 # クイックスタート
 ### リモートPC
-1. リモートPC上でパワーシェルのリモート操作を許可
-   1. PowerShellを管理者として起動し、`Enable-PSRemoting`を実行  
-        <img src="Documents/psadmin.jpg" />
-        <img src="Documents/enablePSRemoting.png" height="200"/>
+1. PowerShellを管理者として起動、以下のコマンドを実行  
+```Enable-PSRemoting```  
+
+<img src="Documents/psadmin.jpg" />
+<img src="Documents/enablePSRemoting.png" height="200"/>
 
 
 ### ローカルPC
+1. PowerShellを管理者として起動し、以下のコマンドを実行  
+`Set-Item WSMan:\localhost\Client\TrustedHosts -Value *`
+<img src="Documents/trustedhosts.png" />
+
 1. [Release]ページからHQをダウンロード
-1. 解凍し、HQを起動
+1. 解凍し、HQを起動（管理者権限が必要です）
 1. リモートPCのユーザ名、パスワードを入力
 1. Scriptsから使用するスクリプトを選んでクリック
 1. スクリプトにパラメータが必要な場合は入力
@@ -64,7 +69,7 @@ HQ上で編集可能です
 
 ![alt editIPList](Documents/editIPList.gif)
 
-* `.\ipList.csv` に保存される
+* `.\ipList.csv` に保存されます
 * 一行目はパラメータ名
 * IPは範囲指定可（[IPAddressRange](https://github.com/jsakamoto/ipaddressrange/)）
   * `192.168.10.10-20`
@@ -73,16 +78,16 @@ HQ上で編集可能です
 
 
 # パラメータ
-* IP Listにないパラメータは`.\param.json`に保存される
-* ユーザ名とパスワードも保存される
+* IP Listにないパラメータは`.\param.json`に保存されます
+* ユーザ名とパスワードも保存されます
 
 
 # TIPS
 ### PCごとにアカウントが異なる場合
-IPListに`UserName`、`UserPassword`というパラメータを用意するとそちらが反映される
+IPListに`UserName`、`UserPassword`というパラメータを用意するとそちらが反映されます
 
 ### ⚠セキュリティに注意
-パスワードは平文で保存される。扱いに注意
+パスワードは平文で保存されます。扱いに注意
 
 # ライブラリ
 https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit - MaterialDesignInXamlToolkit
