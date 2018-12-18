@@ -84,3 +84,11 @@ IPListに`UserName`、`UserPassword`というパラメータを用意すると�
 ### ⚠セキュリティに注意
 パスワードは平文で保存される。扱いに注意
 
+# ライブラリ
+https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit - MaterialDesignInXamlToolkit
+
+https://github.com/jsakamoto/ipaddressrange - IPAddressRange 
+
+https://www.newtonsoft.com/json - Json<span />.NET
+
+https://github.com/Fody/Costura - Costura.Fody
