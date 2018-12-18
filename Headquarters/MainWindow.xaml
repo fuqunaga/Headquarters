@@ -16,8 +16,10 @@
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
         >
-
     <Window.Resources>
+        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="CaretBrush" Value="{DynamicResource PrimaryHueLightBrush}" />
+        </Style>
 
         <PasswordBox
             x:Key="TopPasswordBox"
@@ -63,8 +65,6 @@
                                         FalseTemplate="{StaticResource PasswordTextBoxTemplate}"/>
     </Window.Resources>
 
-
-
     <materialDesign:DialogHost Identifier="RootDialog">
         <DockPanel>
             <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2" Panel.ZIndex="100">
@@ -88,7 +88,13 @@
                                  Text="{Binding Value}"
                                  IsEnabled="{Binding IsIndependentIP}"
                                  materialDesign:HintAssist.Hint="Name" Width="200"  
-                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
+                                 >
+                            <TextBox.Style>
+                                <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
+                                    <Setter Property="CaretBrush" Value="{DynamicResource PrimaryHueLightBrush}" />
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
                 
                         <ContentControl 
                             Name="UserPassword" Margin="16,0,0,0"
