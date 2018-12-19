@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("Headquarters")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("fuquna.ga")]
 [assembly: AssemblyProduct("Headquarters")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
