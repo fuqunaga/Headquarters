@@ -94,7 +94,8 @@ HQ上で編集可能です
 IPListに`UserName`、`UserPassword`というパラメータを用意するとそちらが反映されます
 
 ### ⚠セキュリティに注意
-パスワードは平文で保存されます。扱いに注意
+パスワードは平文で保存されます。
+ipList.csv、param.jsonの取扱にご注意ください。
 
 # ライブラリ
 https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit - MaterialDesignInXamlToolkit
