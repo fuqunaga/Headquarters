@@ -8,7 +8,10 @@ HQはPowerShellを用いて複数のPCをリモートで操作するためのGUI
 # クイックスタート
 ### リモートPC
 1. PowerShellを管理者として起動、以下のコマンドを実行  
-```Enable-PSRemoting```  
+
+```
+Enable-PSRemoting
+```  
 
 <img src="Documents/psadmin.jpg" height="300px"/>
 <img src="Documents/EnablePSRemoting.png" height="200px"/>
@@ -16,7 +19,11 @@ HQはPowerShellを用いて複数のPCをリモートで操作するためのGUI
 
 ### ローカルPC
 1. PowerShellを管理者として起動し、以下のコマンドを実行  
-`Set-Item WSMan:\localhost\Client\TrustedHosts -Value *`
+
+```
+Set-Item WSMan:\localhost\Client\TrustedHosts -Value *
+```
+
 <img src="Documents/trustedhosts.png" height="200px" />
 
 1. [Release](https://github.com/fuqunaga/Headquaters/releases)ページからHQをダウンロード
@@ -41,7 +48,7 @@ HQはPowerShellを用いて複数のPCをリモートで操作するためのGUI
  * 上記場所にファイルを置くことでユーザ独自のスクリプトを追加できます
  * IP ListのIPごとにスクリプトが呼ばれます
  * `$session`でリモートPCのPSSessionを受け取れます
- * `param()`で指定した変数がHQ上で表示され編集できます
+ * `param()`で指定したパラメータがHQ上で表示され編集できます
 
 ## 例
 #### CopyItem.ps1
