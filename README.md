@@ -96,7 +96,7 @@ Editable on HQ.
 If you prepare parameters`UserName`, `UserPassword` in IPList, it will be used.
 
 ### ⚠No Security
-The password word is saved in plaintext.  
+The password is saved in plaintext.  
 Be careful with handling param.json and ipList.csv.
 
 # Libraries:
