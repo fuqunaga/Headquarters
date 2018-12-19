@@ -1,25 +1,31 @@
 # HQ(Headquaters)
+HQ is a GUI tool for remotely operating multiple PCs using PowerShell.
 
 [日本語](./README-jp.md)  
 
-
-HQ is a GUI tool for remotely operating multiple PCs using PowerShell.
 
 <img src="Documents/top.png" height="500px" />
 
 
 # QuickStart
 ### Remote PC
-1. Run PowerShell as an administrator, execute the following command.  
-```Enable-PSRemoting```  
+1. Run PowerShell as an administrator, execute the following command.
+
+```
+Enable-PSRemoting
+```  
 
 <img src="Documents/psadmin.jpg" height="300px"/>
 <img src="Documents/EnablePSRemoting.png" height="200px"/>
 
 
 ### Local PC
-1. Run PowerShell as an administrator, execute the following command.  
-`Set-Item WSMan:\localhost\Client\TrustedHosts -Value *`
+1. Run PowerShell as an administrator, execute the following command.
+
+```
+Set-Item WSMan:\localhost\Client\TrustedHosts -Value *
+```
+
 <img src="Documents/trustedhosts.png" height="200px" />
 
 1. Download HQ from [Release](https://github.com/fuqunaga/Headquaters/releases) page.
@@ -35,7 +41,7 @@ HQ is a GUI tool for remotely operating multiple PCs using PowerShell.
 ![alt throuth](Documents/throuth.gif)
   
 # Script
-File path
+File path:
 ```
 .\*.ps1
 .\Scripts\*.ps1
@@ -46,7 +52,7 @@ File path
  * A script can receive PSSession of remote PC with `$session`.
  * Variables specified with `param()` are displayed on HQ and can be edited.
 
-## Examples
+## Examples:
 #### CopyItem.ps1
  ```
 param($session,$localPath,$remotePath)
@@ -67,7 +73,7 @@ Invoke-Command $session -ScriptBlock {
 
   
 # IP List
-IP address and parameter table for each PC.
+IP address and parameter table for each PC.  
 Editable on HQ.
 
 ![alt editIPList](Documents/editIPList.gif)
@@ -90,9 +96,10 @@ Editable on HQ.
 If you prepare parameters`UserName`, `UserPassword` in IPList, it will be used.
 
 ### ⚠No Security
-The password word is saved in plaintext. 
+The password word is saved in plaintext.  
+Be careful with handling param.json and ipList.csv.
 
-# ライブラリ
+# Libraries:
 https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit - MaterialDesignInXamlToolkit
 
 https://github.com/jsakamoto/ipaddressrange - IPAddressRange 
