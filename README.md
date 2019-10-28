@@ -1,4 +1,4 @@
-# HQ(Headquaters)
+# HQ(Headquarters)
 HQ is a GUI tool for remotely operating multiple windows PCs using PowerShell.
 
 [日本語](./README-jp.md)  
