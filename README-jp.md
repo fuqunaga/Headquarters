@@ -1,4 +1,4 @@
-# HQ(Headquaters)
+# HQ(Headquarters)
 
 HQはPowerShellを用いて複数のPCをリモートで操作するためのGUIツールです  
 
