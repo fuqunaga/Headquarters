@@ -25,13 +25,13 @@ New-PSSession -ComputerName $ComputerName -Credential $cred
 ");
 
 
-        public PowerShellScript.Result CreateSession(Runspace rs, string ipAddress, string userName, string passwordStr, CancellationToken cancelToken)
+        public PowerShellScript.Result CreateSession(RunspacePool rsp, string ipAddress, string userName, string passwordStr, CancellationToken cancelToken)
         {
             var dic = new Dictionary<string, object>();
             dic.Add("ComputerName", ipAddress);
             dic.Add("cred", CreateCredential(userName, passwordStr));
 
-            return createSession.Invoke(rs, dic, cancelToken);
+            return createSession.Invoke(rsp, dic, cancelToken);
         }
 
         PSCredential CreateCredential(string userName, string passwordStr)

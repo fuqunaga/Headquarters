@@ -1,9 +1,9 @@
 ﻿using NetTools;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Management.Automation.Runspaces;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,11 +20,10 @@ namespace Headquarters
 
         protected Script script { get; set; }
 
-        public bool IsRunning => tasks.Any(t => !t.IsCompleted);
-
-
         string resultText_ = "";
-        public string ResultText { get => resultText_;
+        public string ResultText
+        {
+            get => resultText_;
             protected set
             {
                 resultText_ = value;
@@ -33,9 +32,7 @@ namespace Headquarters
         }
 
 
-        List<Task> tasks = new List<Task>();
         CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
-
 
 
         public ScriptViewModel(Script script)
@@ -51,56 +48,62 @@ namespace Headquarters
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Parameters)));
         }
 
-        public Task Run(List<IPParams> ipParams)
+        public Task Run(IReadOnlyCollection<IPParams> ipParamsList)
         {
-            Task ret = null;
-            if (IsRunning) return ret;
-
-            ipParams.ForEach(param =>
+            var parameters = Parameters.Concat(new[]
             {
-                IPAddressRange.TryParse(param.ipStr, out IPAddressRange range);
+                ParameterManager.UserName,
+                ParameterManager.UserPassword,
+            })
+            .GroupBy(p => p.Name)
+            .Select(g => g.First())
+            .ToList();
 
-                var ipStrList = range?.AsEnumerable().Select(ip => ip.ToString()).ToList() ?? (new[] { param.ipStr }).ToList();
+            // Check so many IP on ipParamsList
+            var soManyIp = ipParamsList.Select(ipParams => IPAddressRange.TryParse(ipParams.ipStr, out var range)
+                ? new { ipParams.ipStr, count = range.AsEnumerable().Count() }
+                : null
+            )
+            .Where(pair => pair != null)
+            .FirstOrDefault(pair => pair.count > 100);
 
-                 var paramIsValid = true;
-                 if (ipStrList.Count > 100)
-                 {
-                     var result = MessageBox.Show($"IP[{param.ipStr}] means {ipStrList.Count} targets.\n Continue?", "Many targets", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                     paramIsValid = (result == MessageBoxResult.OK);
-                 }
+            if (soManyIp != null)
+            {
+                var result = MessageBox.Show($"IP[{soManyIp.ipStr}] means {soManyIp.count} targets.\n Continue?", "Many targets", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (result != MessageBoxResult.OK) return null;
+            }
 
-                 if (paramIsValid)
-                 {
-                    ResultText = "";
 
-                    script.Load();
+            var ipAndParams = ipParamsList.SelectMany(ipParams =>
+            {
+                IPAddressRange.TryParse(ipParams.ipStr, out var range);
+                var ipStrList = range?.AsEnumerable().Select(ip => ip.ToString()) ?? (new[] { ipParams.ipStr });
+                var paramDic = parameters.ToDictionary(p => p.Name, p => (object)p.Get(ipParams));
+                return ipStrList.Select(ip => new { ip, paramDic });
+            })
+            .ToList();
 
-                    cancelTokenSource = new CancellationTokenSource();
-                    var cancelToken = cancelTokenSource.Token;
-                    var parameters = Parameters.Concat(new[]
-                    {
-                        ParameterManager.UserName,
-                        ParameterManager.UserPassword,
-                    })
-                    .GroupBy(p => p.Name)
-                    .Select(g => g.First())
-                    .ToDictionary(p => p.Name, p => (object)p.Get(param));
 
-                    tasks = ipStrList.Select(ipStr =>
-                    {
-                        return Task.Run(() =>
-                        {
-                            var result = script.Run(ipStr, parameters, cancelToken);
-                            UpdateText(ipStr, result);
-                        });
-                    })
-                    .ToList();
+            ResultText = "";
+            script.Load();
 
-                    ret = Task.Run(() => Task.WaitAll(tasks.ToArray()));
-                 }
-             });
+            cancelTokenSource = new CancellationTokenSource();
+            var cancelToken = cancelTokenSource.Token;
 
-            return ret;
+            var rsp = RunspaceFactory.CreateRunspacePool(1, ipAndParams.Count());
+            rsp.Open();
+
+            var tasks = ipAndParams.Select(ipAndParam =>
+            {
+                return Task.Run(() =>
+                {
+                    var result = script.Run(rsp, ipAndParam.ip, ipAndParam.paramDic, cancelToken);
+                    UpdateText(ipAndParam.ip, result);
+                });
+            });
+
+            return Task.WhenAll(tasks)
+                .ContinueWith(_ => rsp.Dispose());
         }
 
         internal void Stop()
@@ -112,8 +115,8 @@ namespace Headquarters
         void UpdateText(string ipStr, PowerShellScript.Result result)
         {
             var prefix = result.IsSuccessed ? "✔" : "⚠";
-            var str =  prefix + ipStr + ":" + (result.canceled ? "canceled" : "") + "\n";
-            str += ResultToString(result) +"\n\n";
+            var str = prefix + ipStr + ":" + (result.canceled ? "canceled" : "") + "\n";
+            str += ResultToString(result) + "\n\n";
 
             lock (this)
             {

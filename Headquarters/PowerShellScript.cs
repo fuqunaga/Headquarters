@@ -29,12 +29,12 @@ namespace Headquarters
             this.script = script;
         }
 
-        public Result Invoke(Runspace rs, IDictionary param, CancellationToken cancelToken)
+        public Result Invoke(RunspacePool rsp, IDictionary param, CancellationToken cancelToken)
         {
             Result ret;
             using (var ps = PowerShell.Create())
             {
-                ps.Runspace = rs;
+                ps.RunspacePool = rsp;
 
                 ps.AddScript(script);
                 ps.AddParameters(param);

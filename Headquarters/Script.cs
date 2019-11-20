@@ -50,29 +50,25 @@ namespace Headquarters
                 .ToList();
         }
 
-        public PowerShellScript.Result Run(string ipAddress, Dictionary<string, object> parameters, CancellationToken cancelToken)
+        public PowerShellScript.Result Run(RunspacePool rsp, string ipAddress, Dictionary<string, object> parameters, CancellationToken cancelToken)
         {
             PowerShellScript.Result result;
 
-            using (var rs = RunspaceFactory.CreateRunspace())
+            parameters.TryGetValue(ParameterManager.SpecialParamName.UserName, out var userName);
+            parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword, out var userPassword);
+
+            var sessionResult = SessionManager.Instance.CreateSession(rsp, ipAddress, (string)userName, (string)userPassword, cancelToken);
+            var session = sessionResult.objs.FirstOrDefault()?.BaseObject;
+            if (session == null)
             {
-                rs.Open();
-
-                parameters.TryGetValue(ParameterManager.SpecialParamName.UserName, out object userName);
-                parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword, out object userPassword);
-
-                var sessionResult = SessionManager.Instance.CreateSession(rs, ipAddress, (string)userName, (string)userPassword, cancelToken);
-                var session = sessionResult.objs.FirstOrDefault()?.BaseObject;
-                if (session == null)
-                {
-                    result = sessionResult;
-                }
-                else
-                {
-                    parameters.Add("session", session);
-                    result = psScript.Invoke(rs, parameters, cancelToken);
-                }
+                result = sessionResult;
             }
+            else
+            {
+                parameters.Add("session", session);
+                result = psScript.Invoke(rsp, parameters, cancelToken);
+            }
+
 
             return result;
         }

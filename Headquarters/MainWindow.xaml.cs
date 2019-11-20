@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace Headquarters
 {
@@ -124,7 +123,7 @@ namespace Headquarters
 
         private void OnTopPasswordChanged(object sender, RoutedEventArgs e)
         {
-            if ( UserPassword.DataContext is Parameter p)
+            if (UserPassword.DataContext is Parameter p)
             {
                 p.Value = ((PasswordBox)sender).Password;
             }
