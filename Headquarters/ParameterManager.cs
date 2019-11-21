@@ -56,7 +56,7 @@ namespace Headquarters
 
         public string Get(string name)
         {
-            parameters.TryGetValue(name, out string ret);
+            parameters.TryGetValue(name, out var ret);
             return ret;
         }
 

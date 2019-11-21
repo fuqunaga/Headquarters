@@ -1,4 +1,5 @@
 ﻿using NetTools;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -14,11 +15,10 @@ namespace Headquarters
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
+        #region Binding Properties
 
         public string Header => script.name;
         public ObservableCollection<Parameter> Parameters { get; protected set; }
-
-        protected Script script { get; set; }
 
         string resultText_ = "";
         public string ResultText
@@ -31,6 +31,20 @@ namespace Headquarters
             }
         }
 
+        int MaxTaskNum_ = 100;
+        public int MaxTaskNum
+        {
+            get => MaxTaskNum_;
+            set
+            {
+                MaxTaskNum_ = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxTaskNum)));
+            }
+        }
+
+        #endregion
+
+        protected Script script { get; set; }
 
         CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
 
@@ -87,10 +101,10 @@ namespace Headquarters
             ResultText = "";
             script.Load();
 
-            cancelTokenSource = new CancellationTokenSource();
             var cancelToken = cancelTokenSource.Token;
 
-            var rsp = RunspaceFactory.CreateRunspacePool(1, ipAndParams.Count());
+            var count = Math.Min(ipAndParams.Count(), MaxTaskNum);
+            var rsp = RunspaceFactory.CreateRunspacePool(1, count);
             rsp.Open();
 
             var tasks = ipAndParams.Select(ipAndParam =>
