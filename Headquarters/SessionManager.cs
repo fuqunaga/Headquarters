@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
-using System.Management.Automation.Runspaces;
 using System.Security;
-using System.Threading;
 
 namespace Headquarters
 {
@@ -25,13 +23,13 @@ New-PSSession -ComputerName $ComputerName -Credential $cred
 ");
 
 
-        public PowerShellScript.Result CreateSession(RunspacePool rsp, string ipAddress, string userName, string passwordStr, CancellationToken cancelToken)
+        public PowerShellScript.Result CreateSession(string ipAddress, string userName, string passwordStr, PowerShellScript.InvokeParameter param)
         {
-            var dic = new Dictionary<string, object>();
-            dic.Add("ComputerName", ipAddress);
-            dic.Add("cred", CreateCredential(userName, passwordStr));
+            var p = new PowerShellScript.InvokeParameter(param);
+            p.parameters.Add("ComputerName", ipAddress);
+            p.parameters.Add("cred", CreateCredential(userName, passwordStr));
 
-            return createSession.Invoke(rsp, dic, cancelToken);
+            return createSession.Invoke(p);
         }
 
         PSCredential CreateCredential(string userName, string passwordStr)

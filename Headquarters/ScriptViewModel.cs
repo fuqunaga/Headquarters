@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,12 +14,63 @@ namespace Headquarters
 {
     class ScriptViewModel : INotifyPropertyChanged
     {
+        #region Type Define
+
         public static class OwnParameter
         {
             public const string MaxTaskNum = "MaxTaskNum";
         }
 
+        public class OutputData
+        {
+            public string name;
+            public PSInvocationStateInfo info;
+            public PowerShellScript.Result result;
+
+            public override string ToString()
+            {
+                var prefix = (result == null) ? "" : (result.IsSuccessed ? "✔" : "⚠");
+                var label = $"{prefix} {name}: {info?.State}";
+                var resultStr = GetResultString();
+
+                var ret = label;
+                if (resultStr.Any()) ret += "\n" + resultStr;
+
+                return ret;
+            }
+
+            string GetResultString()
+            {
+                string ToStr<T>(IEnumerable<T> collection)
+                {
+                    string str = "";
+                    if (collection?.Any() ?? false)
+                    {
+                        str = string.Join("\n ", collection.Select(elem => $" {elem.ToString()}")) + "\n";
+                    }
+                    return str;
+                }
+
+                var ret = "";
+                if (result != null)
+                {
+                    var objStr = ToStr(result.objs);
+                    var errStr = ToStr(result.errors);
+
+                    ret = objStr
+                        + ((objStr.Any() && errStr.Any()) ? "\n" : "")
+                        + errStr;
+                }
+
+                return ret;
+            }
+        }
+
+        #endregion
+
+
         public event PropertyChangedEventHandler PropertyChanged;
+
 
         #region Binding Properties
 
@@ -41,7 +93,7 @@ namespace Headquarters
             get
             {
                 var ret = GetOwnParam(OwnParameter.MaxTaskNum);
-                return (ret != null) ? (int)ret : 100;
+                return (ret != null) ? Convert.ToInt32(ret) : 100;
             }
             set
             {
@@ -65,8 +117,8 @@ namespace Headquarters
 
         void SetOwnParam(string paramName, object value) => ParameterManager.Instance.Set(ToOwnParamName(paramName), value);
 
-        CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
-
+        CancellationTokenSource cancelTokenSource;
+        List<OutputData> outputDatas = new List<OutputData>();
 
         public ScriptViewModel(Script script)
         {
@@ -79,6 +131,12 @@ namespace Headquarters
             Parameters = new ObservableCollection<Parameter>(script.paramNames.Select(p => new Parameter(p)));
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Parameters)));
+        }
+
+        void ClearOutput()
+        {
+            outputDatas.Clear();
+            ResultText = "";
         }
 
         public Task Run(IReadOnlyCollection<IPParams> ipParamsList)
@@ -117,9 +175,10 @@ namespace Headquarters
             .ToList();
 
 
-            ResultText = "";
+            ClearOutput();
             script.Load();
 
+            cancelTokenSource = new CancellationTokenSource();
             var cancelToken = cancelTokenSource.Token;
 
             var count = Math.Min(ipAndParams.Count(), MaxTaskNum);
@@ -128,10 +187,32 @@ namespace Headquarters
 
             var tasks = ipAndParams.Select(ipAndParam =>
             {
+                var ip = ipAndParam.ip;
+                var data = new OutputData()
+                {
+                    name = ip
+                };
+
+                outputDatas.Add(data);
+
+
                 return Task.Run(() =>
                 {
-                    var result = script.Run(rsp, ipAndParam.ip, ipAndParam.paramDic, cancelToken);
-                    UpdateText(ipAndParam.ip, result);
+                    var param = new PowerShellScript.InvokeParameter()
+                    {
+                        rsp = rsp,
+                        parameters = ipAndParam.paramDic,
+                        cancelToken = cancelToken,
+                        invocationStateChanged = (_, e) =>
+                        {
+                            data.info = e.InvocationStateInfo;
+                            UpdateOutput();
+                        }
+                    };
+
+                    var result = script.Run(ipAndParam.ip, param);
+                    data.result = result;
+                    UpdateOutput();
                 });
             });
 
@@ -141,32 +222,17 @@ namespace Headquarters
 
         internal void Stop()
         {
-            cancelTokenSource.Cancel();
+            cancelTokenSource?.Cancel();
         }
 
-
-        void UpdateText(string ipStr, PowerShellScript.Result result)
+        void UpdateOutput()
         {
-            var prefix = result.IsSuccessed ? "✔" : "⚠";
-            var str = prefix + ipStr + ":" + (result.canceled ? "canceled" : "") + "\n";
-            str += ResultToString(result) + "\n\n";
+            var str = string.Join("\n", outputDatas.Select(data => data.ToString()));
 
             lock (this)
             {
-                ResultText += str;
+                ResultText = str;
             }
-        }
-
-        string ResultToString(PowerShellScript.Result result)
-        {
-            var objStrs = ToStrings(result.objs);
-            var errStrs = ToStrings(result.errors);
-            return $"{ string.Join("\n", objStrs)}\n{ string.Join("\n", errStrs)}";
-        }
-
-        IEnumerable<string> ToStrings<T>(IEnumerable<T> collection)
-        {
-            return collection?.Select(item => item.ToString()) ?? new string[0];
         }
     }
 }

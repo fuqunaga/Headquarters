@@ -1,16 +1,32 @@
-﻿using System.Management.Automation;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections;
 using System.Linq;
+using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Threading;
-using System.Collections.Generic;
-using System;
 
 namespace Headquarters
 {
     public class PowerShellScript
     {
+        public class InvokeParameter
+        {
+            public RunspacePool rsp;
+            public Dictionary<string, object> parameters;
+            public CancellationToken cancelToken;
+            public EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged;
+
+            public InvokeParameter() { }
+            public InvokeParameter(InvokeParameter other)
+            {
+                rsp = other.rsp;
+                parameters = other.parameters;
+                cancelToken = other.cancelToken;
+                invocationStateChanged = other.invocationStateChanged;
+            }
+        }
+
         public class Result
         {
             public bool canceled;
@@ -29,20 +45,20 @@ namespace Headquarters
             this.script = script;
         }
 
-        public Result Invoke(RunspacePool rsp, IDictionary param, CancellationToken cancelToken)
+        public Result Invoke(InvokeParameter param)
         {
-            Result ret;
             using (var ps = PowerShell.Create())
             {
-                ps.RunspacePool = rsp;
+                ps.InvocationStateChanged += param.invocationStateChanged;
+                ps.RunspacePool = param.rsp;
 
                 ps.AddScript(script);
-                ps.AddParameters(param);
+                ps.AddParameters(param.parameters);
 
-                ret = new Result();
+                var ret = new Result();
                 try
                 {
-                    using (cancelToken.Register(() => { ps.Stop(); ret.canceled = true; }))
+                    using (param.cancelToken.Register(() => { ps.Stop(); ret.canceled = true; }))
                     {
                         ret.objs = ps.Invoke();
                     }

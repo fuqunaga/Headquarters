@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Headquarters
 {
     class Script
     {
-        public static class IgnoreParameterName
+        public static class ReservedParameterName
         {
             public const string Session = "session";
         }
@@ -46,18 +47,18 @@ namespace Headquarters
                 .Replace("$", "")
                 .Replace(" ", "")
                 .Split(',')
-                .Where(str => string.Compare(str, IgnoreParameterName.Session, true) != 0)
+                .Where(str => string.Compare(str, ReservedParameterName.Session, true) != 0)
                 .ToList();
         }
 
-        public PowerShellScript.Result Run(RunspacePool rsp, string ipAddress, Dictionary<string, object> parameters, CancellationToken cancelToken)
+        public PowerShellScript.Result Run(string ipAddress, PowerShellScript.InvokeParameter param)
         {
             PowerShellScript.Result result;
 
-            parameters.TryGetValue(ParameterManager.SpecialParamName.UserName, out var userName);
-            parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword, out var userPassword);
+            param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserName, out var userName);
+            param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword, out var userPassword);
 
-            var sessionResult = SessionManager.Instance.CreateSession(rsp, ipAddress, (string)userName, (string)userPassword, cancelToken);
+            var sessionResult = SessionManager.Instance.CreateSession(ipAddress, (string)userName, (string)userPassword, param);
             var session = sessionResult.objs.FirstOrDefault()?.BaseObject;
             if (session == null)
             {
@@ -65,8 +66,8 @@ namespace Headquarters
             }
             else
             {
-                parameters.Add("session", session);
-                result = psScript.Invoke(rsp, parameters, cancelToken);
+                param.parameters.Add(ReservedParameterName.Session, session);
+                result = psScript.Invoke(param);
             }
 
 
