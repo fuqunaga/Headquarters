@@ -4,7 +4,7 @@ HQ is a GUI tool for remotely operating multiple windows PCs using PowerShell.
 [日本語](./README-jp.md)  
 
 
-<img src="Documents/top.png" height="500px" />
+<img src="Documents/top.png" />
 
 
 # QuickStart
@@ -92,18 +92,19 @@ Editable on HQ.
 
 
 # TIPS
-### Accounts are different for each PC
-If you prepare parameters`UserName`, `UserPassword` in IPList, it will be used.
-
 ### ⚠No Security
 The password is saved in plaintext.  
 Be careful with handling param.json and ipList.csv.
 
+### Accounts are different for each PC
+If you prepare parameters`UserName`, `UserPassword` in IPList, it will be used.
+
+### Avoiding System.OutOfMemoryException
+If multiple IPs are in the IPList, this may be avoided by limiting the number of tasks executed simultaneously.
+Please try to be smaller than IPList the MaxTaskNum that next to run button(▶).
+
 # Libraries:
-https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit - MaterialDesignInXamlToolkit
-
-https://github.com/jsakamoto/ipaddressrange - IPAddressRange 
-
-https://www.newtonsoft.com/json - Json<span />.NET
-
-https://github.com/Fody/Costura - Costura.Fody
+* https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit - MaterialDesignInXamlToolkit
+* https://github.com/jsakamoto/ipaddressrange - IPAddressRange 
+* https://www.newtonsoft.com/json - Json<span />.NET
+* https://github.com/Fody/Costura - Costura.Fody
