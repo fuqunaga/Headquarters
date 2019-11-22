@@ -92,21 +92,17 @@ HQ上で編集可能です
 # TIPS
 
 ### ⚠セキュリティに注意
-パスワードは平文で保存されます。
-ipList.csv、param.jsonの取扱にご注意ください
+パスワードは平文で保存されます。ipList.csv、param.jsonの取扱にご注意ください
 
 ### PCごとにアカウントが異なる
 IPListに`UserName`、`UserPassword`というパラメータを用意するとそちらが反映されます
 
 ### System.OutOfMemoryExceptionが出る
-IPListで複数のIPを指定している場合は同時実行するタスク数を制限することで回避できることがあります
+IPListで複数のIPを指定している場合は同時実行するタスク数を制限することで回避できることがあります。
 実行ボタン（▶）横のMaxTaskNumをIPListより少ない数にして試してみてください
 
 # ライブラリ
-https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit - MaterialDesignInXamlToolkit
-
-https://github.com/jsakamoto/ipaddressrange - IPAddressRange 
-
-https://www.newtonsoft.com/json - Json<span />.NET
-
-https://github.com/Fody/Costura - Costura.Fody
+* https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit - MaterialDesignInXamlToolkit
+* https://github.com/jsakamoto/ipaddressrange - IPAddressRange 
+* https://www.newtonsoft.com/json - Json<span />.NET
+* https://github.com/Fody/Costura - Costura.Fody
