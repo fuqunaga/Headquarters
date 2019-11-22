@@ -13,6 +13,11 @@ namespace Headquarters
 {
     class ScriptViewModel : INotifyPropertyChanged
     {
+        public static class OwnParameter
+        {
+            public const string MaxTaskNum = "MaxTaskNum";
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         #region Binding Properties
@@ -31,20 +36,34 @@ namespace Headquarters
             }
         }
 
-        int MaxTaskNum_ = 100;
         public int MaxTaskNum
         {
-            get => MaxTaskNum_;
+            get
+            {
+                var ret = GetOwnParam(OwnParameter.MaxTaskNum);
+                return (ret != null) ? (int)ret : 100;
+            }
             set
             {
-                MaxTaskNum_ = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxTaskNum)));
+                if (MaxTaskNum != value)
+                {
+                    SetOwnParam(OwnParameter.MaxTaskNum, value);
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxTaskNum)));
+                }
             }
         }
 
         #endregion
 
+
         protected Script script { get; set; }
+
+        string ToOwnParamName(string name) => script.name + "." + name;
+
+        // parameter by script
+        object GetOwnParam(string paramName) => ParameterManager.Instance.Get(ToOwnParamName(paramName));
+
+        void SetOwnParam(string paramName, object value) => ParameterManager.Instance.Set(ToOwnParamName(paramName), value);
 
         CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
 

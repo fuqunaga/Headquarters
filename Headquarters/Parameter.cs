@@ -5,7 +5,7 @@
         public string Name { get; set; }
         public string Value
         {
-            get { return IsDependIP ? "On IP List" : ParameterManager.Instance.Get(Name); }
+            get { return IsDependIP ? "On IP List" : ParameterManager.Instance.Get(Name).ToString(); }
             set
             {
                 if ( !IsDependIP )

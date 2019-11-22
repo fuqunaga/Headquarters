@@ -28,7 +28,7 @@ namespace Headquarters
         public static Parameter UserPassword => new Parameter(SpecialParamName.UserPassword);
 
 
-        protected Dictionary<string, string> parameters = new Dictionary<string, string>();
+        protected Dictionary<string, object> parameters = new Dictionary<string, object>();
         protected string filepath;
 
         public void Load(string filepath)
@@ -39,7 +39,7 @@ namespace Headquarters
             {
                 var str = File.ReadAllText(filepath);
 
-                parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(str);
+                parameters = JsonConvert.DeserializeObject<Dictionary<string, object>>(str);
             }
         }
 
@@ -54,13 +54,13 @@ namespace Headquarters
         }
 
 
-        public string Get(string name)
+        public object Get(string name)
         {
             parameters.TryGetValue(name, out var ret);
             return ret;
         }
 
-        public void Set(string name, string value)
+        public void Set(string name, object value)
         {
             parameters[name] = value;
         }
