@@ -2,7 +2,7 @@
 
 HQはPowerShellを用いて複数のPCをリモートで操作するためのGUIツールです  
 
-<img src="Documents/top.png" height="500px" />
+<img src="Documents/top.png"/>
 
 
 # クイックスタート
@@ -90,12 +90,17 @@ HQ上で編集可能です
 
 
 # TIPS
-### PCごとにアカウントが異なる場合
-IPListに`UserName`、`UserPassword`というパラメータを用意するとそちらが反映されます
 
 ### ⚠セキュリティに注意
 パスワードは平文で保存されます。
-ipList.csv、param.jsonの取扱にご注意ください。
+ipList.csv、param.jsonの取扱にご注意ください
+
+### PCごとにアカウントが異なる
+IPListに`UserName`、`UserPassword`というパラメータを用意するとそちらが反映されます
+
+### System.OutOfMemoryExceptionが出る
+IPListで複数のIPを指定している場合は同時実行するタスク数を制限することで回避できることがあります
+実行ボタン（▶）横のMaxTaskNumをIPListより少ない数にして試してみてください
 
 # ライブラリ
 https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit - MaterialDesignInXamlToolkit
