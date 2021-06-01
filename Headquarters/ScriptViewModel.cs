@@ -169,8 +169,8 @@ namespace Headquarters
             {
                 IPAddressRange.TryParse(ipParams.ipStr, out var range);
                 var ipStrList = range?.AsEnumerable().Select(ip => ip.ToString()) ?? (new[] { ipParams.ipStr });
-                var paramDic = parameters.ToDictionary(p => p.Name, p => (object)p.Get(ipParams));
-                return ipStrList.Select(ip => new { ip, paramDic });
+                var paramDicOrig = parameters.ToDictionary(p => p.Name, p => (object)p.Get(ipParams));
+                return ipStrList.Select(ip => new { ip, paramDic = new Dictionary<string, object>(paramDicOrig) });
             })
             .ToList();
 
