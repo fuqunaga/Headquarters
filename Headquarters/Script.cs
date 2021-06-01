@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Management.Automation.Runspaces;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace Headquarters
 {
@@ -19,7 +16,7 @@ namespace Headquarters
         public string name => Path.GetFileNameWithoutExtension(filepath);
         public List<string> paramNames { get; protected set; }
 
-        string filepath;
+        readonly string filepath;
         PowerShellScript psScript;
 
         public Script(string filepath)
