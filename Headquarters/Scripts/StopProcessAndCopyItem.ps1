@@ -9,9 +9,5 @@ Invoke-Command $session -ScriptBlock {
 		Stop-Process -Name $processName -Force
 		Sleep 2
 	}
-	if(Test-Path $remotePath)
-	{
-		Remove-Item $remotePath -Recurse
-	}
 } -ArgumentList ($remotePath, $processName)
-Copy-Item -Recurse -ToSession $session -Path $localPath -Destination $remotePath
+Copy-Item -ToSession $session -Recurse -Force -Path $localPath -Destination $remotePath
