@@ -146,7 +146,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="Scripts\InvokeCommandTest.ps1" />
-    <None Include="Scripts\StopProccess.ps1" />
     <None Include="Scripts\CreateStartupShortcut.ps1" />
     <None Include="Scripts\RestartPC.ps1" />
     <None Include="Scripts\CopyItem.ps1" />
@@ -159,6 +158,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Scripts\CopyItemFromRemote.ps1" />
+    <Content Include="Scripts\ShutdownPC.ps1" />
+    <Content Include="Scripts\StopProcess.ps1" />
+    <Content Include="Scripts\StopProecessrAndCopyItem.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.3.3.3\build\Fody.targets" Condition="Exists('..\packages\Fody.3.3.3\build\Fody.targets')" />
