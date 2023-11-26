@@ -77,7 +77,7 @@
                            <Hyperlink.Style>
                                <Style TargetType="Hyperlink">
                                    <Setter Property="Foreground" Value="{Binding Foreground,RelativeSource={RelativeSource FindAncestor,AncestorType=TextBlock}}"/>
-                                   <Setter Property="TextDecorations" Value=""/>
+                                   <Setter Property="TextDecorations" Value="None" />
                                </Style>
                            </Hyperlink.Style>                       
                            HQ</Hyperlink>
