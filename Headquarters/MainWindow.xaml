@@ -67,7 +67,7 @@
 
     <materialDesign:DialogHost Identifier="RootDialog">
         <DockPanel>
-            <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2" Panel.ZIndex="100">
+            <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="100">
                 <Grid Margin="16,0,0,0">
                     <TextBlock VerticalAlignment="Center" FontSize="22">
                        <Hyperlink
@@ -119,7 +119,7 @@
 
                 <!-- IPList -->
                 <DockPanel Grid.Column="0" Margin="0">
-                    <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2" Panel.ZIndex="1">
+                    <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="1">
                         <DockPanel>
                             <materialDesign:PackIcon Kind="IpNetwork" DockPanel.Dock="Left" VerticalAlignment="Center"/>
                             <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">IP List</TextBlock>
@@ -167,7 +167,7 @@
 
                         <!-- Select script -->
                         <DockPanel >
-                            <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth2" DockPanel.Dock="Top">
+                            <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" materialDesign:ElevationAssist.Elevation="Dp2" DockPanel.Dock="Top">
                                 <DockPanel>
                                     <materialDesign:PackIcon Kind="ScriptText"/>
                                     <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">Scripts</TextBlock>
@@ -205,11 +205,11 @@
                             <materialDesign:FadeWipe />
                         </materialDesign:TransitionerSlide.BackwardWipe>
                         <DockPanel>
-                            <materialDesign:ColorZone Mode="PrimaryMid" Padding="8,0,0,0" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2">
+                            <materialDesign:ColorZone Mode="PrimaryMid" Padding="8,0,0,0" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2">
                                 <DockPanel>
                                     <!-- Return Button -->
                                     <Button 
-                                        materialDesign:ShadowAssist.ShadowDepth="Depth0"
+                                        materialDesign:ElevationAssist.Elevation="Dp0"
                                         Command="{x:Static materialDesign:Transitioner.MovePreviousCommand}"
                                         HorizontalAlignment="Left">
                                         <materialDesign:PackIcon Kind="ArrowLeft" />
@@ -236,7 +236,7 @@
                                                     Margin="8"
                                                     Name="RunButton"
                                                     Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
-                                                    materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                                                    materialDesign:ElevationAssist.Elevation="Dp3"
                                                     Click="OnClickRun"
                                                     >
                                                     <materialDesign:PackIcon Kind="MenuRight" Height="32" Width="32" />
