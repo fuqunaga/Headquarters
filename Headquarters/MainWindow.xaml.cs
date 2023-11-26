@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Policy;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -131,7 +132,14 @@ namespace Headquarters
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
-            Process.Start(e.Uri.ToString());
+
+            var pi = new ProcessStartInfo()
+            {
+                FileName = e.Uri.ToString(),
+                UseShellExecute = true,
+            };
+
+            Process.Start(pi);
         }
     }
 }
