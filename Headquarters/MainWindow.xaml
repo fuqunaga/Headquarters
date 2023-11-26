@@ -69,7 +69,7 @@
         <DockPanel>
             <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" DockPanel.Dock="Top" materialDesign:ShadowAssist.ShadowDepth="Depth2" Panel.ZIndex="100">
                 <Grid Margin="16,0,0,0">
-                    <TextBlock Style="{StaticResource MaterialDesignDisplay1TextBlock}">
+                    <TextBlock VerticalAlignment="Center" FontSize="22">
                        <Hyperlink
                            NavigateUri="https://github.com/fuqunaga/Headquaters"
                            RequestNavigate="Hyperlink_RequestNavigate"
@@ -329,7 +329,7 @@
 
                             <!-- Output -->
                             <TextBox Text="{Binding ResultText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource MaterialDesignOutlinedTextFieldTextBox}"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
                                  TextWrapping="Wrap" 
                                  VerticalAlignment="Stretch"
                                  IsReadOnly="True"
