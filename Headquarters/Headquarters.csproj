@@ -43,7 +43,8 @@
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
-  <PropertyGroup>
-    <PostBuildEvent>xcopy $(ProjectDir)Scripts $(TargetDir)Scripts /D/E/C/I/H/Y</PostBuildEvent>
-  </PropertyGroup>
+  <PropertyGroup />
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy $(ProjectDir)Scripts $(TargetDir)Scripts /D/E/C/I/H/Y" />
+  </Target>
 </Project>
