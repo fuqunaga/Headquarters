@@ -160,11 +160,7 @@
                 <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
 
                 <materialDesign:Transitioner Name="tsScripts" SelectedIndex="0"  Panel.ZIndex="-10" Grid.Column="2">
-                    <materialDesign:TransitionerSlide OpeningEffect="SlideInFromLeft">
-                        <materialDesign:TransitionerSlide.ForwardWipe>
-                            <materialDesign:FadeWipe />
-                        </materialDesign:TransitionerSlide.ForwardWipe>
-
+                    <materialDesign:TransitionerSlide>
                         <!-- Select script -->
                         <DockPanel >
                             <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" materialDesign:ElevationAssist.Elevation="Dp2" DockPanel.Dock="Top">
@@ -200,11 +196,8 @@
                         </DockPanel>
                     </materialDesign:TransitionerSlide>
 
-                    <materialDesign:TransitionerSlide OpeningEffect="SlideInFromRight" DataContext="{Binding Current}">
-                        <materialDesign:TransitionerSlide.BackwardWipe>
-                            <materialDesign:FadeWipe />
-                        </materialDesign:TransitionerSlide.BackwardWipe>
-                        <DockPanel>
+                    <materialDesign:TransitionerSlide DataContext="{Binding Current}">
+                          <DockPanel>
                             <materialDesign:ColorZone Mode="PrimaryMid" Padding="8,0,0,0" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2">
                                 <DockPanel>
                                     <!-- Return Button -->
