@@ -159,7 +159,7 @@
 
                 <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
 
-                <materialDesign:Transitioner Name="tsScripts" SelectedIndex="0"  Panel.ZIndex="-10" Grid.Column="2">
+                <materialDesign:Transitioner Name="psScripts" SelectedIndex="0"  Panel.ZIndex="-10" Grid.Column="2" >
                     <materialDesign:TransitionerSlide>
                         <!-- Select script -->
                         <DockPanel >
@@ -187,8 +187,11 @@
                                         <DataTemplate>
                                             <Button
                                                 Margin="8"
-                                        Style="{StaticResource MaterialDesignRaisedLightButton}"
-                                        Click="OnClickSelectScript" Content="{Binding Header}" HorizontalAlignment="Left"/>
+                                                Style="{StaticResource MaterialDesignRaisedLightButton}"
+                                                Click="OnClickSelectScript"
+                                                Content="{Binding Header}"
+                                                HorizontalAlignment="Left"
+                                                />
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>

@@ -48,8 +48,8 @@ namespace Headquarters
 
         void OnChangeIPList()
         {
-            tsScripts.DataContext = null;
-            tsScripts.DataContext = scriptsVM;
+            psScripts.DataContext = null;
+            psScripts.DataContext = scriptsVM;
 
             tbUserName.DataContext = ParameterManager.UserName;
             UserPassword.DataContext = ParameterManager.UserPassword;
@@ -58,7 +58,7 @@ namespace Headquarters
         private void OnClickSelectScript(object sender, RoutedEventArgs e)
         {
             scriptsVM.SetCurrent(((Button)sender).Content.ToString());
-            tsScripts.SelectedIndex += 1;
+            psScripts.SelectedIndex += 1;
         }
 
         private void OnClickRun(object sender, RoutedEventArgs e)
