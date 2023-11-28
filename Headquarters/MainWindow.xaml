@@ -160,7 +160,11 @@
                 <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
 
                 <materialDesign:Transitioner Name="psScripts" SelectedIndex="0"  Panel.ZIndex="-10" Grid.Column="2" >
-                    <materialDesign:TransitionerSlide>
+                    <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect SlideInFromLeft}">
+                        <materialDesign:TransitionerSlide.ForwardWipe>
+                            <local:CustomFadeWipe />
+                        </materialDesign:TransitionerSlide.ForwardWipe>
+
                         <!-- Select script -->
                         <DockPanel >
                             <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" materialDesign:ElevationAssist.Elevation="Dp2" DockPanel.Dock="Top">
@@ -199,8 +203,11 @@
                         </DockPanel>
                     </materialDesign:TransitionerSlide>
 
-                    <materialDesign:TransitionerSlide DataContext="{Binding Current}">
-                          <DockPanel>
+                    <materialDesign:TransitionerSlide DataContext="{Binding Current}" OpeningEffect="{materialDesign:TransitionEffect SlideInFromRight}">
+                        <materialDesign:TransitionerSlide.BackwardWipe>
+                            <local:CustomFadeWipe />
+                        </materialDesign:TransitionerSlide.BackwardWipe>
+                        <DockPanel>
                             <materialDesign:ColorZone Mode="PrimaryMid" Padding="8,0,0,0" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2">
                                 <DockPanel>
                                     <!-- Return Button -->
@@ -216,16 +223,24 @@
 
                                     <!-- Run Button -->
                                     <materialDesign:Transitioner Name="RunButtonSelector" SelectedIndex="1" Margin="16,0,8,0">
-                                        <Button 
-                                            Style="{StaticResource MaterialDesignRaisedAccentButton}"
-                                            HorizontalAlignment="Left"
-                                            IsEnabled="False"
-                                            Content="Select IP" />
+                                        <materialDesign:TransitionerSlide>
+                                            <materialDesign:TransitionerSlide.ForwardWipe>
+                                                <local:CustomFadeWipe />
+                                            </materialDesign:TransitionerSlide.ForwardWipe>
+                                            <Button 
+                                                Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                                                HorizontalAlignment="Left"
+                                                IsEnabled="False"
+                                                Content="Select IP" />
+                                        </materialDesign:TransitionerSlide>
 
                                         <materialDesign:TransitionerSlide>
                                             <materialDesign:TransitionerSlide.BackwardWipe>
-                                                <materialDesign:FadeWipe />
+                                                <local:CustomFadeWipe />
                                             </materialDesign:TransitionerSlide.BackwardWipe>
+                                            <materialDesign:TransitionerSlide.ForwardWipe>
+                                                <local:CustomFadeWipe />
+                                            </materialDesign:TransitionerSlide.ForwardWipe>
 
                                             <DockPanel>
                                                 <Button 
@@ -252,7 +267,7 @@
                                                            Width="32"
                                                            VerticalAlignment="Center"
                                                            />
-                                                    
+
                                                     <Slider
                                                         Margin="16"
                                                         VerticalAlignment="Center"
@@ -276,7 +291,7 @@
 
                                         <materialDesign:TransitionerSlide>
                                             <materialDesign:TransitionerSlide.BackwardWipe>
-                                                <materialDesign:FadeWipe />
+                                                <local:CustomFadeWipe />
                                             </materialDesign:TransitionerSlide.BackwardWipe>
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
