@@ -121,9 +121,9 @@
                 <DockPanel Grid.Column="0" Margin="0">
                     <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="1">
                         <DockPanel>
-                            <materialDesign:PackIcon Kind="IpNetwork" DockPanel.Dock="Left" VerticalAlignment="Center"/>
-                            <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">IP List</TextBlock>
+                            <local:IpListBar />
                         </DockPanel>
+                        
                     </materialDesign:ColorZone>
 
                     <DataGrid x:Name="dgIPList" 
