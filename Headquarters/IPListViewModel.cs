@@ -2,13 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Input;
 
 namespace Headquarters
 {
@@ -26,21 +25,29 @@ namespace Headquarters
         #endregion
 
 
-        protected bool isColumnEditable_;
+        protected string filepath;
+        protected bool isColumnEditable;
+
         public bool IsColumnEditable
         {
-            get => isColumnEditable_;
+            get => isColumnEditable;
             protected set
             {
-                if (isColumnEditable_ != value)
+                if (isColumnEditable != value)
                 {
-                    isColumnEditable_ = value;
+                    isColumnEditable = value;
                     OnPropertyChanged(nameof(IsColumnEditable));
                 }
             }
         }
 
-        protected string filepath;
+
+        public IEnumerable<IPParams> IpParams => Items.Rows.OfType<DataRow>().Select(d => new IPParams(d));
+        public IEnumerable<IPParams> SelectedParams => IpParams.Where(p => p.isSelected);
+
+        public bool Contains(string name) => Items.Columns.Contains(name);
+
+
 
         public void Load(string filepath)
         {
@@ -75,11 +82,6 @@ namespace Headquarters
             AddItemsCallback();
         }
 
-        public IEnumerable<IPParams> ipParams => Items.Rows.OfType<DataRow>().Select(d => new IPParams(d));
-        public IEnumerable<IPParams> selectedParams => ipParams.Where(p => p.isSelected);
-
-        public bool Contains(string name) => Items.Columns.Contains(name);
-
         internal void Save()
         {
             var csv = "";
@@ -103,9 +105,6 @@ namespace Headquarters
         }
 
 
-
-
-
         internal void OnHeaderContextMenuOpen(object sender)
         {
             var header = (DataGridColumnHeader)sender;
@@ -114,6 +113,7 @@ namespace Headquarters
             IsColumnEditable = !((name == selectedPropertyName) || (name == IPParams.ipPropertyName));
         }
 
+        [SupportedOSPlatform("windows")]
         public async void AddColumn(object o)
         {
             var vm = new NameDialogViewModel()

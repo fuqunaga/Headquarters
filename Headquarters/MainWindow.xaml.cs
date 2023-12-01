@@ -63,7 +63,7 @@ namespace Headquarters
 
         private void OnClickRun(object sender, RoutedEventArgs e)
         {
-            var task = scriptsVM.Current?.Run(ipList.selectedParams.ToList());
+            var task = scriptsVM.Current?.Run(ipList.SelectedParams.ToList());
             if (task != null)
             {
                 RunButtonSelector.SelectedIndex = 2;
