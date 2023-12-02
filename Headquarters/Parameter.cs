@@ -1,8 +1,8 @@
 ﻿namespace Headquarters
 {
-    public class Parameter
+    public class Parameter(string name)
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = name;
         public string Value
         {
             get { return IsDependIP ? "On IP List" : ParameterManager.Instance.Get(Name)?.ToString(); }
@@ -16,13 +16,6 @@
         public bool IsIndependentIP => !IsDependIP;
 
         public bool IsDependIP => IPListViewModel.Instance.Contains(Name);
-
-
-
-        public Parameter(string name)
-        {
-            Name = name;
-        }
 
         public string Get(IPParams ipParam)
         {

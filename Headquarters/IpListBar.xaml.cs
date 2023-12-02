@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Path = System.IO.Path;
 
 namespace Headquarters
 {
@@ -20,9 +12,37 @@ namespace Headquarters
     /// </summary>
     public partial class IpListBar : UserControl
     {
+        private static readonly string _ipListFolder = @".\IpList";
+        private static readonly string _ipListExtension = ".csv";
+
+
+        public List<string> IpListFileList { get; } = [];
+        public string SelectedIpListFile { get; set; }
+
         public IpListBar()
         {
             InitializeComponent();
+            DataContext = this;
+            UpdateIpListFileList();
+            SelectedIpListFile = IpListFileList.FirstOrDefault();
+        }
+
+        private void UpdateIpListFileList()
+        {
+            IpListFileList.Clear();
+
+            if (Directory.Exists(_ipListFolder))
+            {
+                IpListFileList.AddRange(
+                    Directory.GetFiles(_ipListFolder)
+                    .Where(filePath => Path.GetExtension(filePath) == _ipListExtension)
+                    .Select(Path.GetFileName)
+                );
+            }
+
+            IpListComboBox.Visibility = IpListFileList.Any() 
+                ? Visibility.Visible 
+                : Visibility.Collapsed;
         }
     }
 }

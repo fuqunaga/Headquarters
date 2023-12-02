@@ -119,12 +119,9 @@
 
                 <!-- IPList -->
                 <DockPanel Grid.Column="0" Margin="0">
-                    <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="1">
-                        <DockPanel>
-                            <local:IpListBar />
-                        </DockPanel>
-                        
-                    </materialDesign:ColorZone>
+
+                    <local:IpListBar  DockPanel.Dock="Top" Height="48" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="1" />
+                    
 
                     <DataGrid x:Name="dgIPList" 
                               ItemsSource="{Binding Items, Mode=TwoWay}" 
