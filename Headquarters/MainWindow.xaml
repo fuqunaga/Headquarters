@@ -120,7 +120,7 @@
                 <!-- IPList -->
                 <DockPanel Grid.Column="0" Margin="0">
 
-                    <local:IpListBar  DockPanel.Dock="Top" Height="48" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="1" />
+                    <local:IpListBarControl x:Name="IpListBar" DockPanel.Dock="Top" Height="48" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="1" />
                     
 
                     <DataGrid x:Name="dgIPList" 

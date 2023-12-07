@@ -12,8 +12,9 @@ namespace Headquarters
     /// </summary>
     public partial class MainWindow : Window
     {
-        IPListViewModel ipList;
-        ScriptsViewModel scriptsVM;
+        private readonly IpListBarViewModel _ipListBarViewModel;
+        private readonly IPListViewModel _ipList;
+        private readonly ScriptsViewModel _scriptsVM;
 
         public MainWindow()
         {
@@ -22,16 +23,22 @@ namespace Headquarters
             var paramManager = ParameterManager.Instance;
             paramManager.Load(".\\param.json");
 
-            scriptsVM = new ScriptsViewModel(".", @".\Scripts");
-            ScriptButtons.DataContext = scriptsVM;
+            _ipListBarViewModel = new IpListBarViewModel();
+            IpListBar.DataContext = _ipListBarViewModel;
+            _ipListBarViewModel.Initialize();
 
-            ipList = IPListViewModel.Instance;
-            ipList.Load(".\\iplist.csv");
-            ipList.Bind(dgIPList);
 
-            ipList.PropertyChanged += (sender, e) =>
+            _scriptsVM = new ScriptsViewModel(".", @".\Scripts");
+            ScriptButtons.DataContext = _scriptsVM;
+
+
+            _ipList = IPListViewModel.Instance;
+            _ipList.Load(".\\iplist.csv");
+            _ipList.Bind(dgIPList);
+
+            _ipList.PropertyChanged += (sender, e) =>
             {
-                if (e.PropertyName == ipList.selectedPropertyName) UpdateRunButton();
+                if (e.PropertyName == _ipList.selectedPropertyName) UpdateRunButton();
 
                 if (e.PropertyName == nameof(IPListViewModel.Items))
                 {
@@ -46,10 +53,10 @@ namespace Headquarters
             OnChangeIPList();
         }
 
-        void OnChangeIPList()
+        private void OnChangeIPList()
         {
             psScripts.DataContext = null;
-            psScripts.DataContext = scriptsVM;
+            psScripts.DataContext = _scriptsVM;
 
             tbUserName.DataContext = ParameterManager.UserName;
             UserPassword.DataContext = ParameterManager.UserPassword;
@@ -57,13 +64,13 @@ namespace Headquarters
 
         private void OnClickSelectScript(object sender, RoutedEventArgs e)
         {
-            scriptsVM.SetCurrent(((Button)sender).Content.ToString());
+            _scriptsVM.SetCurrent(((Button)sender).Content.ToString());
             psScripts.SelectedIndex += 1;
         }
 
         private void OnClickRun(object sender, RoutedEventArgs e)
         {
-            var task = scriptsVM.Current?.Run(ipList.SelectedParams.ToList());
+            var task = _scriptsVM.Current?.Run(_ipList.SelectedParams.ToList());
             if (task != null)
             {
                 RunButtonSelector.SelectedIndex = 2;
@@ -75,15 +82,15 @@ namespace Headquarters
             }
         }
 
-        void UpdateRunButton()
+        private void UpdateRunButton()
         {
-            var selectAny = ipList.IsSelected ?? true;
+            var selectAny = _ipList.IsSelected ?? true;
             RunButtonSelector.Dispatcher.BeginInvoke(new Action(() => RunButtonSelector.SelectedIndex = selectAny ? 1 : 0));
         }
 
         private void OnClickStop(object sender, RoutedEventArgs e)
         {
-            scriptsVM.Current?.Stop();
+            _scriptsVM.Current?.Stop();
             RunButtonSelector.SelectedIndex = 1;
         }
 
@@ -91,7 +98,7 @@ namespace Headquarters
 
         protected override void OnClosed(EventArgs e)
         {
-            ipList.Save();
+            _ipList.Save();
             ParameterManager.Instance.Save();
 
             base.OnClosed(e);
@@ -102,22 +109,22 @@ namespace Headquarters
 
         private void OnHeaderContextMenuOpen(object sender, System.Windows.Controls.ContextMenuEventArgs e)
         {
-            ipList.OnHeaderContextMenuOpen(sender);
+            _ipList.OnHeaderContextMenuOpen(sender);
         }
 
         private void OnClickAddColumn(object sender, RoutedEventArgs e)
         {
-            ipList.AddColumn(sender);
+            _ipList.AddColumn(sender);
         }
 
         private void OnClickDeleteColumn(object sender, RoutedEventArgs e)
         {
-            ipList.DeleteColumn(sender);
+            _ipList.DeleteColumn(sender);
         }
 
         private void OnClickRenameColumn(object sender, RoutedEventArgs e)
         {
-            ipList.RenameColumn(sender);
+            _ipList.RenameColumn(sender);
         }
 
         #endregion
