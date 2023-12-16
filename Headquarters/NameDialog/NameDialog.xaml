@@ -8,7 +8,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:Headquarters"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="350" d:DataContext="{d:NameDialogViewModel }">
+             d:DesignHeight="300" d:DesignWidth="350" d:DataContext="{d:NameDialogViewModel}">
     <UserControl.Resources>
         <local:BooleanAllFalseConverter x:Key="BooleanAllFalseConverter" />
     </UserControl.Resources>

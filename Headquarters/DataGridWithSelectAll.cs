@@ -7,7 +7,7 @@ using System.Windows.Controls;
 
 namespace Headquarters
 {
-    class DataGridWithSelectAll : INotifyPropertyChanged
+    public class DataGridWithSelectAll : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -11,8 +12,7 @@ using MaterialDesignThemes.Wpf;
 
 namespace Headquarters
 {
-    [SuppressMessage("Interoperability", "CA1416:プラットフォームの互換性を検証")]
-    public class IpListBarViewModel
+    public class IpListBarViewModel : INotifyPropertyChanged
     {
         #region Type Define
         
@@ -35,25 +35,60 @@ namespace Headquarters
         #endregion
 
         
-        private const string IpListFolder = @".\IpList";
-        private const string IpListExtension = ".csv";
+        private const string IpListFolder = @".\IPList";
+        private const string DefaultIpListFileName = "iplist";
+        private const string IpListFileExtension = ".csv";
+        
+        private static string DefaultIpListFilePath => FileNameToFullPath(DefaultIpListFileName);
+        private static string FileNameToFullPath(string fileName) =>Path.Combine(IpListFolder, fileName);
+        
+        
+        #region INotifyPropertyChanged
+        
+        public event PropertyChangedEventHandler PropertyChanged;
 
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
-        private List<string> IpListFileList { get; } = [];
-        public string SelectedIpListFile { get; set; }
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
+        }
+        
+        #endregion
+
+        private IPListViewModel _ipListViewModel;
+        private string _selectedIpListFileNameName;
+
+        
+        
+        public List<string> IpListFileList { get; } = [];
+
+        public string SelectedIpListFileName
+        {
+            get => _selectedIpListFileNameName;
+            set => SetField(ref _selectedIpListFileNameName, value);
+        }
         public Visibility ComboBoxVisibility { get; set; }
 
         public ICommand AddCommand { get; private set; }
-
-
-
-        public void Initialize()
+        public ICommand RemoveCommand { get; private set; }
+        
+        
+        public void Initialize(IPListViewModel ipListViewModel)
         {
             UpdateIpListFileList();
-
             AddCommand = new UiCommand() { Proc = ShowAddDialog };
-        }
+            RemoveCommand = new UiCommand() { Proc = ShowRemoveDialog };
 
+            _ipListViewModel = ipListViewModel;
+            _ipListViewModel.Load(SelectedIpListFileName ?? DefaultIpListFilePath);
+        }
 
         private void UpdateIpListFileList()
         {
@@ -63,14 +98,14 @@ namespace Headquarters
             {
                 IpListFileList.AddRange(
                     Directory.GetFiles(IpListFolder)
-                    .Where(filePath => Path.GetExtension(filePath) == IpListExtension)
+                    .Where(filePath => Path.GetExtension(filePath) == IpListFileExtension)
                     .Select(Path.GetFileName)
                 );
             }
 
             if ( IpListFileList.Count > 0 )
             {
-                SelectedIpListFile = IpListFileList.FirstOrDefault();
+                SelectedIpListFileName = IpListFileList.FirstOrDefault();
                 ComboBoxVisibility = Visibility.Visible;
             }
             else
@@ -83,8 +118,8 @@ namespace Headquarters
         {
             var vm = new NameDialogViewModel()
             {
-                Title = "Add IpList file",
-                Suffix = IpListExtension
+                Title = "Add IP List file",
+                Suffix = IpListFileExtension
             };
 
             var view = new NameDialog()
@@ -101,23 +136,36 @@ namespace Headquarters
             }
 
             var result = await DialogHost.Show(view, "RootDialog");
+            if (result == null || !(bool)result) return;
+            
+            _ipListViewModel.Save(FileNameToFullPath($"{vm.Name}{IpListFileExtension}"));
+            UpdateIpListFileList();
+        }
 
-            if (result != null && (bool)result)
+        private async void ShowRemoveDialog()
+        {
+            var vm = new NameDialogViewModel
             {
-                AddIpListFile(vm.Name);
-            }
+                Title = "Remove?",
+                Name = SelectedIpListFileName
+            };
+            
+            var view = new NameDialog
+            {
+                DataContext = vm,
+                NameTextBox =
+                {
+                    IsEnabled = false
+                }
+            };
+
+            var result = await DialogHost.Show(view, "RootDialog");
+            if (result == null || !(bool)result) return;
+            
+            File.Delete(FileNameToFullPath(SelectedIpListFileName));
+            UpdateIpListFileList();
         }
 
-
-        private void RemoveButton_Click(object sender, RoutedEventArgs e)
-        {
-        }
-
-        private void AddIpListFile(string filePath)
-        {
-            var path = Path.Combine(IpListFolder, filePath);
-            File.WriteAllTextAsync(path, SelectedIpListFile);
-        }
 
     }
 }

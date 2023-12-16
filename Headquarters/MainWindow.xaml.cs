@@ -23,17 +23,7 @@ namespace Headquarters
             var paramManager = ParameterManager.Instance;
             paramManager.Load(".\\param.json");
 
-            _ipListBarViewModel = new IpListBarViewModel();
-            IpListBar.DataContext = _ipListBarViewModel;
-            _ipListBarViewModel.Initialize();
-
-
-            _scriptsVM = new ScriptsViewModel(".", @".\Scripts");
-            ScriptButtons.DataContext = _scriptsVM;
-
-
             _ipList = IPListViewModel.Instance;
-            _ipList.Load(".\\iplist.csv");
             _ipList.Bind(dgIPList);
 
             _ipList.PropertyChanged += (sender, e) =>
@@ -45,6 +35,14 @@ namespace Headquarters
                     OnChangeIPList();
                 }
             };
+            
+            _ipListBarViewModel = new IpListBarViewModel();
+            IpListBar.DataContext = _ipListBarViewModel;
+            _ipListBarViewModel.Initialize(_ipList);
+            
+            _scriptsVM = new ScriptsViewModel(".", @".\Scripts");
+            ScriptButtons.DataContext = _scriptsVM;
+
 
             var pb = Resources["TopPasswordBox"] as PasswordBox;
             pb.Password = ParameterManager.UserPassword.Value;
@@ -98,7 +96,7 @@ namespace Headquarters
 
         protected override void OnClosed(EventArgs e)
         {
-            _ipList.Save();
+            // _ipList.Save();
             ParameterManager.Instance.Save();
 
             base.OnClosed(e);

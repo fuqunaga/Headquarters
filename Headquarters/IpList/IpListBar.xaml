@@ -4,10 +4,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" 
-             d:DesignHeight="60" d:DesignWidth="400">
+             mc:Ignorable="d"
+             d:DesignHeight="60" d:DesignWidth="400" d:DataContext="{d:IpListBarViewModel}">
     <UserControl.Resources>
-        <Style x:Key="AddRemoveButton" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignFloatingActionMiniDarkButton}">
+        <Style x:Key="AddRemoveButton" TargetType="{x:Type Button}"
+               BasedOn="{StaticResource MaterialDesignFloatingActionMiniDarkButton}">
             <Setter Property="Margin" Value="8,0,0,0" />
             <Setter Property="Width" Value="24" />
             <Setter Property="Height" Value="24" />
@@ -17,36 +18,33 @@
 
     <materialDesign:ColorZone Mode="PrimaryMid" Padding="16,0" VerticalAlignment="Stretch">
         <StackPanel Orientation="Horizontal">
-            <materialDesign:PackIcon Kind="IpNetwork" DockPanel.Dock="Left"  VerticalAlignment="Center"/>
-            <TextBlock Margin="8,0"  VerticalAlignment="Center">IP List</TextBlock>
-            <materialDesign:ColorZone 
-                Mode="PrimaryDark" 
+            <materialDesign:PackIcon Kind="IpNetwork" DockPanel.Dock="Left" VerticalAlignment="Center" />
+            <TextBlock Margin="8,0" VerticalAlignment="Center">IP List</TextBlock>
+            <materialDesign:ColorZone
+                Mode="PrimaryDark"
                 materialDesign:ElevationAssist.Elevation="Dp1"
                 CornerRadius="5"
                 VerticalAlignment="Center">
-                <ComboBox 
-                    Name ="IpListComboBox"
+                <ComboBox
+                    Name="IpListComboBox"
                     ItemsSource="{Binding IpListFileList}"
-                    SelectedItem="{Binding SelectedIpListFile,  Mode=TwoWay}"
+                    SelectedItem="{Binding SelectedIpListFileName, Mode=TwoWay}"
                     Visibility="{Binding ComboBoxVisibility}"
                     materialDesign:ColorZoneAssist.Mode="PrimaryDark"
                     Padding="0"
-                    Margin="8.0" MinWidth="120"/>
+                    Margin="8.0" MinWidth="120" />
             </materialDesign:ColorZone>
             <Button
-                Name="AddButton"
                 Style="{StaticResource AddRemoveButton}"
-                materialDesign:ElevationAssist.Elevation="Dp0" 
+                materialDesign:ElevationAssist.Elevation="Dp0"
                 Content="{materialDesign:PackIcon Kind=Plus}"
-                Command="{Binding AddCommand}"
-                />
+                Command="{Binding AddCommand}" />
             <Button
-                Name="RemoveButton"
                 Style="{StaticResource AddRemoveButton}"
-                materialDesign:ElevationAssist.Elevation="Dp0" 
-                Content="{materialDesign:PackIcon Kind=Minus}"
                 Visibility="{Binding ElementName=IpListComboBox, Path=Visibility}"
-                />
+                materialDesign:ElevationAssist.Elevation="Dp0"
+                Content="{materialDesign:PackIcon Kind=Minus}"
+                Command="{Binding RemoveCommand}" />
         </StackPanel>
     </materialDesign:ColorZone>
 </UserControl>
