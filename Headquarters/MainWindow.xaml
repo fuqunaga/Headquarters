@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Headquarters"
         mc:Ignorable="d"
-        Title="Headquaters" MinHeight="600"
+        Title="Headquarters" MinHeight="600"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"

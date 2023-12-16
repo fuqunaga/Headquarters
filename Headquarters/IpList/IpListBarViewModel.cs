@@ -5,15 +5,17 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Headquarters
 {
-    internal class IpListBarViewModel
+    public class IpListBarViewModel
     {
-        public class UICommand : ICommand
+        private class UiCommand : ICommand
         {
-            public Action proc { get; set; }
+            public Action Proc { get; set; }
             #region ICommand メンバ
             public bool CanExecute(object parameter)
             {
@@ -22,13 +24,13 @@ namespace Headquarters
             public event EventHandler CanExecuteChanged;
             public void Execute(object parameter)
             {
-                proc();
+                Proc();
             }
             #endregion
         }
 
-        private static readonly string _ipListFolder = @".\IpList";
-        private static readonly string _ipListExtension = ".csv";
+        private const string IpListFolder = @".\IpList";
+        private const string IpListExtension = ".csv";
 
 
         public List<string> IpListFileList { get; } = [];
@@ -43,7 +45,7 @@ namespace Headquarters
         {
             UpdateIpListFileList();
 
-            AddCommand = new UICommand() { proc = Add };
+            AddCommand = new UiCommand() { Proc = Add };
         }
 
 
@@ -51,11 +53,11 @@ namespace Headquarters
         {
             IpListFileList.Clear();
 
-            if (Directory.Exists(_ipListFolder))
+            if (Directory.Exists(IpListFolder))
             {
                 IpListFileList.AddRange(
-                    Directory.GetFiles(_ipListFolder)
-                    .Where(filePath => Path.GetExtension(filePath) == _ipListExtension)
+                    Directory.GetFiles(IpListFolder)
+                    .Where(filePath => Path.GetExtension(filePath) == IpListExtension)
                     .Select(Path.GetFileName)
                 );
             }
@@ -72,17 +74,26 @@ namespace Headquarters
         }
 
         [SupportedOSPlatform("windows")]
-        private async void Add()
+        private static async void Add()
         {
             var vm = new NameDialogViewModel()
             {
-                Title = "Add IpList:"
+                Title = "Add IpList file:",
+                Suffix = IpListExtension
             };
 
             var view = new NameDialog()
             {
                 DataContext = vm
             };
+            
+            
+            var binding = BindingOperations.GetBinding(view.NameTextBox, TextBox.TextProperty);
+            if (binding != null)
+            {
+                var fileNotExistsValidationRule = new FileNotExistsValidationRule(IpListFolder);
+                binding.ValidationRules.Add(fileNotExistsValidationRule);
+            }
 
             var result = await DialogHost.Show(view, "RootDialog");
         }
