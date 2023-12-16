@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="60" d:DesignWidth="400">
     <UserControl.Resources>
-        <Style x:Key="AddRemoveButtonl" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignFloatingActionMiniDarkButton}">
+        <Style x:Key="AddRemoveButton" TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignFloatingActionMiniDarkButton}">
             <Setter Property="Margin" Value="8,0,0,0" />
             <Setter Property="Width" Value="24" />
             <Setter Property="Height" Value="24" />
@@ -35,16 +35,17 @@
             </materialDesign:ColorZone>
             <Button
                 Name="AddButton"
-                Style="{StaticResource AddRemoveButtonl}"
+                Style="{StaticResource AddRemoveButton}"
                 materialDesign:ElevationAssist.Elevation="Dp0" 
                 Content="{materialDesign:PackIcon Kind=Plus}"
                 Command="{Binding AddCommand}"
                 />
             <Button
                 Name="RemoveButton"
-                Style="{StaticResource AddRemoveButtonl}"
+                Style="{StaticResource AddRemoveButton}"
                 materialDesign:ElevationAssist.Elevation="Dp0" 
                 Content="{materialDesign:PackIcon Kind=Minus}"
+                Visibility="{Binding ElementName=IpListComboBox, Path=Visibility}"
                 />
         </StackPanel>
     </materialDesign:ColorZone>
