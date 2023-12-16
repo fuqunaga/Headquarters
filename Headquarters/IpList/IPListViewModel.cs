@@ -94,11 +94,10 @@ namespace Headquarters
 
             csv = string.Join(",", names.ToArray()) + Environment.NewLine;
 
-            csv += string.Join(Environment.NewLine,
-                Items.Rows.OfType<DataRow>().Select(row =>
+            csv += string.Join(Environment.NewLine, Items.Rows.OfType<DataRow>().Select(row =>
                 {
-                    var hoge = names.Select(name => row[name].ToString()).ToArray();
-                    return string.Join(",", hoge);
+                    var element = names.Select(name => row[name].ToString());
+                    return string.Join(",", element);
                 }).ToArray());
 
 

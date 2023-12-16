@@ -1,18 +1,21 @@
-﻿using MaterialDesignThemes.Wpf;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using MaterialDesignThemes.Wpf;
 
 namespace Headquarters
 {
+    [SuppressMessage("Interoperability", "CA1416:プラットフォームの互換性を検証")]
     public class IpListBarViewModel
     {
+        #region Type Define
+        
         private class UiCommand : ICommand
         {
             public Action Proc { get; set; }
@@ -28,12 +31,15 @@ namespace Headquarters
             }
             #endregion
         }
+        
+        #endregion
 
+        
         private const string IpListFolder = @".\IpList";
         private const string IpListExtension = ".csv";
 
 
-        public List<string> IpListFileList { get; } = [];
+        private List<string> IpListFileList { get; } = [];
         public string SelectedIpListFile { get; set; }
         public Visibility ComboBoxVisibility { get; set; }
 
@@ -45,7 +51,7 @@ namespace Headquarters
         {
             UpdateIpListFileList();
 
-            AddCommand = new UiCommand() { Proc = Add };
+            AddCommand = new UiCommand() { Proc = ShowAddDialog };
         }
 
 
@@ -72,9 +78,8 @@ namespace Headquarters
                 ComboBoxVisibility = Visibility.Collapsed;
             }
         }
-
-        [SupportedOSPlatform("windows")]
-        private static async void Add()
+        
+        private async void ShowAddDialog()
         {
             var vm = new NameDialogViewModel()
             {
@@ -99,13 +104,19 @@ namespace Headquarters
 
             if (result != null && (bool)result)
             {
-
+                AddIpListFile(vm.Name);
             }
         }
 
 
         private void RemoveButton_Click(object sender, RoutedEventArgs e)
         {
+        }
+
+        private void AddIpListFile(string filePath)
+        {
+            var path = Path.Combine(IpListFolder, filePath);
+            File.WriteAllTextAsync(path, SelectedIpListFile);
         }
 
     }
