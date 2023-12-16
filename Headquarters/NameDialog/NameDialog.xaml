@@ -8,7 +8,10 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:Headquarters"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="350" d:DataContext="{d:NameDialogViewModel }">
+    <UserControl.Resources>
+        <local:BooleanAllFalseConverter x:Key="BooleanAllFalseConverter" />
+    </UserControl.Resources>
 
     <Grid Margin="16">
         <Grid.RowDefinitions>
@@ -29,15 +32,25 @@
                 </Binding>
             </TextBox.Text>
         </TextBox>
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0 16 0 0">
-            <Button IsDefault="True" Style="{DynamicResource MaterialDesignFlatButton}"
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0 16 0 0" HorizontalAlignment="Center">
+            <Button IsDefault="True"
+                    Style="{DynamicResource MaterialDesignFlatButton}"
+                    Width="150"
                     Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
                 <Button.CommandParameter>
                     <system:Boolean>True</system:Boolean>
                 </Button.CommandParameter>
-                ACCEPT
+                <Button.IsEnabled>
+                    <MultiBinding Converter="{StaticResource BooleanAllFalseConverter}"  Mode="TwoWay">
+                        <Binding ElementName="NameTextBox" Path="(Validation.HasError)" />
+                    </MultiBinding>
+                </Button.IsEnabled>
+                OK
             </Button>
-            <Button IsCancel="True" Margin="8 0 0 0" Style="{DynamicResource MaterialDesignFlatButton}"
+            <Button IsCancel="True"
+                    Style="{DynamicResource MaterialDesignFlatButton}"
+                    Margin="8 0 0 0" 
+                    Width="150"
                     Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
                 <Button.CommandParameter>
                     <system:Boolean>False</system:Boolean>
