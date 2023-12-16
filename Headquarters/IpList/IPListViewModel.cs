@@ -8,6 +8,7 @@ using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 
 namespace Headquarters
 {
@@ -118,24 +119,28 @@ namespace Headquarters
         {
             var vm = new NameDialogViewModel()
             {
-                Title = "Add Column:"
+                Title = "Add Column"
             };
 
             var view = new NameDialog()
             {
                 DataContext = vm
             };
+            
+            var binding = BindingOperations.GetBinding(view.NameTextBox, TextBox.TextProperty);
+            if (binding != null)
+            {
+                var validationRule = new NotContainDataColumnCollectionValidationRule(Items.Columns, "Column already exists.");
+                binding.ValidationRules.Add(validationRule);
+            }
 
             var result = await DialogHost.Show(view, "RootDialog");
 
-            if ((bool)result)
-            {
-                if (!Items.Columns.Contains(vm.Name))
-                {
-                    Items.Columns.Add(vm.Name, typeof(string));
-                    RefreshDataGrid();
-                }
-            }
+            if (result == null || !(bool)result) return;
+            if (Items.Columns.Contains(vm.Name)) return;
+            
+            Items.Columns.Add(vm.Name, typeof(string));
+            RefreshDataGrid();
         }
 
         public async void RenameColumn(object sender)

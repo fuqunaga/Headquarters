@@ -78,7 +78,7 @@ namespace Headquarters
         {
             var vm = new NameDialogViewModel()
             {
-                Title = "Add IpList file:",
+                Title = "Add IpList file",
                 Suffix = IpListExtension
             };
 
@@ -96,6 +96,11 @@ namespace Headquarters
             }
 
             var result = await DialogHost.Show(view, "RootDialog");
+
+            if (result != null && (bool)result)
+            {
+
+            }
         }
 
 
