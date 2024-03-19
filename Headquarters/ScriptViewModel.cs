@@ -185,7 +185,7 @@ namespace Headquarters
             var rsp = RunspaceFactory.CreateRunspacePool(1, count);
             rsp.Open();
 
-            var tasks = ipAndParams.Select(ipAndParam =>
+            var runDatas = ipAndParams.Select(ipAndParam =>
             {
                 var ip = ipAndParam.ip;
                 var data = new OutputData()
@@ -195,6 +195,14 @@ namespace Headquarters
 
                 outputDatas.Add(data);
 
+                return new { ipAndParam, data };
+            })
+            .ToList();
+
+            var tasks = runDatas.Select(runData =>
+            {
+                var data = runData.data;
+                var ipAndParam = runData.ipAndParam;
 
                 return Task.Run(() =>
                 {
