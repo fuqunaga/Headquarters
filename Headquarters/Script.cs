@@ -56,7 +56,7 @@ namespace Headquarters
             param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword, out var userPassword);
 
             var sessionResult = SessionManager.Instance.CreateSession(ipAddress, (string)userName, (string)userPassword, param);
-            var session = sessionResult.objs.FirstOrDefault()?.BaseObject;
+            var session = sessionResult.objs?.FirstOrDefault()?.BaseObject;
             if (session == null)
             {
                 result = sessionResult;
