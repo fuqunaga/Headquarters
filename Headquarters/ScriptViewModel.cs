@@ -9,6 +9,7 @@ using System.Management.Automation.Runspaces;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using static Headquarters.ScriptViewModel;
 
 namespace Headquarters
 {
@@ -185,36 +186,30 @@ namespace Headquarters
             var rsp = RunspaceFactory.CreateRunspacePool(1, count);
             rsp.Open();
 
-            var tasks = ipAndParams.Select(ipAndParam =>
+
+            outputDatas.Clear();
+            outputDatas.AddRange(ipAndParams.Select(ipAndParam => new OutputData() { name = ipAndParam.ip}));
+
+            var tasks = ipAndParams.Select((ipAndParam, i) => Task.Run(() =>
             {
-                var ip = ipAndParam.ip;
-                var data = new OutputData()
+                var data = outputDatas[i];
+
+                var param = new PowerShellScript.InvokeParameter()
                 {
-                    name = ip
+                    rsp = rsp,
+                    parameters = ipAndParam.paramDic,
+                    cancelToken = cancelToken,
+                    invocationStateChanged = (_, e) =>
+                    {
+                        data.info = e.InvocationStateInfo;
+                        UpdateOutput();
+                    }
                 };
 
-                outputDatas.Add(data);
-
-
-                return Task.Run(() =>
-                {
-                    var param = new PowerShellScript.InvokeParameter()
-                    {
-                        rsp = rsp,
-                        parameters = ipAndParam.paramDic,
-                        cancelToken = cancelToken,
-                        invocationStateChanged = (_, e) =>
-                        {
-                            data.info = e.InvocationStateInfo;
-                            UpdateOutput();
-                        }
-                    };
-
-                    var result = script.Run(ipAndParam.ip, param);
-                    data.result = result;
-                    UpdateOutput();
-                });
-            });
+                var result = script.Run(ipAndParam.ip, param);
+                data.result = result;
+                UpdateOutput();
+            }));
 
             return Task.WhenAll(tasks)
                 .ContinueWith(_ => rsp.Dispose());
