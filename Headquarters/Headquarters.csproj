@@ -145,6 +145,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="Scripts\Robocopy.ps1" />
     <None Include="Scripts\InvokeCommandTest.ps1" />
     <None Include="Scripts\CreateStartupShortcut.ps1" />
     <None Include="Scripts\RestartPC.ps1" />
