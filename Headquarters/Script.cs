@@ -8,16 +8,25 @@ namespace Headquarters
 {
     class Script
     {
-        public static class ReservedParameterName
+        public static class ReservedParameterNames
         {
+            public const string IP = "ip";
             public const string Session = "session";
         }
 
-        public string name => Path.GetFileNameWithoutExtension(filepath);
-        public List<string> paramNames { get; protected set; }
 
-        readonly string filepath;
-        PowerShellScript psScript;
+        private List<string> paramNames;
+        private readonly string filepath;
+        private PowerShellScript psScript;
+
+        public string Name => Path.GetFileNameWithoutExtension(filepath);
+
+        public IEnumerable<string> ParamNamesForUI => paramNames.Where(n =>
+        {
+            var nl = n.ToLower();
+            return nl != ReservedParameterNames.IP && nl != ReservedParameterNames.Session;
+        });
+
 
         public Script(string filepath)
         {
@@ -31,7 +40,7 @@ namespace Headquarters
             {
                 var script = File.ReadAllText(filepath);
 
-                psScript = new PowerShellScript(name, script);
+                psScript = new PowerShellScript(Name, script);
 
                 paramNames = SearchParameters(script);
             }
@@ -44,31 +53,40 @@ namespace Headquarters
                 .Replace("$", "")
                 .Replace(" ", "")
                 .Split(',')
-                .Where(str => string.Compare(str, ReservedParameterName.Session, true) != 0)
                 .ToList();
         }
 
         public PowerShellScript.Result Run(string ipAddress, PowerShellScript.InvokeParameter param)
         {
-            PowerShellScript.Result result;
-
-            param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserName, out var userName);
-            param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword, out var userPassword);
-
-            var sessionResult = SessionManager.Instance.CreateSession(ipAddress, (string)userName, (string)userPassword, param);
-            var session = sessionResult.objs.FirstOrDefault()?.BaseObject;
-            if (session == null)
+            var needIP = HasParameter(ReservedParameterNames.IP);
+            if (needIP)
             {
-                result = sessionResult;
-            }
-            else
-            {
-                param.parameters.Add(ReservedParameterName.Session, session);
-                result = psScript.Invoke(param);
+                param.parameters.Add(ReservedParameterNames.IP, ipAddress);
             }
 
 
-            return result;
+            var needSession = HasParameter(ReservedParameterNames.Session);
+            if (needSession)
+            {
+
+                param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserName, out var userName);
+                param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword, out var userPassword);
+
+                var sessionResult = SessionManager.Instance.CreateSession(ipAddress, (string)userName, (string)userPassword, param);
+                var session = sessionResult.objs.FirstOrDefault()?.BaseObject;
+                if (session == null)
+                {
+                    return sessionResult;
+                }
+                else
+                {
+                    param.parameters.Add(ReservedParameterNames.Session, session);
+                }
+            }
+
+            return psScript.Invoke(param);
         }
+
+        private bool HasParameter(string parameterName) => paramNames.Any(n => n.ToLower() == parameterName.ToLower());
     }
 }

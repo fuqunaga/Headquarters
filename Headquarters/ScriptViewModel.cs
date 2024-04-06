@@ -9,7 +9,6 @@ using System.Management.Automation.Runspaces;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using static Headquarters.ScriptViewModel;
 
 namespace Headquarters
 {
@@ -47,7 +46,7 @@ namespace Headquarters
                     string str = "";
                     if (collection?.Any() ?? false)
                     {
-                        str = string.Join("\n ", collection.Select(elem => $" {elem.ToString()}")) + "\n";
+                        str = string.Join("\n ", collection.Select(elem => $" {elem}")) + "\n";
                     }
                     return str;
                 }
@@ -75,7 +74,7 @@ namespace Headquarters
 
         #region Binding Properties
 
-        public string Header => script.name;
+        public string Header => script.Name;
         public ObservableCollection<Parameter> Parameters { get; protected set; }
 
         string resultText_ = "";
@@ -111,7 +110,7 @@ namespace Headquarters
 
         protected Script script { get; set; }
 
-        string ToOwnParamName(string name) => script.name + "." + name;
+        string ToOwnParamName(string name) => script.Name + "." + name;
 
         // parameter by script
         object GetOwnParam(string paramName) => ParameterManager.Instance.Get(ToOwnParamName(paramName));
@@ -129,7 +128,7 @@ namespace Headquarters
         public void Load()
         {
             script.Load();
-            Parameters = new ObservableCollection<Parameter>(script.paramNames.Select(p => new Parameter(p)));
+            Parameters = new ObservableCollection<Parameter>(script.ParamNamesForUI.Select(p => new Parameter(p)));
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Parameters)));
         }
