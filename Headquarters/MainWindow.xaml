@@ -7,7 +7,6 @@
         mc:Ignorable="d"
         Title="Headquarters" MinHeight="600"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:System="clr-namespace:System;assembly=mscorlib"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
@@ -27,7 +26,7 @@
             materialDesign:HintAssist.Hint="Password"
             Width="200"
             >
-            <!-- For stange font color,size when delete "UserPassword" column at IPList -->
+            <!-- For strange font color,size when delete "UserPassword" column at IPList -->
             <PasswordBox.Style>
                 <Style TargetType="PasswordBox" BasedOn="{StaticResource MaterialDesignFloatingHintPasswordBox}" >
                     <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialDesignBody}" />
@@ -225,7 +224,7 @@
                                                 <local:CustomFadeWipe />
                                             </materialDesign:TransitionerSlide.ForwardWipe>
                                             <Button 
-                                                Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                                                Style="{StaticResource MaterialDesignFloatingActionSecondaryButton}"
                                                 HorizontalAlignment="Left"
                                                 IsEnabled="False"
                                                 Content="Select IP" />
@@ -243,7 +242,7 @@
                                                 <Button 
                                                     Margin="8"
                                                     Name="RunButton"
-                                                    Style="{StaticResource MaterialDesignFloatingActionAccentButton}"
+                                                    Style="{StaticResource MaterialDesignFloatingActionSecondaryButton}"
                                                     materialDesign:ElevationAssist.Elevation="Dp3"
                                                     Click="OnClickRun"
                                                     >
@@ -275,11 +274,11 @@
                                                         IsSnapToTickEnabled="True"
                                                         Value="{Binding MaxTaskNum, Mode=TwoWay}"
                                                         >
-                                                        <Slider.Style>
-                                                            <Style TargetType="Slider" BasedOn="{StaticResource MaterialDesignSlider}">
-                                                                <Setter Property="Foreground" Value="{DynamicResource PrimaryHueLightBrush}" />
-                                                            </Style>
-                                                        </Slider.Style>
+                                                        <!-- <Slider.Style> -->
+                                                        <!--     <Style TargetType="Slider" BasedOn="{StaticResource MaterialDesignSlider}"> -->
+                                                        <!--         <Setter Property="Foreground" Value="{DynamicResource PrimaryHueLightBrush}" /> -->
+                                                        <!--     </Style> -->
+                                                        <!-- </Slider.Style> -->
                                                     </Slider>
 
                                                 </DockPanel>
