@@ -1,20 +1,15 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using Path = System.IO.Path;
+﻿using System.Windows;
 
-namespace Headquarters
+namespace Headquarters;
+
+public partial class IpListBar
 {
-    /// <summary>
-    /// IpListBar.xaml の相互作用ロジック
-    /// </summary>
-    public partial class IpListBarControl : UserControl
-    {        
-        public IpListBarControl()
-        {
-            InitializeComponent();
-        }
+    private IpListBarViewModel ViewModel => DataContext as IpListBarViewModel;
+    
+    public IpListBar() => InitializeComponent();
+
+    private void SaveAs(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SaveAs();
     }
 }
