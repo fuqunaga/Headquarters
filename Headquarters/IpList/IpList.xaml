@@ -4,9 +4,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:headquarters="clr-namespace:Headquarters"
+             xmlns:local="clr-namespace:Headquarters"
              mc:Ignorable="d"
-             d:DesignHeight="600" d:DesignWidth="400" d:DataContext="{headquarters:IpListBarViewModel}">
+             d:DesignHeight="600" d:DesignWidth="400" d:DataContext="{local:IpListBarViewModel}">
 
 
     <Grid>
@@ -44,6 +44,6 @@
             </Grid>
         </materialDesign:ColorZone>
 
-        <headquarters:SelectableDataGrid Grid.Row="1" />
+        <local:IpListDataGrid Grid.Row="1" />
     </Grid>
 </UserControl>

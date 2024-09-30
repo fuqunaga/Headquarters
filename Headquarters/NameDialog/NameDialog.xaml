@@ -13,17 +13,13 @@
         <local:BooleanAllFalseConverter x:Key="BooleanAllFalseConverter" />
     </UserControl.Resources>
 
-    <Grid Margin="16">
-        <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-        </Grid.RowDefinitions>
+    <StackPanel Margin="16">
         <Label Content="{Binding Title}" />
-        <TextBox x:Name="NameTextBox" wpf:HintAssist.Hint="Name" Style="{DynamicResource MaterialDesignFloatingHintTextBox}"
+        <TextBox x:Name="NameTextBox"
+                 IsEnabled="{Binding IsEnabled}"
                  materialDesign:TextFieldAssist.SuffixText="{Binding Suffix}"
-                 Margin="0 6 0 0"
-                 FontSize="18" Grid.Row="1">
+                 Margin="0 8 0 0"
+                 FontSize="18">
             <TextBox.Text>
                 <Binding Path="Name" UpdateSourceTrigger="PropertyChanged" >
                     <Binding.ValidationRules>
@@ -32,10 +28,12 @@
                 </Binding>
             </TextBox.Text>
         </TextBox>
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0 16 0 0" HorizontalAlignment="Center">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button IsDefault="True"
+                    Content="ACCEPT"
                     Style="{DynamicResource MaterialDesignFlatButton}"
-                    Width="150"
+                    Width="100"
+                    Margin="0,8,8,0"
                     Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
                 <Button.CommandParameter>
                     <system:Boolean>True</system:Boolean>
@@ -45,18 +43,17 @@
                         <Binding ElementName="NameTextBox" Path="(Validation.HasError)" />
                     </MultiBinding>
                 </Button.IsEnabled>
-                OK
             </Button>
             <Button IsCancel="True"
+                    Content="CANCEL"
                     Style="{DynamicResource MaterialDesignFlatButton}"
-                    Margin="8 0 0 0" 
-                    Width="150"
+                    Width="100"
+                    Margin="0,8,8,0"
                     Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
                 <Button.CommandParameter>
                     <system:Boolean>False</system:Boolean>
                 </Button.CommandParameter>
-                CANCEL
             </Button>
         </StackPanel>
-    </Grid>
+    </StackPanel>
 </UserControl>

@@ -14,22 +14,22 @@ namespace Headquarters
         private static string FileNameToFullPath(string fileName) =>Path.Combine(IpListFolder, fileName);
 
 
-        private IPListViewModel _ipListViewModel;
+        private IpListDataGridViewModel _ipListDataGridViewModel;
         private string _selectedIpListFileNameName;
 
         
         public List<string> IpListFileList { get; } = [];
 
         
-        public void Initialize(IPListViewModel ipListViewModel)
+        public void Initialize(IpListDataGridViewModel ipListDataGridViewModel)
         {
             // UpdateIpListFileList();
             // // SaveCommand = new UiCommand() { Proc = Save };
             // // LoadCommand = new UiCommand() { Proc = Load };
             // // OpenFolderCommand = new UiCommand() { Proc = OpenFolderCommand };
             //
-            _ipListViewModel = ipListViewModel;
-            _ipListViewModel.Load(DefaultIpListFilePath);
+            _ipListDataGridViewModel = ipListDataGridViewModel;
+            _ipListDataGridViewModel.Load(DefaultIpListFilePath);
         }
         
         #if false

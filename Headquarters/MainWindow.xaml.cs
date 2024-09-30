@@ -13,7 +13,7 @@ namespace Headquarters
     public partial class MainWindow : Window
     {
         private readonly IpListBarViewModel _ipListBarViewModel;
-        private readonly IPListViewModel _ipList;
+        private readonly IpListDataGridViewModel _ipListDataGrid;
         private readonly ScriptsViewModel _scriptsVM;
 
         public MainWindow()
@@ -23,14 +23,14 @@ namespace Headquarters
             var paramManager = ParameterManager.Instance;
             paramManager.Load(".\\param.json");
 
-            _ipList = IPListViewModel.Instance;
+            _ipListDataGrid = IpListDataGridViewModel.Instance;
             // _ipList.Bind(dgIPList);
 
-            _ipList.PropertyChanged += (sender, e) =>
+            _ipListDataGrid.PropertyChanged += (sender, e) =>
             {
-                if (e.PropertyName == IPListViewModel.SelectedPropertyName) UpdateRunButton();
+                if (e.PropertyName == IpListDataGridViewModel.SelectedPropertyName) UpdateRunButton();
 
-                if (e.PropertyName == nameof(IPListViewModel.Items))
+                if (e.PropertyName == nameof(IpListDataGridViewModel.Items))
                 {
                     OnChangeIPList();
                 }
@@ -38,7 +38,7 @@ namespace Headquarters
             
             _ipListBarViewModel = new IpListBarViewModel();
             IpListBar.DataContext = _ipListBarViewModel;
-            _ipListBarViewModel.Initialize(_ipList);
+            _ipListBarViewModel.Initialize(_ipListDataGrid);
             
             _scriptsVM = new ScriptsViewModel(".", @".\Scripts");
             ScriptButtons.DataContext = _scriptsVM;
@@ -68,7 +68,7 @@ namespace Headquarters
 
         private void OnClickRun(object sender, RoutedEventArgs e)
         {
-            var task = _scriptsVM.Current?.Run(_ipList.SelectedParams.ToList());
+            var task = _scriptsVM.Current?.Run(_ipListDataGrid.SelectedParams.ToList());
             if (task != null)
             {
                 RunButtonSelector.SelectedIndex = 2;
@@ -82,7 +82,7 @@ namespace Headquarters
 
         private void UpdateRunButton()
         {
-            var selectAny = _ipList.IsAllItemSelected ?? true;
+            var selectAny = _ipListDataGrid.IsAllItemSelected ?? true;
             RunButtonSelector.Dispatcher.BeginInvoke(new Action(() => RunButtonSelector.SelectedIndex = selectAny ? 1 : 0));
         }
 
@@ -101,31 +101,6 @@ namespace Headquarters
 
             base.OnClosed(e);
         }
-
-
-        #region IPList Context Menu
-
-        private void OnHeaderContextMenuOpen(object sender, System.Windows.Controls.ContextMenuEventArgs e)
-        {
-            _ipList.OnHeaderContextMenuOpen(sender);
-        }
-
-        private void OnClickAddColumn(object sender, RoutedEventArgs e)
-        {
-            _ipList.AddColumn(sender);
-        }
-
-        private void OnClickDeleteColumn(object sender, RoutedEventArgs e)
-        {
-            _ipList.DeleteColumn(sender);
-        }
-
-        private void OnClickRenameColumn(object sender, RoutedEventArgs e)
-        {
-            _ipList.RenameColumn(sender);
-        }
-
-        #endregion
 
         private void OnTopPasswordChanged(object sender, RoutedEventArgs e)
         {
