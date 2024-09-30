@@ -24,11 +24,11 @@ namespace Headquarters
             paramManager.Load(".\\param.json");
 
             _ipList = IPListViewModel.Instance;
-            _ipList.Bind(dgIPList);
+            // _ipList.Bind(dgIPList);
 
             _ipList.PropertyChanged += (sender, e) =>
             {
-                if (e.PropertyName == _ipList.selectedPropertyName) UpdateRunButton();
+                if (e.PropertyName == IPListViewModel.SelectedPropertyName) UpdateRunButton();
 
                 if (e.PropertyName == nameof(IPListViewModel.Items))
                 {
@@ -82,7 +82,7 @@ namespace Headquarters
 
         private void UpdateRunButton()
         {
-            var selectAny = _ipList.IsSelected ?? true;
+            var selectAny = _ipList.IsAllItemSelected ?? true;
             RunButtonSelector.Dispatcher.BeginInvoke(new Action(() => RunButtonSelector.SelectedIndex = selectAny ? 1 : 0));
         }
 

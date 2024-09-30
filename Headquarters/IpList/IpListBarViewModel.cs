@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Input;
-using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 
 namespace Headquarters
@@ -29,7 +20,6 @@ namespace Headquarters
         
         public List<string> IpListFileList { get; } = [];
 
- 
         
         public void Initialize(IPListViewModel ipListViewModel)
         {
@@ -40,18 +30,6 @@ namespace Headquarters
             //
             _ipListViewModel = ipListViewModel;
             _ipListViewModel.Load(DefaultIpListFilePath);
-        }
-
-        public void SaveAs()
-        {
-            var dialog = new SaveFileDialog
-            {
-                Filter = "CSV files (*.csv)|*.csv",
-                Title = "Save IP List file",
-                InitialDirectory = Path.GetFullPath(IpListFolder)
-            };
-
-            dialog.ShowDialog();
         }
         
         #if false

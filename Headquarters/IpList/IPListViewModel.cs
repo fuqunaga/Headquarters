@@ -12,7 +12,7 @@ using System.Windows.Data;
 
 namespace Headquarters;
 
-public class IPListViewModel : DataGridWithSelectAll
+public class IPListViewModel : SelectableDataGridViewModel
 {
     #region Singleton
 
@@ -20,7 +20,7 @@ public class IPListViewModel : DataGridWithSelectAll
 
     private IPListViewModel() : base()
     {
-        IPParams.isSelectedPropertyName = selectedPropertyName;
+        IPParams.isSelectedPropertyName = SelectedPropertyName;
     }
 
     #endregion
@@ -52,7 +52,7 @@ public class IPListViewModel : DataGridWithSelectAll
     public void Load(string filePath)
     {
         Items = new DataTable();
-        Items.Columns.Add(selectedPropertyName, typeof(bool));
+        Items.Columns.Add(SelectedPropertyName, typeof(bool));
 
         var lines = File.Exists(filePath) ? File.ReadAllLines(filePath) : new string[0];
 
@@ -84,7 +84,7 @@ public class IPListViewModel : DataGridWithSelectAll
     {
         var names = Items.Columns.OfType<DataColumn>()
             .Select(c => c.ColumnName)
-            .Where(name => name != selectedPropertyName)
+            .Where(name => name != SelectedPropertyName)
             .ToList();
 
         var csv = string.Join(",", names) + Environment.NewLine;
@@ -107,7 +107,7 @@ public class IPListViewModel : DataGridWithSelectAll
         var header = (DataGridColumnHeader)sender;
         var name = (string)header.Content;
 
-        IsColumnEditable = !((name == selectedPropertyName) || (name == IPParams.ipPropertyName));
+        IsColumnEditable = !((name == SelectedPropertyName) || (name == IPParams.ipPropertyName));
     }
 
     [SupportedOSPlatform("windows")]
@@ -186,8 +186,8 @@ public class IPListViewModel : DataGridWithSelectAll
     {
         // refresh datagrid
         // https://code.msdn.microsoft.com/windowsdesktop/How-to-add-the-Column-into-2ad31c47
-        dataGridBinding.DataContext = null;
-        dataGridBinding.DataContext = this;
+        // dataGridBinding.DataContext = null;
+        // dataGridBinding.DataContext = this;
 
         OnPropertyChanged(nameof(Items));
     }

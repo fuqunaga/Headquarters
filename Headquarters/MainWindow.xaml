@@ -119,7 +119,7 @@
                 <!-- IPList -->
                 <DockPanel Grid.Column="0" Margin="0">
 
-                    <local:IpListBar x:Name="IpListBar" DockPanel.Dock="Top" Height="48" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="1" />
+                    <local:IpList x:Name="IpListBar" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="1" />
                     
 
                     <DataGrid x:Name="dgIPList" 
@@ -127,14 +127,16 @@
                               Margin="0" 
                               VerticalScrollBarVisibility="Auto"
                               DockPanel.Dock="Bottom"
+                              
+                              Height="0"
                               >
 
                         <DataGrid.Resources>
                             <DataTemplate x:Key="SelectAll">
-                                <CheckBox IsChecked="{Binding DataContext.IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" />
+                                <CheckBox IsChecked="{Binding DataContext.IsAllItemSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" />
                             </DataTemplate>
                             <DataTemplate x:Key="IsSelected">
-                                <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <CheckBox IsChecked="{Binding IsAllItemSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </DataTemplate>
 
                             <ContextMenu x:Key="HeaderContextMenu">
