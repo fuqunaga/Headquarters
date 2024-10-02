@@ -17,7 +17,6 @@ public partial class SelectableDataGrid
 
         var c = new DataGridTemplateColumn()
         {
-            CellTemplate = TargetDataGrid.Resources["IsSelected"] as DataTemplate,
             Header = e.Column.Header,
             HeaderTemplate = TargetDataGrid.Resources["IsSelectedHeader"] as DataTemplate,
             HeaderStringFormat = e.Column.HeaderStringFormat,

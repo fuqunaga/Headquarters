@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Headquarters"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance local:SelectableDataGridViewModel, IsDesignTimeCreatable=True}"
+             d:DataContext="{d:DesignInstance local:SelectableDataGridViewModelWithSampleData, IsDesignTimeCreatable=True}"
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <DataGrid x:Name="TargetDataGrid"
@@ -18,10 +18,6 @@
                 <DataTemplate x:Key="IsSelectedHeader">
                     <CheckBox
                         IsChecked="{Binding DataContext.IsAllItemSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" />
-                </DataTemplate>
-                
-                <DataTemplate x:Key="IsSelected">
-                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </DataTemplate>
 
                 <!-- <ContextMenu x:Key="HeaderContextMenu"> -->
