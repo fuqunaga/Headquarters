@@ -34,8 +34,22 @@
 
                 <materialDesign:PopupBox Grid.Column="2" StaysOpen="False">
                     <StackPanel>
-                        <Button Content="Export Csv" Command="{Binding ExportCommand}" />
-                        <Button Content="Import Csv" Command="{Binding ImportCommand}" />
+                        <Button Command="{Binding ImportCommand}" >
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Import" />
+                                <TextBlock Margin="8,0,0,0"
+                                           VerticalAlignment="Center"
+                                           Text="Import CSV" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding ExportCommand}" >
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Export" />
+                                <TextBlock Margin="8,0,0,0"
+                                           VerticalAlignment="Center"
+                                           Text="Export CSV" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </materialDesign:PopupBox>
 

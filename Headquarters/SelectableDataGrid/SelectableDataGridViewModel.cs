@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 
@@ -17,10 +18,16 @@ public class SelectableDataGridViewModel : ViewModelBase
         get => _items;
         set
         {
-            if (!SetProperty(ref _items, value)) return;
+            if (EqualityComparer<DataTable>.Default.Equals(_items, value))
+            {
+                return;
+            }
 
+            _items = value;
             VerifyAndSettingSelectedColumnIfNeed();
             AddItemsCallback();
+            
+            OnPropertyChanged();
         }
     }
 
