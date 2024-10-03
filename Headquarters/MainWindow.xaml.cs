@@ -28,17 +28,22 @@ namespace Headquarters
                               {
                                   MainTabDataList =
                                   [
-                                      new MainTabModel.MainTabData
+                                      new MainTabData
                                       {
                                           TabHeader = "Tab0",
                                           IpList = new()
+                                          {
+                                                new Dictionary<string, string?>()
+                                                {
+                                                    {"Value1",  "1"}
+                                                }
+                                          }
                                       }
                                   ]
                               };
 
             var mainTabViewModels = settingData.MainTabDataList
-                .Select(data => new MainTabModel(data))
-                .Select(model => new MainTabViewModel(model));
+                .Select(data => new MainTabViewModel(data));
 
 
             MainTabControl.ItemsSource = mainTabViewModels;
@@ -119,6 +124,13 @@ namespace Headquarters
 
         protected override void OnClosed(EventArgs e)
         {
+            var settingData = new SettingManager.SettingData()
+            {
+                MainTabDataList = MainTabControl.ItemsSource.OfType<MainTabViewModel>().Select(vm => vm.CreateMainTabData()).ToList()
+            };
+            
+            SettingManager.Instance.Save(".\\setting.json", settingData);
+            
             // _ipList.Save();
             ParameterManager.Instance.Save();
 

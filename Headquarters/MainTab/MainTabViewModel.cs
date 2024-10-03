@@ -2,20 +2,26 @@
 
 public class MainTabViewModel : ViewModelBase
 {
-    private readonly MainTabModel _model;
-    
     public IpListViewModel IpListViewModel { get; } = new();
     
-    public string Header => _model.Header;
+    public string Header { get; init; }
     
 
-    public MainTabViewModel(MainTabModel model)
+    public MainTabViewModel(MainTabData data)
     {
-        _model = model;
-        IpListViewModel.DataGridViewModel.Items = _model.IpListDataTable;
+        Header = data.TabHeader;
+        IpListViewModel.DataGridViewModel.Items = data.CreateIpListDataTable();
     }
 
-    private MainTabViewModel() : this(new MainTabModel())
+    private MainTabViewModel() : this(new MainTabData())
     {
+    }
+    
+    public MainTabData CreateMainTabData()
+    {
+        return new MainTabData(IpListViewModel.DataGridViewModel.Items)
+        {
+            TabHeader = Header
+        };
     }
 }
