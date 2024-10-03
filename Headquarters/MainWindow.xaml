@@ -60,6 +60,22 @@
 
     <materialDesign:DialogHost Identifier="RootDialog">
         <DockPanel>
+      
+            <TabControl x:Name="MainTabControl">
+                <TabControl.Resources>
+                    <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource MaterialDesignTabItem}">
+                        <Setter Property="Header" Value="{Binding Header}"/>
+                    </Style>
+                </TabControl.Resources>
+                
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <local:MainTab />
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </TabControl>
+            
+            
             <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="100">
                 <Grid Margin="16,0,0,0">
                     <TextBlock VerticalAlignment="Center" FontSize="22">
@@ -113,7 +129,7 @@
                 <!-- IPList -->
                 <DockPanel Grid.Column="0" Margin="0">
 
-                    <local:IpList x:Name="IpListBar" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="1" />
+                    <local:IpList x:Name="IpList" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="1" />
                     
                 </DockPanel>
 

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Policy;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -12,7 +15,7 @@ namespace Headquarters
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly IpListBarViewModel _ipListBarViewModel;
+        // private readonly IpListBarViewModel _ipListViewModel;
         private readonly IpListDataGridViewModel _ipListDataGrid;
         private readonly ScriptsViewModel _scriptsVM;
 
@@ -20,10 +23,30 @@ namespace Headquarters
         {
             InitializeComponent();
 
+            var settingData = SettingManager.Instance.Load(".\\setting.json")
+                              ?? new SettingManager.SettingData()
+                              {
+                                  MainTabDataList =
+                                  [
+                                      new MainTabModel.MainTabData
+                                      {
+                                          TabHeader = "Tab0",
+                                          IpList = new()
+                                      }
+                                  ]
+                              };
+
+            var mainTabViewModels = settingData.MainTabDataList
+                .Select(data => new MainTabModel(data))
+                .Select(model => new MainTabViewModel(model));
+
+
+            MainTabControl.ItemsSource = mainTabViewModels;
+
             var paramManager = ParameterManager.Instance;
             paramManager.Load(".\\param.json");
 
-            _ipListDataGrid = IpListDataGridViewModel.Instance;
+            _ipListDataGrid = new();//IpListDataGridViewModel.Instance;
             // _ipList.Bind(dgIPList);
 
             _ipListDataGrid.PropertyChanged += (sender, e) =>
@@ -36,9 +59,9 @@ namespace Headquarters
                 }
             };
             
-            _ipListBarViewModel = new IpListBarViewModel();
-            IpListBar.DataContext = _ipListBarViewModel;
-            _ipListBarViewModel.Initialize(_ipListDataGrid);
+            // _ipListViewModel = new IpListBarViewModel();
+            // IpList.DataContext = _ipListViewModel;
+            // _ipListViewModel.Initialize(_ipListDataGrid);
             
             _scriptsVM = new ScriptsViewModel(".", @".\Scripts");
             ScriptButtons.DataContext = _scriptsVM;

@@ -6,7 +6,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:Headquarters"
              mc:Ignorable="d"
-             d:DesignHeight="600" d:DesignWidth="400" d:DataContext="{local:IpListBarViewModel}">
+             d:DesignHeight="600" d:DesignWidth="400" d:DataContext="{local:IpListViewModel}">
 
 
     <Grid>
@@ -32,18 +32,17 @@
                            Margin="8,0" VerticalAlignment="Center"
                            Text="IP List" />
 
-                <materialDesign:PopupBox Grid.Column="2"
-                                         StaysOpen="False">
+                <materialDesign:PopupBox Grid.Column="2" StaysOpen="False">
                     <StackPanel>
-                        <Button Content="Save As" Click="SaveAs" />
-                        <!-- <Button Content="Load" Click="Load" /> -->
-                        <!-- <Button Content="Open folder" Click="OpenFolder" /> -->
+                        <Button Content="Export Csv" Command="{Binding ExportCommand}" />
+                        <Button Content="Import Csv" Command="{Binding ImportCommand}" />
                     </StackPanel>
                 </materialDesign:PopupBox>
 
             </Grid>
         </materialDesign:ColorZone>
 
-        <local:IpListDataGrid Grid.Row="1" />
+        <local:IpListDataGrid Grid.Row="1" 
+                              DataContext="{Binding DataGridViewModel}"/>
     </Grid>
 </UserControl>

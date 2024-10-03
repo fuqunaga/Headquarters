@@ -1,5 +1,4 @@
-﻿using MaterialDesignThemes.Wpf;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -10,23 +9,18 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using MaterialDesignThemes.Wpf;
 
 namespace Headquarters;
 
 public class IpListDataGridViewModel : SelectableDataGridViewModel
 {
-    #region Singleton
-
-    public static IpListDataGridViewModel Instance { get; } = new IpListDataGridViewModel();
-    
-    #endregion
-    
     public ICommand AddColumnCommand { get; protected set; }
     public ICommand RenameColumnCommand { get; protected set; }
     public ICommand DeleteColumnCommand { get; protected set; }
-    
 
-    private IpListDataGridViewModel() : base()
+
+    public IpListDataGridViewModel()
     {
         IPParams.isSelectedPropertyName = SelectedPropertyName;
         

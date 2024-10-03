@@ -8,12 +8,11 @@ namespace Headquarters;
 public partial class IpList
 {
     private const string IpListFolder = @".\IPList";
-    private IpListBarViewModel _viewModel;
     
     public IpList()
     {
         InitializeComponent();
-        DataContext = _viewModel = new IpListBarViewModel();
+        DataContext = new IpListViewModel();
     }
 
     public void SaveAs(object sender, RoutedEventArgs e)
