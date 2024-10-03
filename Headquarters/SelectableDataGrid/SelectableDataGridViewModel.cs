@@ -10,29 +10,41 @@ public class SelectableDataGridViewModel : ViewModelBase
         
     public const string SelectedPropertyName = "IsSelected";
         
-    private DataTable _items;
+    private DataTable _items = new();
 
     public DataTable Items
     {
         get => _items;
-        set => SetProperty(ref _items, value);
+        set
+        {
+            if (!SetProperty(ref _items, value)) return;
+
+            VerifyAndSettingSelectedColumnIfNeed();
+            AddItemsCallback();
+        }
     }
 
-
-    public SelectableDataGridViewModel()
+    private void VerifyAndSettingSelectedColumnIfNeed()
     {
-        _items = new DataTable();
-        _items.Columns.Add(SelectedPropertyName, typeof(bool));
-            
+        var selectedColumn = Items.Columns[SelectedPropertyName];
+        if (selectedColumn == null)
+        {
+            selectedColumn = Items.Columns.Add(SelectedPropertyName, typeof(bool));
+            selectedColumn.SetOrdinal(0);
+        }
 
-        // if (Items.Columns[IPParams.ipPropertyName] == null)
-        // {
-        //     Items.Columns.Add(IPParams.ipPropertyName, typeof(string));
-        // }
-            
-        AddItemsCallback();
+        foreach (DataRow row in Items.Rows)
+        {
+            if (row[SelectedPropertyName] is not bool)
+            {
+                row[SelectedPropertyName] = false;
+            }
+        }
+                
+        selectedColumn.DefaultValue = false;
     }
-        
+    
+
     protected void AddItemsCallback()
     {
         Items.ColumnChanged += (_, e) =>
@@ -42,13 +54,17 @@ public class SelectableDataGridViewModel : ViewModelBase
                 OnPropertyChanged(nameof(IsAllItemSelected));
             }
         };
-
+        
+        Items.RowDeleted += (_, _) =>
+        {
+            OnPropertyChanged(nameof(IsAllItemSelected));
+        };
+        
         Items.RowChanged += (_, e) =>
         {
-            if (e.Action == DataRowAction.Add)
+            if (e.Action is DataRowAction.Add)
             {
-                e.Row[SelectedPropertyName] = true;
-                Debug.WriteLine(e);
+                OnPropertyChanged(nameof(IsAllItemSelected));
             }
         };
     }
@@ -60,7 +76,12 @@ public class SelectableDataGridViewModel : ViewModelBase
             var list = Items.AsEnumerable().Select(row => row[SelectedPropertyName]).Cast<bool>();
 
             var uniqList = list.Distinct().ToList();
-            return (uniqList.Count == 1) ? uniqList.Single() : null;
+            return uniqList.Count switch
+            {
+                0 => false,
+                1 => uniqList.Single(),
+                _ => null
+            };
         }
         set
         {

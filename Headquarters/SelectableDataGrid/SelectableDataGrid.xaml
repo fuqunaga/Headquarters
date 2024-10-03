@@ -27,7 +27,7 @@
 
     <DataGrid x:Name="TargetDataGrid"
               AutoGeneratingColumn="TargetDataGrid_OnAutoGeneratingColumn"
-              ItemsSource="{Binding Items, Mode=TwoWay}"
+              ItemsSource="{Binding Items, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
               Margin="0"
               VerticalScrollBarVisibility="Auto">
 
