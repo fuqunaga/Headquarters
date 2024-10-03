@@ -43,7 +43,8 @@ namespace Headquarters
                               };
 
             var mainTabViewModels = settingData.MainTabDataList
-                .Select(data => new MainTabViewModel(data));
+                .Select(data => new MainTabViewModel(data))
+                .ToList();
 
 
             MainTabControl.ItemsSource = mainTabViewModels;
