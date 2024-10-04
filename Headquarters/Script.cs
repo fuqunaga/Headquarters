@@ -6,14 +6,14 @@ using System.Text.RegularExpressions;
 
 namespace Headquarters
 {
-    class Script
+    public class Script
     {
         public static class ReservedParameterName
         {
             public const string Session = "session";
         }
 
-        public string name => Path.GetFileNameWithoutExtension(filepath);
+        public string Name => Path.GetFileNameWithoutExtension(filepath);
         public List<string> paramNames { get; protected set; }
 
         readonly string filepath;
@@ -31,7 +31,7 @@ namespace Headquarters
             {
                 var script = File.ReadAllText(filepath);
 
-                psScript = new PowerShellScript(name, script);
+                psScript = new PowerShellScript(Name, script);
 
                 paramNames = SearchParameters(script);
             }

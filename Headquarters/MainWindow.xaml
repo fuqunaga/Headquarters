@@ -64,7 +64,7 @@
             <TabControl x:Name="MainTabControl">
                 <TabControl.Resources>
                     <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource MaterialDesignTabItem}">
-                        <Setter Property="Header" Value="{Binding Header}"/>
+                        <Setter Property="Header" Value="{Binding ScriptName}"/>
                     </Style>
                 </TabControl.Resources>
                 
@@ -169,8 +169,7 @@
                                             <Button
                                                 Margin="8"
                                                 Style="{StaticResource MaterialDesignRaisedLightButton}"
-                                                Click="OnClickSelectScript"
-                                                Content="{Binding Header}"
+                                                Content="{Binding ScriptName}"
                                                 HorizontalAlignment="Left"
                                                 />
                                         </DataTemplate>
@@ -180,7 +179,7 @@
                         </DockPanel>
                     </materialDesign:TransitionerSlide>
 
-                    <materialDesign:TransitionerSlide DataContext="{Binding Current}" OpeningEffect="{materialDesign:TransitionEffect SlideInFromRight}">
+                    <materialDesign:TransitionerSlide DataContext="{Binding ScriptViewModel}" OpeningEffect="{materialDesign:TransitionEffect SlideInFromRight}">
                         <materialDesign:TransitionerSlide.BackwardWipe>
                             <local:CustomFadeWipe />
                         </materialDesign:TransitionerSlide.BackwardWipe>
@@ -196,7 +195,7 @@
                                     </Button>
 
                                     <materialDesign:PackIcon Kind="ScriptText" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                                    <Label Content="{Binding Header}" VerticalAlignment="Center" />
+                                    <Label Content="{Binding ScriptName}" VerticalAlignment="Center" />
 
                                     <!-- Run Button -->
                                     <materialDesign:Transitioner Name="RunButtonSelector" SelectedIndex="1" Margin="16,0,8,0">

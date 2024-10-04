@@ -12,7 +12,7 @@ using System.Windows;
 
 namespace Headquarters
 {
-    class ScriptViewModel : INotifyPropertyChanged
+    public class ScriptViewModel : INotifyPropertyChanged
     {
         #region Type Define
 
@@ -74,7 +74,7 @@ namespace Headquarters
 
         #region Binding Properties
 
-        public string Header => script.name;
+        public string ScriptName => Script.Name;
         public ObservableCollection<Parameter> Parameters { get; protected set; }
 
         string resultText_ = "";
@@ -108,9 +108,9 @@ namespace Headquarters
         #endregion
 
 
-        protected Script script { get; set; }
+        protected Script Script { get; set; }
 
-        string ToOwnParamName(string name) => script.name + "." + name;
+        string ToOwnParamName(string name) => Script.Name + "." + name;
 
         // parameter by script
         object GetOwnParam(string paramName) => ParameterManager.Instance.Get(ToOwnParamName(paramName));
@@ -119,16 +119,17 @@ namespace Headquarters
 
         CancellationTokenSource cancelTokenSource;
         List<OutputData> outputDatas = new List<OutputData>();
-
-        public ScriptViewModel(Script script)
+        
+        public void SetScript(Script script)
         {
-            this.script = script;
+            Script = script;
+            Script.Load();
         }
 
         public void Load()
         {
-            script.Load();
-            Parameters = new ObservableCollection<Parameter>(script.paramNames.Select(p => new Parameter(p)));
+            Script.Load();
+            Parameters = new ObservableCollection<Parameter>(Script.paramNames.Select(p => new Parameter(p)));
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Parameters)));
         }
@@ -176,7 +177,7 @@ namespace Headquarters
 
 
             ClearOutput();
-            script.Load();
+            Script.Load();
 
             cancelTokenSource = new CancellationTokenSource();
             var cancelToken = cancelTokenSource.Token;
@@ -210,7 +211,7 @@ namespace Headquarters
                         }
                     };
 
-                    var result = script.Run(ipAndParam.ip, param);
+                    var result = Script.Run(ipAndParam.ip, param);
                     data.result = result;
                     UpdateOutput();
                 });

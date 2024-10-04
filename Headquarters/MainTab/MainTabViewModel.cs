@@ -3,8 +3,9 @@
 public class MainTabViewModel : ViewModelBase
 {
     public IpListViewModel IpListViewModel { get; } = new();
+    public ScriptPageViewModel ScriptPageViewModel { get; } = new();
     
-    public string Header { get; init; }
+    public string Header { get; }
     
 
     public MainTabViewModel(MainTabData data)
