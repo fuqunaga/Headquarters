@@ -12,6 +12,8 @@ public class MainTabViewModel : ViewModelBase
     {
         Header = data.TabHeader;
         IpListViewModel.DataGridViewModel.Items = data.CreateIpListDataTable();
+        
+        ScriptPageViewModel.ScriptRunViewModel.SetIpListViewModel(IpListViewModel);
     }
 
     private MainTabViewModel() : this(new MainTabData())

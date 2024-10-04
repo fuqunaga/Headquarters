@@ -8,6 +8,8 @@ namespace Headquarters
 {
     public class Script
     {
+        public static Script Empty => new("");
+        
         public static class ReservedParameterName
         {
             public const string Session = "session";

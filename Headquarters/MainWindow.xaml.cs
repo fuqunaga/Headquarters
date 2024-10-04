@@ -73,11 +73,11 @@ namespace Headquarters
             // ScriptButtons.DataContext = _scriptsVM;
 
 
-            var pb = Resources["TopPasswordBox"] as PasswordBox;
-            pb.Password = ParameterManager.UserPassword.Value;
+            // var pb = Resources["TopPasswordBox"] as PasswordBox;
+            // pb.Password = ParameterManager.UserPassword.Value;
 
-            UpdateRunButton();
-            OnChangeIPList();
+            // UpdateRunButton();
+            // OnChangeIPList();
         }
 
         private void OnChangeIPList()
@@ -86,7 +86,7 @@ namespace Headquarters
             // psScripts.DataContext = _scriptsVM;
 
             tbUserName.DataContext = ParameterManager.UserName;
-            UserPassword.DataContext = ParameterManager.UserPassword;
+            // UserPassword.DataContext = ParameterManager.UserPassword;
         }
         
         private void OnClickRun(object sender, RoutedEventArgs e)
@@ -132,13 +132,6 @@ namespace Headquarters
             base.OnClosed(e);
         }
 
-        private void OnTopPasswordChanged(object sender, RoutedEventArgs e)
-        {
-            if (UserPassword.DataContext is Parameter p)
-            {
-                p.Value = ((PasswordBox)sender).Password;
-            }
-        }
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {

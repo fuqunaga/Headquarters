@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Input;
 using Microsoft.Win32;
 
-
 namespace Headquarters;
 
 public class IpListViewModel : ViewModelBase

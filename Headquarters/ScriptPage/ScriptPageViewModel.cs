@@ -16,7 +16,7 @@ public class ScriptPageViewModel : ViewModelBase
     
     public ObservableCollection<ScriptButtonViewModel> Items { get; }
         
-    public ScriptViewModel ScriptViewModel { get; } = new();
+    public ScriptRunViewModel ScriptRunViewModel { get; } = new();
         
 
     public ScriptPageViewModel() : this(@".\Scripts")
@@ -38,8 +38,7 @@ public class ScriptPageViewModel : ViewModelBase
 
     private void OnSelectScript(Script script)
     {
-        ScriptViewModel.SetScript(script);
+        ScriptRunViewModel.SetScript(script);
         PageIndex = 1;
     }
-    
 }

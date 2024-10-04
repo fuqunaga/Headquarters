@@ -1,20 +1,28 @@
-﻿using NetTools;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
+using NetTools;
 
 namespace Headquarters
 {
-    public class ScriptViewModel : INotifyPropertyChanged
+    public class ScriptRunViewModel : ViewModelBase
     {
         #region Type Define
+
+        public enum RunButtonMode
+        {
+            SelectIp = 0,
+            Run = 1,
+            Stop = 2,
+        };
+        
 
         public static class OwnParameter
         {
@@ -69,13 +77,27 @@ namespace Headquarters
         #endregion
 
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-
+        private RunButtonMode _runButtonMode = RunButtonMode.Run;
+        private ObservableCollection<Parameter> _parameters = [];
+        
+        
         #region Binding Properties
 
         public string ScriptName => Script.Name;
-        public ObservableCollection<Parameter> Parameters { get; protected set; }
+        
+        public int RunButtonIndex
+        {
+            get => (int)_runButtonMode;
+            set => SetProperty(ref _runButtonMode, (RunButtonMode)value);
+        }
+
+        public ICommand RunCommand { get; }
+
+        public ObservableCollection<Parameter> Parameters
+        {
+            get => _parameters;
+            private set => SetProperty(ref _parameters, value);
+        }
 
         string resultText_ = "";
         public string ResultText
@@ -84,7 +106,7 @@ namespace Headquarters
             protected set
             {
                 resultText_ = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultText)));
+                // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultText)));
             }
         }
 
@@ -100,15 +122,19 @@ namespace Headquarters
                 if (MaxTaskNum != value)
                 {
                     SetOwnParam(OwnParameter.MaxTaskNum, value);
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxTaskNum)));
+                    // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxTaskNum)));
                 }
             }
         }
 
         #endregion
 
+        
+        private IpListViewModel _ipListViewModel = new IpListViewModel();
 
-        protected Script Script { get; set; }
+        private Script Script { get; set; } = Script.Empty;
+        
+        
 
         string ToOwnParamName(string name) => Script.Name + "." + name;
 
@@ -119,19 +145,51 @@ namespace Headquarters
 
         CancellationTokenSource cancelTokenSource;
         List<OutputData> outputDatas = new List<OutputData>();
+
+
+        public ScriptRunViewModel()
+        {
+            RunCommand = new DelegateCommand(RunCommandExecute);
+        }
+        
+        public void SetIpListViewModel(IpListViewModel ipListViewModel)
+        {
+            _ipListViewModel = ipListViewModel;
+            _ipListViewModel.DataGridViewModel.PropertyChanged += (_, args) =>
+            {
+                if ( args.PropertyName == nameof(IpListDataGridViewModel.IsAllItemSelected) )
+                {
+                    UpdateRunButtonIndex();
+                }
+            };
+
+            UpdateRunButtonIndex();
+            
+            return;
+
+            void UpdateRunButtonIndex()
+            {
+                var hasAnySelectedIp = _ipListViewModel.DataGridViewModel.IsAllItemSelected ?? true;
+                RunButtonIndex = (int)(hasAnySelectedIp
+                        ? RunButtonMode.Run
+                        : RunButtonMode.SelectIp
+                    );
+
+            }
+        }
         
         public void SetScript(Script script)
         {
             Script = script;
             Script.Load();
+            Parameters = new ObservableCollection<Parameter>(Script.paramNames.Select(p => new Parameter(p)));
+            
+            OnPropertyChanged(nameof(ScriptName));
         }
 
-        public void Load()
+        private void RunCommandExecute(object? _)
         {
-            Script.Load();
-            Parameters = new ObservableCollection<Parameter>(Script.paramNames.Select(p => new Parameter(p)));
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Parameters)));
+            
         }
 
         void ClearOutput()

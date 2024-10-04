@@ -2,20 +2,20 @@
 {
     public class Parameter(string name)
     {
-        public string Name { get; set; } = name;
+        public string Name { get; } = name;
         public string Value
         {
-            get { return IsDependIP ? "On IP List" : ParameterManager.Instance.Get(Name)?.ToString(); }
+            get => IsDependIp ? "On IP List" : ParameterManager.Instance.Get(Name)?.ToString() ?? "";
             set
             {
-                if ( !IsDependIP )
-                    ParameterManager.Instance.Set(Name, value);
+                if (IsDependIp) return;
+                ParameterManager.Instance.Set(Name, value);
             }
         }
 
-        public bool IsIndependentIP => !IsDependIP;
+        public bool IsIndependentIp => !IsDependIp;
 
-        public bool IsDependIP => false;//IpListDataGridViewModel.Instance.Contains(Name);
+        public bool IsDependIp => false;//IpListDataGridViewModel.Instance.Contains(Name);
 
         public string Get(IPParams ipParam)
         {
