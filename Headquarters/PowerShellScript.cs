@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Headquarters
 {
-    public class PowerShellScript
+    public class PowerShellScript(string name, string script)
     {
         public class InvokeParameter
         {
@@ -33,44 +33,35 @@ namespace Headquarters
             public Collection<PSObject> objs;
             public List<ErrorRecord> errors;
 
-            public bool IsSuccessed => !canceled && !errors.Any();
+            public bool IsSucceed => !canceled && !errors.Any();
         }
-
-        public readonly string name;
-        public readonly string script;
-
-        public PowerShellScript(string name, string script)
-        {
-            this.name = name;
-            this.script = script;
-        }
+        
 
         public Result Invoke(InvokeParameter param)
         {
-            using (var ps = PowerShell.Create())
+            using var ps = PowerShell.Create();
+            
+            ps.InvocationStateChanged += param.invocationStateChanged;
+            ps.RunspacePool = param.rsp;
+
+            ps.AddScript(script);
+            ps.AddParameters(param.parameters);
+
+            var ret = new Result();
+            try
             {
-                ps.InvocationStateChanged += param.invocationStateChanged;
-                ps.RunspacePool = param.rsp;
-
-                ps.AddScript(script);
-                ps.AddParameters(param.parameters);
-
-                var ret = new Result();
-                try
+                using (param.cancelToken.Register(() => { ps.Stop(); ret.canceled = true; }))
                 {
-                    using (param.cancelToken.Register(() => { ps.Stop(); ret.canceled = true; }))
-                    {
-                        ret.objs = ps.Invoke();
-                    }
-                    ret.errors = ps.Streams.Error.ToList();
+                    ret.objs = ps.Invoke();
                 }
-                catch (Exception e)
-                {
-                    ret.errors = (new[] { new ErrorRecord(e, "", ErrorCategory.InvalidData, null) }).ToList();
-                }
-
-                return ret;
+                ret.errors = ps.Streams.Error.ToList();
             }
+            catch (Exception e)
+            {
+                ret.errors = (new[] { new ErrorRecord(e, "", ErrorCategory.InvalidData, null) }).ToList();
+            }
+
+            return ret;
         }
     }
 }

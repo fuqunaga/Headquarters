@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace Headquarters
 {
-    public class Script
+    public partial class Script
     {
         public static Script Empty => new("");
         
@@ -14,8 +15,15 @@ namespace Headquarters
         {
             public const string Session = "session";
         }
+        
+        
+        [GeneratedRegex(@"(?<=param\().*?(?=\))")]
+        private static partial Regex ParamRegex();
 
-        public string Name => Path.GetFileNameWithoutExtension(filepath);
+        
+
+        public string Name { get; }
+
         public List<string> paramNames { get; protected set; }
 
         readonly string filepath;
@@ -24,29 +32,27 @@ namespace Headquarters
         public Script(string filepath)
         {
             this.filepath = filepath;
+            Name = Path.GetFileNameWithoutExtension(filepath);
             Load();
         }
 
         public void Load()
         {
-            if (File.Exists(filepath))
-            {
-                var script = File.ReadAllText(filepath);
-
-                psScript = new PowerShellScript(Name, script);
-
-                paramNames = SearchParameters(script);
-            }
+            if (!File.Exists(filepath)) return;
+            
+            var script = File.ReadAllText(filepath);
+            psScript = new PowerShellScript(Name, script);
+            paramNames = SearchParameters(script);
         }
 
-        List<string> SearchParameters(string script)
+        private static List<string> SearchParameters(string script)
         {
-            var match = Regex.Match(script, @"(?<=param\().*?(?=\))");
+            var match = ParamRegex().Match(script);
             return match.Value
                 .Replace("$", "")
                 .Replace(" ", "")
                 .Split(',')
-                .Where(str => string.Compare(str, ReservedParameterName.Session, true) != 0)
+                .Where(str => string.Compare(str, ReservedParameterName.Session, StringComparison.OrdinalIgnoreCase) != 0)
                 .ToList();
         }
 
@@ -72,5 +78,6 @@ namespace Headquarters
 
             return result;
         }
+
     }
 }

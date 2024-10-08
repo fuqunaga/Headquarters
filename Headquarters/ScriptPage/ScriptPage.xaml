@@ -9,7 +9,7 @@
              d:DataContext="{d:DesignInstance local:ScriptPageViewModel}"
              d:DesignHeight="500">
 
-    <materialDesign:Transitioner Name="PsScripts" SelectedIndex="{Binding PageIndex}" Panel.ZIndex="-10">
+    <materialDesign:Transitioner SelectedIndex="{Binding PageIndex}" Panel.ZIndex="-10">
         <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect SlideInFromLeft}">
             <materialDesign:TransitionerSlide.ForwardWipe>
                 <local:CustomFadeWipe />

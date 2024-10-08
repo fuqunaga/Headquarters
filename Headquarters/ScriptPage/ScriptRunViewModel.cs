@@ -37,7 +37,7 @@ namespace Headquarters
 
             public override string ToString()
             {
-                var prefix = (result == null) ? "" : (result.IsSuccessed ? "✔" : "⚠");
+                var prefix = (result == null) ? "" : (result.IsSucceed ? "✔" : "⚠");
                 var label = $"{prefix} {name}: {info?.State}";
                 var resultStr = GetResultString();
 
