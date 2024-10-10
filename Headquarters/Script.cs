@@ -41,7 +41,7 @@ namespace Headquarters
             if (!File.Exists(filepath)) return;
             
             var script = File.ReadAllText(filepath);
-            psScript = new PowerShellScript(Name, script);
+            psScript = new PowerShellScript(script);
             paramNames = SearchParameters(script);
         }
 

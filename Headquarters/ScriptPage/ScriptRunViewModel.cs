@@ -130,7 +130,7 @@ namespace Headquarters
         #endregion
 
         
-        private IpListViewModel _ipListViewModel = new IpListViewModel();
+        private IpListViewModel _ipListViewModel = new();
 
         private Script Script { get; set; } = Script.Empty;
         
@@ -189,7 +189,7 @@ namespace Headquarters
 
         private void RunCommandExecute(object? _)
         {
-            
+            Run(_ipListViewModel.DataGridViewModel.SelectedParams.ToList());
         }
 
         void ClearOutput()
@@ -241,8 +241,8 @@ namespace Headquarters
             var cancelToken = cancelTokenSource.Token;
 
             var count = Math.Min(ipAndParams.Count(), MaxTaskNum);
-            var rsp = RunspaceFactory.CreateRunspacePool(1, count);
-            rsp.Open();
+            // var rsp = RunspaceFactory.CreateRunspacePool(1, count);
+            // rsp.Open();
 
             var tasks = ipAndParams.Select(ipAndParam =>
             {
@@ -257,9 +257,8 @@ namespace Headquarters
 
                 return Task.Run(() =>
                 {
-                    var param = new PowerShellScript.InvokeParameter()
+                    var param = new PowerShellScript.InvokeParameter
                     {
-                        rsp = rsp,
                         parameters = ipAndParam.paramDic,
                         cancelToken = cancelToken,
                         invocationStateChanged = (_, e) =>
@@ -275,8 +274,10 @@ namespace Headquarters
                 });
             });
 
-            return Task.WhenAll(tasks)
-                .ContinueWith(_ => rsp.Dispose());
+            
+            return Task.WhenAll(tasks);
+            // return Task.WhenAll(tasks)
+            //     .ContinueWith(_ => rsp.Dispose());
         }
 
         internal void Stop()

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Management.Automation;
+﻿using System.Management.Automation;
 using System.Security;
 
 namespace Headquarters
@@ -16,7 +14,7 @@ namespace Headquarters
 
         #endregion
 
-        private readonly PowerShellScript _createSession = new("CreateSession",
+        private readonly PowerShellScript _createSession = new(
             """
             param($ComputerName,$cred)
             New-PSSession -ComputerName $ComputerName -Credential $cred
@@ -34,10 +32,15 @@ namespace Headquarters
 
         private static PSCredential CreateCredential(string? userName, string passwordStr)
         {
-            SecureString password = new SecureString();
-            passwordStr?.ToList().ForEach(c => password.AppendChar(c));
+            var password = new SecureString();
+            foreach (var c in passwordStr)
+            {
+                password.AppendChar(c);
+            }
 
-            return string.IsNullOrEmpty(userName) ? PSCredential.Empty : new PSCredential(userName, password);
+            return string.IsNullOrEmpty(userName)
+                ? PSCredential.Empty 
+                : new PSCredential(userName, password);
         }
     }
 }
