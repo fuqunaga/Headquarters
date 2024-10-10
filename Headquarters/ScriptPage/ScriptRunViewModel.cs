@@ -22,7 +22,7 @@ namespace Headquarters
             Run = 1,
             Stop = 2,
         };
-        
+
 
         public static class OwnParameter
         {
@@ -33,7 +33,7 @@ namespace Headquarters
         {
             public string name;
             public PSInvocationStateInfo info;
-            public PowerShellScript.Result result;
+            public PowerShellRunner.Result result;
 
             public override string ToString()
             {
@@ -56,6 +56,7 @@ namespace Headquarters
                     {
                         str = string.Join("\n ", collection.Select(elem => $" {elem.ToString()}")) + "\n";
                     }
+
                     return str;
                 }
 
@@ -66,8 +67,8 @@ namespace Headquarters
                     var errStr = ToStr(result.errors);
 
                     ret = objStr
-                        + ((objStr.Any() && errStr.Any()) ? "\n" : "")
-                        + errStr;
+                          + ((objStr.Any() && errStr.Any()) ? "\n" : "")
+                          + errStr;
                 }
 
                 return ret;
@@ -79,12 +80,13 @@ namespace Headquarters
 
         private RunButtonMode _runButtonMode = RunButtonMode.Run;
         private ObservableCollection<Parameter> _parameters = [];
-        
-        
+        private string _resultText = "";
+
+
         #region Binding Properties
 
         public string ScriptName => Script.Name;
-        
+
         public int RunButtonIndex
         {
             get => (int)_runButtonMode;
@@ -98,16 +100,11 @@ namespace Headquarters
             get => _parameters;
             private set => SetProperty(ref _parameters, value);
         }
-
-        string resultText_ = "";
+        
         public string ResultText
         {
-            get => resultText_;
-            protected set
-            {
-                resultText_ = value;
-                // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultText)));
-            }
+            get => _resultText;
+            private set => SetProperty(ref _resultText, value);
         }
 
         public int MaxTaskNum
@@ -129,19 +126,19 @@ namespace Headquarters
 
         #endregion
 
-        
+
         private IpListViewModel _ipListViewModel = new();
 
         private Script Script { get; set; } = Script.Empty;
-        
-        
+
 
         string ToOwnParamName(string name) => Script.Name + "." + name;
 
         // parameter by script
         object GetOwnParam(string paramName) => ParameterManager.Instance.Get(ToOwnParamName(paramName));
 
-        void SetOwnParam(string paramName, object value) => ParameterManager.Instance.Set(ToOwnParamName(paramName), value);
+        void SetOwnParam(string paramName, object value) =>
+            ParameterManager.Instance.Set(ToOwnParamName(paramName), value);
 
         CancellationTokenSource cancelTokenSource;
         List<OutputData> outputDatas = new List<OutputData>();
@@ -151,20 +148,20 @@ namespace Headquarters
         {
             RunCommand = new DelegateCommand(RunCommandExecute);
         }
-        
+
         public void SetIpListViewModel(IpListViewModel ipListViewModel)
         {
             _ipListViewModel = ipListViewModel;
             _ipListViewModel.DataGridViewModel.PropertyChanged += (_, args) =>
             {
-                if ( args.PropertyName == nameof(IpListDataGridViewModel.IsAllItemSelected) )
+                if (args.PropertyName == nameof(IpListDataGridViewModel.IsAllItemSelected))
                 {
                     UpdateRunButtonIndex();
                 }
             };
 
             UpdateRunButtonIndex();
-            
+
             return;
 
             void UpdateRunButtonIndex()
@@ -174,16 +171,15 @@ namespace Headquarters
                         ? RunButtonMode.Run
                         : RunButtonMode.SelectIp
                     );
-
             }
         }
-        
+
         public void SetScript(Script script)
         {
             Script = script;
             Script.Load();
-            Parameters = new ObservableCollection<Parameter>(Script.paramNames.Select(p => new Parameter(p)));
-            
+            Parameters = new ObservableCollection<Parameter>(Script.ParamNames.Select(p => new Parameter(p)));
+
             OnPropertyChanged(nameof(ScriptName));
         }
 
@@ -192,92 +188,103 @@ namespace Headquarters
             Run(_ipListViewModel.DataGridViewModel.SelectedParams.ToList());
         }
 
-        void ClearOutput()
+        private void ClearOutput()
         {
             outputDatas.Clear();
             ResultText = "";
         }
 
-        public Task Run(IReadOnlyCollection<IPParams> ipParamsList)
+        private async void Run(IReadOnlyList<IPParams> ipParamsList)
         {
             var parameters = Parameters.Concat(new[]
-            {
-                ParameterManager.UserName,
-                ParameterManager.UserPassword,
-            })
-            .GroupBy(p => p.Name)
-            .Select(g => g.First())
-            .ToList();
+                {
+                    ParameterManager.UserName,
+                    ParameterManager.UserPassword,
+                })
+                .DistinctBy(p => p.Name);
 
             // Check so many IP on ipParamsList
             var soManyIp = ipParamsList.Select(ipParams => IPAddressRange.TryParse(ipParams.ipStr, out var range)
-                ? new { ipParams.ipStr, count = range.AsEnumerable().Count() }
-                : null
-            )
-            .Where(pair => pair != null)
-            .FirstOrDefault(pair => pair.count > 100);
+                    ? new { ipParams.ipStr, count = range.AsEnumerable().Count() }
+                    : null
+                )
+                .FirstOrDefault(pair => pair != null && pair.count > 100);
 
             if (soManyIp != null)
             {
-                var result = MessageBox.Show($"IP[{soManyIp.ipStr}] means {soManyIp.count} targets.\n Continue?", "Many targets", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                if (result != MessageBoxResult.OK) return null;
+                var result = MessageBox.Show($"IP[{soManyIp.ipStr}] means {soManyIp.count} targets.\n Continue?",
+                    "Many targets", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (result != MessageBoxResult.OK)
+                {
+                    return;
+                }
             }
-
-
-            var ipAndParams = ipParamsList.SelectMany(ipParams =>
-            {
-                IPAddressRange.TryParse(ipParams.ipStr, out var range);
-                var ipStrList = range?.AsEnumerable().Select(ip => ip.ToString()) ?? (new[] { ipParams.ipStr });
-                var paramDicOrig = parameters.ToDictionary(p => p.Name, p => (object)p.Get(ipParams));
-                return ipStrList.Select(ip => new { ip, paramDic = new Dictionary<string, object>(paramDicOrig) });
-            })
-            .ToList();
-
 
             ClearOutput();
             Script.Load();
 
+            var taskParameterSet = ipParamsList.SelectMany(ipParams =>
+                {
+                    var paramDictionary = parameters.ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name));
+
+                    var ipStringList = IPAddressRange.TryParse(ipParams.ipStr, out var range)
+                        ? range.AsEnumerable().Select(ip => ip.ToString())
+                        : [ipParams.ipStr];
+
+
+                    return ipStringList.Select(ipString =>
+                        new
+                        {
+                            ip = ipString,
+                            paramDictionary = (IReadOnlyDictionary<string, object>)paramDictionary,
+                            outputData = new OutputData { name = ipString }
+                        }
+                    );
+                })
+                .ToList();
+
+            //　別スレッドでAddするとまずいのであらかじめAddしておく
+            outputDatas.AddRange(taskParameterSet.Select(paramSet => paramSet.outputData));
+
+
             cancelTokenSource = new CancellationTokenSource();
             var cancelToken = cancelTokenSource.Token;
 
-            var count = Math.Min(ipAndParams.Count(), MaxTaskNum);
-            // var rsp = RunspaceFactory.CreateRunspacePool(1, count);
-            // rsp.Open();
+            var semaphore = new SemaphoreSlim(MaxTaskNum);
 
-            var tasks = ipAndParams.Select(ipAndParam =>
+            await Task.WhenAll(
+                taskParameterSet.Select(async paramSet =>
+                {
+                    await semaphore.WaitAsync(cancelToken);
+                    await RunTask(paramSet.ip, paramSet.paramDictionary, paramSet.outputData, cancelToken);
+                    semaphore.Release();
+                })
+            );
+        }
+
+        private async Task RunTask(string ip, IReadOnlyDictionary<string, object> parameters,
+             OutputData outputData, CancellationToken cancelToken)
+        {
+            var param = new PowerShellRunner.InvokeParameter
             {
-                var ip = ipAndParam.ip;
-                var data = new OutputData()
+                parameters = parameters,
+                cancelToken = cancelToken,
+                invocationStateChanged = (_, e) =>
                 {
-                    name = ip
-                };
-
-                outputDatas.Add(data);
-
-
-                return Task.Run(() =>
-                {
-                    var param = new PowerShellScript.InvokeParameter
+                    lock (outputDatas)
                     {
-                        parameters = ipAndParam.paramDic,
-                        cancelToken = cancelToken,
-                        invocationStateChanged = (_, e) =>
-                        {
-                            data.info = e.InvocationStateInfo;
-                            UpdateOutput();
-                        }
-                    };
+                        outputData.info = e.InvocationStateInfo;
+                        UpdateOutput();
+                    }
+                }
+            };
 
-                    var result = Script.Run(ipAndParam.ip, param);
-                    data.result = result;
-                    UpdateOutput();
-                });
-            });
-
-            
-            return Task.WhenAll(tasks);
-            // return Task.WhenAll(tasks)
-            //     .ContinueWith(_ => rsp.Dispose());
+            var result = await Script.Run(ip, param);
+            lock (outputDatas)
+            {
+                outputData.result = result;
+                UpdateOutput();
+            }
         }
 
         internal void Stop()
@@ -285,14 +292,10 @@ namespace Headquarters
             cancelTokenSource?.Cancel();
         }
 
-        void UpdateOutput()
+        private void UpdateOutput()
         {
             var str = string.Join("\n", outputDatas.Select(data => data.ToString()));
-
-            lock (this)
-            {
-                ResultText = str;
-            }
+            ResultText = str;
         }
     }
 }
