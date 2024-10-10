@@ -30,7 +30,8 @@ namespace Headquarters
         
         public string Name { get; }
 
-        public List<string> ParamNames { get; private set; } = [];
+        public List<string> ParameterNames { get; private set; } = [];
+        public bool IsNeedSession { get; private set; }
 
 
         public Script(string filepath)
@@ -45,7 +46,11 @@ namespace Headquarters
             if (!File.Exists(_filepath)) return;
             
             _scriptString = File.ReadAllText(_filepath);
-            ParamNames = SearchParameters(_scriptString);
+            var allParameters = SearchParameters(_scriptString);
+            var sessionParam = allParameters.FirstOrDefault(str => str.Equals(ReservedParameterName.Session, StringComparison.CurrentCultureIgnoreCase));
+            
+            IsNeedSession = sessionParam != null;
+            ParameterNames = allParameters.Where(str => str != sessionParam).ToList();
         }
 
         private static List<string> SearchParameters(string scriptString)
@@ -55,29 +60,34 @@ namespace Headquarters
                 .Replace("$", "")
                 .Replace(" ", "")
                 .Split(',')
-                .Where(str => string.Compare(str, ReservedParameterName.Session, StringComparison.OrdinalIgnoreCase) != 0)
+                .Distinct()
                 .ToList();
         }
 
         public async Task<PowerShellRunner.Result> Run(string ipAddress, PowerShellRunner.InvokeParameter param)
         {
-            param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserName, out var userNameObject);
-            param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword, out var userPasswordObject);
-            
-            var userName = userNameObject as string ?? "";
-            var userPassword = userPasswordObject as string ?? "";
-
-            var sessionResult = await SessionManager.CreateSession(ipAddress, userName, userPassword, param);
-            var session = sessionResult.objs?.FirstOrDefault()?.BaseObject;
-            if (session == null)
+            if (IsNeedSession)
             {
-                return sessionResult;
+                param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserName, out var userNameObject);
+                param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword,
+                    out var userPasswordObject);
+
+                var userName = userNameObject as string ?? "";
+                var userPassword = userPasswordObject as string ?? "";
+
+                var sessionResult = await SessionManager.CreateSession(ipAddress, userName, userPassword, param);
+                var session = sessionResult.objs?.FirstOrDefault()?.BaseObject;
+                if (session == null)
+                {
+                    return sessionResult;
+                }
+                
+                param.parameters = new Dictionary<string, object>(param.parameters)
+                {
+                    { ReservedParameterName.Session, session }
+                };
             }
 
-            param.parameters = new Dictionary<string, object>(param.parameters)
-            {
-                { ReservedParameterName.Session, session }
-            };
             
             return await PowerShellRunner.InvokeAsync(_scriptString, param);
         }

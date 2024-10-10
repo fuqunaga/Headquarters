@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Management.Automation;
-using System.Management.Automation.Runspaces;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -29,55 +27,14 @@ namespace Headquarters
             public const string MaxTaskNum = "MaxTaskNum";
         }
 
-        public class OutputData
-        {
-            public string name;
-            public PSInvocationStateInfo info;
-            public PowerShellRunner.Result result;
-
-            public override string ToString()
-            {
-                var prefix = (result == null) ? "" : (result.IsSucceed ? "✔" : "⚠");
-                var label = $"{prefix} {name}: {info?.State}";
-                var resultStr = GetResultString();
-
-                var ret = label;
-                if (resultStr.Any()) ret += "\n" + resultStr;
-
-                return ret;
-            }
-
-            string GetResultString()
-            {
-                string ToStr<T>(IEnumerable<T> collection)
-                {
-                    string str = "";
-                    if (collection?.Any() ?? false)
-                    {
-                        str = string.Join("\n ", collection.Select(elem => $" {elem.ToString()}")) + "\n";
-                    }
-
-                    return str;
-                }
-
-                var ret = "";
-                if (result != null)
-                {
-                    var objStr = ToStr(result.objs);
-                    var errStr = ToStr(result.errors);
-
-                    ret = objStr
-                          + ((objStr.Any() && errStr.Any()) ? "\n" : "")
-                          + errStr;
-                }
-
-                return ret;
-            }
-        }
-
         #endregion
 
 
+        private IpListViewModel _ipListViewModel = new();
+        private readonly CancellationTokenSource _cancelTokenSource = new();
+        private readonly List<ScriptResult> _scriptResults = [];
+        
+        
         private RunButtonMode _runButtonMode = RunButtonMode.Run;
         private ObservableCollection<Parameter> _parameters = [];
         private string _resultText = "";
@@ -94,6 +51,7 @@ namespace Headquarters
         }
 
         public ICommand RunCommand { get; }
+        public ICommand StopCommand { get; }
 
         public ObservableCollection<Parameter> Parameters
         {
@@ -127,7 +85,6 @@ namespace Headquarters
         #endregion
 
 
-        private IpListViewModel _ipListViewModel = new();
 
         private Script Script { get; set; } = Script.Empty;
 
@@ -140,13 +97,12 @@ namespace Headquarters
         void SetOwnParam(string paramName, object value) =>
             ParameterManager.Instance.Set(ToOwnParamName(paramName), value);
 
-        CancellationTokenSource cancelTokenSource;
-        List<OutputData> outputDatas = new List<OutputData>();
 
 
         public ScriptRunViewModel()
         {
             RunCommand = new DelegateCommand(RunCommandExecute);
+            StopCommand = new DelegateCommand(_ => Stop());
         }
 
         public void SetIpListViewModel(IpListViewModel ipListViewModel)
@@ -178,7 +134,7 @@ namespace Headquarters
         {
             Script = script;
             Script.Load();
-            Parameters = new ObservableCollection<Parameter>(Script.ParamNames.Select(p => new Parameter(p)));
+            Parameters = new ObservableCollection<Parameter>(Script.ParameterNames.Select(p => new Parameter(p)));
 
             OnPropertyChanged(nameof(ScriptName));
         }
@@ -190,7 +146,7 @@ namespace Headquarters
 
         private void ClearOutput()
         {
-            outputDatas.Clear();
+            _scriptResults.Clear();
             ResultText = "";
         }
 
@@ -237,19 +193,17 @@ namespace Headquarters
                         {
                             ip = ipString,
                             paramDictionary = (IReadOnlyDictionary<string, object>)paramDictionary,
-                            outputData = new OutputData { name = ipString }
+                            outputData = new ScriptResult { name = ipString }
                         }
                     );
                 })
                 .ToList();
 
             //　別スレッドでAddするとまずいのであらかじめAddしておく
-            outputDatas.AddRange(taskParameterSet.Select(paramSet => paramSet.outputData));
+            _scriptResults.AddRange(taskParameterSet.Select(paramSet => paramSet.outputData));
 
-
-            cancelTokenSource = new CancellationTokenSource();
-            var cancelToken = cancelTokenSource.Token;
-
+            
+            var cancelToken = _cancelTokenSource.Token;
             var semaphore = new SemaphoreSlim(MaxTaskNum);
 
             await Task.WhenAll(
@@ -263,7 +217,7 @@ namespace Headquarters
         }
 
         private async Task RunTask(string ip, IReadOnlyDictionary<string, object> parameters,
-             OutputData outputData, CancellationToken cancelToken)
+             ScriptResult scriptResult, CancellationToken cancelToken)
         {
             var param = new PowerShellRunner.InvokeParameter
             {
@@ -271,30 +225,30 @@ namespace Headquarters
                 cancelToken = cancelToken,
                 invocationStateChanged = (_, e) =>
                 {
-                    lock (outputDatas)
+                    lock (_scriptResults)
                     {
-                        outputData.info = e.InvocationStateInfo;
-                        UpdateOutput();
+                        scriptResult.info = e.InvocationStateInfo;
+                        UpdateResults();
                     }
                 }
             };
 
             var result = await Script.Run(ip, param);
-            lock (outputDatas)
+            lock (_scriptResults)
             {
-                outputData.result = result;
-                UpdateOutput();
+                scriptResult.result = result;
+                UpdateResults();
             }
         }
 
-        internal void Stop()
+        private void Stop()
         {
-            cancelTokenSource?.Cancel();
+            _cancelTokenSource.Cancel();
         }
 
-        private void UpdateOutput()
+        private void UpdateResults()
         {
-            var str = string.Join("\n", outputDatas.Select(data => data.ToString()));
+            var str = string.Join("\n", _scriptResults.Select(data => data.ToString()));
             ResultText = str;
         }
     }
