@@ -31,7 +31,7 @@ namespace Headquarters
 
 
         private IpListViewModel _ipListViewModel = new();
-        private readonly CancellationTokenSource _cancelTokenSource = new();
+        private CancellationTokenSource? _cancelTokenSource;
         private readonly List<ScriptResult> _scriptResults = [];
         
         
@@ -201,7 +201,10 @@ namespace Headquarters
 
             //　別スレッドでAddするとまずいのであらかじめAddしておく
             _scriptResults.AddRange(taskParameterSet.Select(paramSet => paramSet.outputData));
-
+            
+            
+            using var cancelTokenSource = new CancellationTokenSource();
+            _cancelTokenSource = cancelTokenSource;
             
             var cancelToken = _cancelTokenSource.Token;
             var semaphore = new SemaphoreSlim(MaxTaskNum);
@@ -214,6 +217,8 @@ namespace Headquarters
                     semaphore.Release();
                 })
             );
+            
+            _cancelTokenSource = null;
         }
 
         private async Task RunTask(string ip, IReadOnlyDictionary<string, object> parameters,
@@ -243,7 +248,7 @@ namespace Headquarters
 
         private void Stop()
         {
-            _cancelTokenSource.Cancel();
+            _cancelTokenSource?.Cancel();
         }
 
         private void UpdateResults()
