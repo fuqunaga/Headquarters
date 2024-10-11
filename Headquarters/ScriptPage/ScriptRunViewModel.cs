@@ -134,7 +134,7 @@ namespace Headquarters
         {
             Script = script;
             Script.Load();
-            Parameters = new ObservableCollection<Parameter>(Script.ParameterNames.Select(p => new Parameter(p)));
+            Parameters = new ObservableCollection<Parameter>(Script.ParameterNames.Select(p => new Parameter(p, _ipListViewModel)));
 
             OnPropertyChanged(nameof(ScriptName));
         }

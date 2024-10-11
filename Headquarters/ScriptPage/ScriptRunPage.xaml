@@ -144,8 +144,22 @@
                 <DataTemplate>
                     <TextBlock>
                         <Label Content="{Binding Name}" MinWidth="100" />
-                        <TextBox Text="{Binding Value}" IsEnabled="{Binding IsIndependentIp}"
-                                 MinWidth="100" IsTabStop="True" />
+                        <TextBox IsEnabled="{Binding IsIndependentIp}"
+                                 MinWidth="100" IsTabStop="True">
+                            <TextBox.Style>
+                                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+                                    <Setter Property="Text" Value="{Binding Value}" />
+
+                                    <Style.Triggers>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Text" Value="On IP List" /> 
+                                        </Trigger>
+                                    </Style.Triggers>
+                                 
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+
                     </TextBlock>
                 </DataTemplate>
             </ListBox.ItemTemplate>
