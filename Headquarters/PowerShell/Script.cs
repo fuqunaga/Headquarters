@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Management.Automation.Language;
 using System.Threading.Tasks;
 
 namespace Headquarters
 {
-    public partial class Script
+    public class Script(string filepath)
     {
         #region static
         
@@ -19,58 +18,74 @@ namespace Headquarters
             public const string Session = "session";
         }
         
-        [GeneratedRegex(@"(?<=param\().*?(?=\))")]
-        private static partial Regex ParamRegex();
-        
         #endregion
 
 
-        private readonly string _filepath;
         private string _scriptString = "";
+        private bool _isLoadingNeeded;
+        private readonly List<string> _parameterNames = [];
+        private bool _isSessionRequired;
         
-        public string Name { get; }
+        
+        public string Name { get; } = Path.GetFileNameWithoutExtension(filepath);
 
-        public List<string> ParameterNames { get; private set; } = [];
-        public bool IsNeedSession { get; private set; }
-
-
-        public Script(string filepath)
+        public List<string> ParameterNames
         {
-            _filepath = filepath;
-            Name = Path.GetFileNameWithoutExtension(filepath);
-            Load();
+            get
+            {
+                if (_isLoadingNeeded)
+                {
+                    Load();
+                }
+
+                return _parameterNames;
+            }
         }
+
+        private bool IsSessionRequired
+        {
+            get
+            {
+                if (_isLoadingNeeded)
+                {
+                    Load();
+                }
+
+                return _isSessionRequired;
+            }
+        }
+
 
         public void Load()
         {
-            if (!File.Exists(_filepath)) return;
+            _isSessionRequired = false;
+            _parameterNames.Clear();
+            _isLoadingNeeded = false;
             
-            _scriptString = File.ReadAllText(_filepath);
+            if (!File.Exists(filepath)) return;
+            
+            _scriptString = File.ReadAllText(filepath);
             var allParameters = SearchParameters(_scriptString);
             var sessionParam = allParameters.FirstOrDefault(str => str.Equals(ReservedParameterName.Session, StringComparison.CurrentCultureIgnoreCase));
             
-            IsNeedSession = sessionParam != null;
-            ParameterNames = allParameters.Where(str => str != sessionParam).ToList();
+            _isSessionRequired = sessionParam != null;
+            _parameterNames.AddRange(allParameters.Where(str => str != sessionParam));
         }
 
         private static List<string> SearchParameters(string scriptString)
         {
-            var match = ParamRegex().Match(scriptString);
-            return match.Value
-                .Replace("$", "")
-                .Replace(" ", "")
-                .Split(',')
-                .Distinct()
-                .ToList();
+            var ast = Parser.ParseInput(scriptString, out _, out var errors);
+            return errors.Length != 0 
+                ? [] 
+                : ast.ParamBlock.Parameters.Select(p => p.Name.ToString().TrimStart('$')).ToList();
         }
 
         public async Task<PowerShellRunner.Result> Run(string ipAddress, PowerShellRunner.InvokeParameter param)
         {
-            if (IsNeedSession)
+            if (IsSessionRequired)
             {
                 param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserName, out var userNameObject);
-                param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword,
-                    out var userPasswordObject);
+                param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword, out var userPasswordObject);
 
                 var userName = userNameObject as string ?? "";
                 var userPassword = userPasswordObject as string ?? "";
