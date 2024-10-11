@@ -56,7 +56,7 @@
                 <local:CustomFadeWipe />
             </materialDesign:TransitionerSlide.BackwardWipe>
             
-            <local:ScriptRunPage DataContext="{Binding ScriptRunViewModel}" />
+            <local:ScriptRunPage DataContext="{Binding CurrentScriptRunViewModel}" />
             
         </materialDesign:TransitionerSlide>
     </materialDesign:Transitioner>

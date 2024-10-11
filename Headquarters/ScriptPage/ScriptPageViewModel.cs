@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -7,6 +9,9 @@ namespace Headquarters;
 public class ScriptPageViewModel : ViewModelBase
 {
     private int _pageIndex;
+    private IpListViewModel? _ipListViewModel;
+    private readonly Dictionary<Script, ScriptRunViewModel> _scriptRunViewModelDictionary = new();
+    private ScriptRunViewModel _currentScriptRunViewModel = new();
 
     public int PageIndex
     {
@@ -15,8 +20,12 @@ public class ScriptPageViewModel : ViewModelBase
     }
     
     public ObservableCollection<ScriptButtonViewModel> Items { get; }
-        
-    public ScriptRunViewModel ScriptRunViewModel { get; } = new();
+
+    public ScriptRunViewModel CurrentScriptRunViewModel
+    {
+        get => _currentScriptRunViewModel;
+        private set => SetProperty(ref _currentScriptRunViewModel, value);
+    }
         
 
     public ScriptPageViewModel() : this(@".\Scripts")
@@ -35,10 +44,25 @@ public class ScriptPageViewModel : ViewModelBase
             scripts.Select(s => new ScriptButtonViewModel(s, OnSelectScript))
         );
     }
+    
+    public void SetIpListViewModel(IpListViewModel ipListViewModel) => _ipListViewModel = ipListViewModel;
+    
 
     private void OnSelectScript(Script script)
     {
-        ScriptRunViewModel.SetScript(script);
+        if (!_scriptRunViewModelDictionary.TryGetValue(script, out var scriptRunViewModel))
+        {
+            _scriptRunViewModelDictionary[script] = scriptRunViewModel = new ScriptRunViewModel();
+            
+            if (_ipListViewModel is null)
+            {
+                throw new NullReferenceException("IpListViewModel is not set.");
+            }
+            scriptRunViewModel.SetIpListViewModel(_ipListViewModel);
+        }
+        scriptRunViewModel.SetScript(script);
+        
+        CurrentScriptRunViewModel = scriptRunViewModel;
         PageIndex = 1;
     }
 }
