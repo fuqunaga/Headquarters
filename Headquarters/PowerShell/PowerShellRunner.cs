@@ -38,30 +38,32 @@ namespace Headquarters
             powerShell.AddParameters((IDictionary)param.parameters);
 
             var result = new Result();
+
+            await using var _ = param.cancelToken.Register(state =>
+                {
+                    if (state is PowerShell ps)
+                    {
+                        ps.Stop();
+                    }
+
+                    result.canceled = true;
+                },
+                powerShell
+            );
+
+
             try
             {
-                await using var _ = param.cancelToken.Register(state =>
-                    {
-                        if (state is PowerShell ps)
-                        {
-                            ps.Stop();
-                        }
-
-                        result.canceled = true;
-                    },
-                    powerShell
-                );
-
-
                 result.objs = await powerShell.InvokeAsync();
-                
-                result.errors = powerShell.Streams.Error.ToList();
             }
             catch (Exception e)
             {
-                result.errors = (new[] { new ErrorRecord(e, "", ErrorCategory.InvalidData, null) }).ToList();
+                result.errors = [new ErrorRecord(e, "InvokeAsync", ErrorCategory.NotSpecified, null)];
             }
 
+            result.errors ??= [];
+            result.errors.AddRange(powerShell.Streams.Error);
+            
             return result;
         }
     }
