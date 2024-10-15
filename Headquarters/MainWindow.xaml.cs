@@ -85,7 +85,7 @@ namespace Headquarters
             psScripts.DataContext = null;
             // psScripts.DataContext = _scriptsVM;
 
-            tbUserName.DataContext = ParameterManager.UserName;
+            // tbUserName.DataContext = ParameterManager.UserName;
             // UserPassword.DataContext = ParameterManager.UserPassword;
         }
         

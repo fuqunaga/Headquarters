@@ -1,18 +1,21 @@
 ﻿namespace Headquarters
 {
-    public class Parameter : ViewModelBase
+    public class ScriptParameterViewModel : ViewModelBase
     {
-        private readonly IpListViewModel? _ipListViewModel;
+        private readonly IpListViewModel _ipListViewModel;
+        private readonly ScriptParameterSet _scriptParameterSet;
         
         public string Name { get; }
         public string Value
         {
-            get => ParameterManager.Instance.Get(Name)?.ToString() ?? "";
+            get => _scriptParameterSet.Get(Name);
             set
             {
                 if (IsDependIp) return;
-                ParameterManager.Instance.Set(Name, value);
-                OnPropertyChanged();
+                if ( _scriptParameterSet.Set(Name, value) )
+                {
+                    OnPropertyChanged();
+                }
             }
         }
 
@@ -20,13 +23,12 @@
 
         public bool IsDependIp => _ipListViewModel?.DataGridViewModel.Contains(Name) ?? false;
         
-        public Parameter(string name, IpListViewModel? ipListViewModel = null)
+        public ScriptParameterViewModel(string name, IpListViewModel ipListViewModel, ScriptParameterSet scriptParameterSet)
         {
             Name = name;
             _ipListViewModel = ipListViewModel;
+            _scriptParameterSet = scriptParameterSet;
             
-            if (_ipListViewModel is null) return;
-
             _ipListViewModel.DataGridViewModel.PropertyChanged += (_, args) =>
             {
                 if (args.PropertyName == nameof(IpListDataGridViewModel.Items))

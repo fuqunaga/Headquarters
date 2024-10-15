@@ -11,16 +11,20 @@ namespace Headquarters;
 public readonly struct MainTabData
 {
     public string TabHeader { get;  init ; } = string.Empty;
-    public List<Dictionary<string, string?>> IpList { get; init; }
+    public List<Dictionary<string, string>> IpList { get; init; }
+    public Dictionary<string, Dictionary<string, string>> TabParameterDictionary { get; init; }
 
+    
     public MainTabData()
     {
-        IpList = new();
+        IpList = [];
+        TabParameterDictionary = new Dictionary<string, Dictionary<string, string>>();
     }
 
-    public MainTabData(DataTable dataTable)
+    public MainTabData(DataTable dataTable, TabParameterSet tabParameterSet)
     {
         IpList = CreateIpList(dataTable);
+        TabParameterDictionary = tabParameterSet.ScriptParameterSetTable;
     }
 
     public DataTable CreateIpListDataTable()
@@ -31,39 +35,43 @@ public readonly struct MainTabData
         foreach (var rowDictionary in IpList)
         {
             var row = dataTable.NewRow();
-            foreach (var (key, value) in rowDictionary)
+            foreach (var (key, stringValue) in rowDictionary)
             {
-                var isSelected = (key == IPParams.isSelectedPropertyName);
+                var isSelected = (key == IpParameterSet.IsSelectedPropertyName);
+                object value = isSelected 
+                    ?  (bool.TryParse(stringValue, out var v) && v) 
+                    : stringValue;
+                
                 
                 if (!columns.Contains(key))
                 {
-                    columns.Add(key, isSelected ? typeof(bool) : typeof(string));
+                    columns.Add(key, value.GetType());
                 }
 
-
-                row[key] = isSelected
-                    ? value != null && bool.Parse(value)
-                    : value;
+                row[key] = value;
             }
             
             dataTable.Rows.Add(row);
         }
 
-        if (dataTable.Columns[IPParams.ipPropertyName] == null)
+        if (dataTable.Columns[IpParameterSet.IpPropertyName] == null)
         {
-            dataTable.Columns.Add(IPParams.ipPropertyName, typeof(string)).SetOrdinal(0);
+            dataTable.Columns.Add(IpParameterSet.IpPropertyName, typeof(string)).SetOrdinal(0);
         }
 
         return dataTable;
     }
-    
-    public List<Dictionary<string, string?>> CreateIpList(DataTable dataTable)
+
+    private static List<Dictionary<string, string>> CreateIpList(DataTable dataTable)
     {
         return dataTable.AsEnumerable().Select(
             row => dataTable.Columns.Cast<DataColumn>().ToDictionary(
                 column => column.ColumnName,
-                column => row[column].ToString()
+                column => row[column].ToString() ?? string.Empty
             )).ToList();
 
     }
+
+    public TabParameterSet CreateTabParameterSet() => new(TabParameterDictionary);
+    
 }

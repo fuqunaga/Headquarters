@@ -2,6 +2,8 @@
 
 public class MainTabViewModel : ViewModelBase
 {
+    private readonly TabParameterSet _tabParameterSet;
+    
     public IpListViewModel IpListViewModel { get; } = new();
     public ScriptPageViewModel ScriptPageViewModel { get; } = new();
     
@@ -12,8 +14,9 @@ public class MainTabViewModel : ViewModelBase
     {
         Header = data.TabHeader;
         IpListViewModel.DataGridViewModel.Items = data.CreateIpListDataTable();
-        
-        ScriptPageViewModel.SetIpListViewModel(IpListViewModel);
+
+        _tabParameterSet = data.CreateTabParameterSet();
+        ScriptPageViewModel.Initialize(IpListViewModel,_tabParameterSet);
     }
 
     private MainTabViewModel() : this(new MainTabData())
@@ -22,7 +25,7 @@ public class MainTabViewModel : ViewModelBase
     
     public MainTabData CreateMainTabData()
     {
-        return new MainTabData(IpListViewModel.DataGridViewModel.Items)
+        return new MainTabData(IpListViewModel.DataGridViewModel.Items, _tabParameterSet)
         {
             TabHeader = Header
         };

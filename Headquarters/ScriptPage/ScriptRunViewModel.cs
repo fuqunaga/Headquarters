@@ -30,19 +30,21 @@ namespace Headquarters
         #endregion
 
 
-        private IpListViewModel _ipListViewModel = new();
+        private readonly IpListViewModel _ipListViewModel;
+        private readonly Script _script;
+        
         private CancellationTokenSource? _cancelTokenSource;
         private readonly List<ScriptResult> _scriptResults = [];
         
         
         private RunButtonMode _runButtonMode = RunButtonMode.Run;
-        private ObservableCollection<Parameter> _parameters = [];
+        private ObservableCollection<ScriptParameterViewModel> _parameters = [];
         private string _resultText = "";
 
 
         #region Binding Properties
 
-        public string ScriptName => Script.Name;
+        public string ScriptName => _script.Name;
 
         public int RunButtonIndex
         {
@@ -53,7 +55,7 @@ namespace Headquarters
         public ICommand RunCommand { get; }
         public ICommand StopCommand { get; }
 
-        public ObservableCollection<Parameter> Parameters
+        public ObservableCollection<ScriptParameterViewModel> Parameters
         {
             get => _parameters;
             private set => SetProperty(ref _parameters, value);
@@ -86,10 +88,9 @@ namespace Headquarters
 
 
 
-        private Script Script { get; set; } = Script.Empty;
-
-
-        string ToOwnParamName(string name) => Script.Name + "." + name;
+        
+        
+        string ToOwnParamName(string name) => _script.Name + "." + name;
 
         // parameter by script
         object GetOwnParam(string paramName) => ParameterManager.Instance.Get(ToOwnParamName(paramName));
@@ -98,16 +99,36 @@ namespace Headquarters
             ParameterManager.Instance.Set(ToOwnParamName(paramName), value);
 
 
+        public ScriptRunViewModel() : this(Script.Empty, new IpListViewModel(), new ScriptParameterSet(new Dictionary<string, string>()))
+        {
+        }
 
-        public ScriptRunViewModel()
+        public ScriptRunViewModel(Script script, IpListViewModel ipListViewModel, ScriptParameterSet scriptParameterSet)
         {
             RunCommand = new DelegateCommand(RunCommandExecute);
             StopCommand = new DelegateCommand(_ => Stop());
+            
+            _script = script;
+            _ipListViewModel = ipListViewModel;
+            
+            InitializeScript(scriptParameterSet);
+            InitializeIpListViewModel();
         }
 
-        public void SetIpListViewModel(IpListViewModel ipListViewModel)
+        private void InitializeScript(ScriptParameterSet scriptParameterSet)
         {
-            _ipListViewModel = ipListViewModel;
+            _script.Load();
+            Parameters.Clear();
+            foreach (var name in _script.ParameterNames)
+            {
+                Parameters.Add(new ScriptParameterViewModel(name, _ipListViewModel, scriptParameterSet));
+            }
+
+            OnPropertyChanged(nameof(ScriptName));
+        }
+        
+        private void InitializeIpListViewModel()
+        {
             _ipListViewModel.DataGridViewModel.PropertyChanged += (_, args) =>
             {
                 if (args.PropertyName == nameof(IpListDataGridViewModel.IsAllItemSelected))
@@ -129,15 +150,8 @@ namespace Headquarters
                     );
             }
         }
-
-        public void SetScript(Script script)
-        {
-            Script = script;
-            Script.Load();
-            Parameters = new ObservableCollection<Parameter>(Script.ParameterNames.Select(p => new Parameter(p, _ipListViewModel)));
-
-            OnPropertyChanged(nameof(ScriptName));
-        }
+        
+      
 
         private void RunCommandExecute(object? _)
         {
@@ -150,18 +164,18 @@ namespace Headquarters
             ResultText = "";
         }
 
-        private async void Run(IReadOnlyList<IPParams> ipParamsList)
+        private async void Run(IReadOnlyList<IpParameterSet> ipParamsList)
         {
-            var parameters = Parameters.Concat(new[]
-                {
-                    ParameterManager.UserName,
-                    ParameterManager.UserPassword,
-                })
-                .DistinctBy(p => p.Name);
+            // var parameters = Parameters.Concat(new[]
+            //     {
+            //         ParameterManager.UserName,
+            //         ParameterManager.UserPassword,
+            //     })
+            //     .DistinctBy(p => p.Name);
 
             // Check so many IP on ipParamsList
-            var soManyIp = ipParamsList.Select(ipParams => IPAddressRange.TryParse(ipParams.ipStr, out var range)
-                    ? new { ipParams.ipStr, count = range.AsEnumerable().Count() }
+            var soManyIp = ipParamsList.Select(ipParams => IPAddressRange.TryParse(ipParams.IpString, out var range)
+                    ? new { ipStr = ipParams.IpString, count = range.AsEnumerable().Count() }
                     : null
                 )
                 .FirstOrDefault(pair => pair != null && pair.count > 100);
@@ -177,15 +191,15 @@ namespace Headquarters
             }
 
             ClearOutput();
-            Script.Load();
+            _script.Load();
 
             var taskParameterSet = ipParamsList.SelectMany(ipParams =>
                 {
-                    var paramDictionary = parameters.ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name));
+                    var paramDictionary = Parameters.ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name) ?? p.Value);
 
-                    var ipStringList = IPAddressRange.TryParse(ipParams.ipStr, out var range)
+                    var ipStringList = IPAddressRange.TryParse(ipParams.IpString, out var range)
                         ? range.AsEnumerable().Select(ip => ip.ToString())
-                        : [ipParams.ipStr];
+                        : [ipParams.IpString];
 
 
                     return ipStringList.Select(ipString =>
@@ -238,7 +252,7 @@ namespace Headquarters
                 }
             };
 
-            var result = await Script.Run(ip, param);
+            var result = await _script.Run(ip, param);
             lock (_scriptResults)
             {
                 scriptResult.result = result;

@@ -10,6 +10,7 @@ public class ScriptPageViewModel : ViewModelBase
 {
     private int _pageIndex;
     private IpListViewModel? _ipListViewModel;
+    private TabParameterSet? _tabParameterSet;
     private readonly Dictionary<Script, ScriptRunViewModel> _scriptRunViewModelDictionary = new();
     private ScriptRunViewModel _currentScriptRunViewModel = new();
 
@@ -26,6 +27,8 @@ public class ScriptPageViewModel : ViewModelBase
         get => _currentScriptRunViewModel;
         private set => SetProperty(ref _currentScriptRunViewModel, value);
     }
+    
+    public IReadOnlyDictionary<Script, ScriptRunViewModel> ScriptRunViewModelDictionary => _scriptRunViewModelDictionary;
         
 
     public ScriptPageViewModel() : this(@".\Scripts")
@@ -44,23 +47,36 @@ public class ScriptPageViewModel : ViewModelBase
             scripts.Select(s => new ScriptButtonViewModel(s, OnSelectScript))
         );
     }
-    
-    public void SetIpListViewModel(IpListViewModel ipListViewModel) => _ipListViewModel = ipListViewModel;
-    
+
+    public void Initialize(IpListViewModel ipListViewModel, TabParameterSet tabParameterSet)
+    {
+        _ipListViewModel = ipListViewModel;
+        _tabParameterSet = tabParameterSet;
+    }
+
 
     private void OnSelectScript(Script script)
     {
         if (!_scriptRunViewModelDictionary.TryGetValue(script, out var scriptRunViewModel))
         {
-            _scriptRunViewModelDictionary[script] = scriptRunViewModel = new ScriptRunViewModel();
-            
             if (_ipListViewModel is null)
             {
                 throw new NullReferenceException("IpListViewModel is not set.");
             }
-            scriptRunViewModel.SetIpListViewModel(_ipListViewModel);
+            
+            if (_tabParameterSet is null)
+            {
+                throw new NullReferenceException("TabParameterSet is not set.");
+            }
+
+            scriptRunViewModel = new ScriptRunViewModel(
+                script,
+                _ipListViewModel,
+                _tabParameterSet.GetScriptParameterSet(script.Name)
+            );
+
+            _scriptRunViewModelDictionary[script] = scriptRunViewModel;
         }
-        scriptRunViewModel.SetScript(script);
         
         CurrentScriptRunViewModel = scriptRunViewModel;
         PageIndex = 1;

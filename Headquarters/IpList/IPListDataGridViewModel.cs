@@ -22,8 +22,6 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
 
     public IpListDataGridViewModel()
     {
-        IPParams.isSelectedPropertyName = SelectedPropertyName;
-        
         AddColumnCommand = new DelegateCommand(_ => AddColumn());
         RenameColumnCommand = new DelegateCommand(RenameColumn, IsColumnNameEditable);
         DeleteColumnCommand = new DelegateCommand(DeleteColumn, IsColumnNameEditable);
@@ -32,7 +30,7 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
     private bool IsColumnNameEditable(object? obj)
     {
         var columnName = GetColumnNameFromMenuItem(obj);
-        return (columnName != SelectedPropertyName) && (columnName != IPParams.ipPropertyName);
+        return (columnName != SelectedPropertyName) && (columnName != Headquarters.IpParameterSet.IpPropertyName);
     }
 
     private string GetColumnNameFromMenuItem(object? obj)
@@ -117,8 +115,8 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
  
 
 
-    public IEnumerable<IPParams> IpParams => Items.Rows.OfType<DataRow>().Select(d => new IPParams(d));
-    public IEnumerable<IPParams> SelectedParams => IpParams.Where(p => p.isSelected);
+    public IEnumerable<IpParameterSet> IpParams => Items.Rows.OfType<DataRow>().Select(d => new IpParameterSet(d));
+    public IEnumerable<IpParameterSet> SelectedParams => IpParams.Where(p => p.IsSelected);
 
     public bool Contains(string name) => Items.Columns.Contains(name);
 
@@ -133,9 +131,9 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
 
         lines.FirstOrDefault()?.Split(',').ToList().ForEach(header => Items.Columns.Add(header, typeof(string)));
 
-        if (Items.Columns[IPParams.ipPropertyName] == null)
+        if (Items.Columns[Headquarters.IpParameterSet.IpPropertyName] == null)
         {
-            Items.Columns.Add(IPParams.ipPropertyName, typeof(string));
+            Items.Columns.Add(Headquarters.IpParameterSet.IpPropertyName, typeof(string));
         }
 
         try

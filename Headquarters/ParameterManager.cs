@@ -24,10 +24,6 @@ namespace Headquarters
 
         #endregion
 
-        public static Parameter UserName => new Parameter(SpecialParamName.UserName);
-        public static Parameter UserPassword => new Parameter(SpecialParamName.UserPassword);
-
-
         protected Dictionary<string, object> parameters = new Dictionary<string, object>();
         protected string filepath;
 
