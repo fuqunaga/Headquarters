@@ -64,7 +64,7 @@
 
 
                             <DockPanel HorizontalAlignment="Right">
-                                <Label VerticalAlignment="Center" Margin="4" Content="MaxTaskNum"
+                                <Label VerticalAlignment="Center" Margin="4" Content="MaxTaskCount"
                                        ToolTipService.ShowDuration="10000">
                                     <Label.ToolTip>
                                         <TextBlock>
@@ -74,7 +74,7 @@
                                     </Label.ToolTip>
                                 </Label>
 
-                                <Label Content="{Binding MaxTaskNum, Mode=TwoWay}"
+                                <Label Content="{Binding MaxTaskCount, Mode=TwoWay}"
                                        Width="32"
                                        VerticalAlignment="Center" />
 
@@ -86,7 +86,7 @@
                                     Maximum="100"
                                     TickFrequency="1"
                                     IsSnapToTickEnabled="True"
-                                    Value="{Binding MaxTaskNum, Mode=TwoWay}">
+                                    Value="{Binding MaxTaskCount, Mode=TwoWay}">
                                     <!-- <Slider.Style> -->
                                     <!--     <Style TargetType="Slider" BasedOn="{StaticResource MaterialDesignSlider}"> -->
                                     <!--         <Setter Property="Foreground" Value="{DynamicResource PrimaryHueLightBrush}" /> -->

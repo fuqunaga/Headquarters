@@ -14,7 +14,7 @@ namespace Headquarters
     {
         #region Type Define
 
-        public enum RunButtonMode
+        private enum RunButtonMode
         {
             SelectIp = 0,
             Run = 1,
@@ -22,9 +22,9 @@ namespace Headquarters
         };
 
 
-        public static class OwnParameter
+        public static class ReservedParameterName
         {
-            public const string MaxTaskNum = "MaxTaskNum";
+            public const string MaxTaskCount = "MaxTaskCount";
         }
 
         #endregion
@@ -32,9 +32,10 @@ namespace Headquarters
 
         private readonly IpListViewModel _ipListViewModel;
         private readonly Script _script;
+        private readonly ScriptParameterSet _scriptParameterSet;
         
         private CancellationTokenSource? _cancelTokenSource;
-        private readonly List<ScriptResult> _scriptResults = [];
+        private readonly List<ScriptResult> _ipAddressProcessResults = [];
         
         
         private RunButtonMode _runButtonMode = RunButtonMode.Run;
@@ -67,36 +68,20 @@ namespace Headquarters
             private set => SetProperty(ref _resultText, value);
         }
 
-        public int MaxTaskNum
+        public int MaxTaskCount
         {
-            get
-            {
-                var ret = GetOwnParam(OwnParameter.MaxTaskNum);
-                return (ret != null) ? Convert.ToInt32(ret) : 100;
-            }
+            get => int.TryParse(_scriptParameterSet.Get(ReservedParameterName.MaxTaskCount), out var num) ? num : 100;
             set
             {
-                if (MaxTaskNum != value)
+                var num = value.ToString();
+                if( _scriptParameterSet.Set(ReservedParameterName.MaxTaskCount, num) )
                 {
-                    SetOwnParam(OwnParameter.MaxTaskNum, value);
-                    // PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxTaskNum)));
+                    OnPropertyChanged();
                 }
             }
         }
 
         #endregion
-
-
-
-        
-        
-        string ToOwnParamName(string name) => _script.Name + "." + name;
-
-        // parameter by script
-        object GetOwnParam(string paramName) => ParameterManager.Instance.Get(ToOwnParamName(paramName));
-
-        void SetOwnParam(string paramName, object value) =>
-            ParameterManager.Instance.Set(ToOwnParamName(paramName), value);
 
 
         public ScriptRunViewModel() : this(Script.Empty, new IpListViewModel(), new ScriptParameterSet(new Dictionary<string, string>()))
@@ -109,6 +94,7 @@ namespace Headquarters
             StopCommand = new DelegateCommand(_ => Stop());
             
             _script = script;
+            _scriptParameterSet = scriptParameterSet;
             _ipListViewModel = ipListViewModel;
             
             ResetScript(scriptParameterSet);
@@ -160,7 +146,6 @@ namespace Headquarters
 
         private void ClearOutput()
         {
-            _scriptResults.Clear();
             ResultText = "";
         }
 
@@ -180,63 +165,28 @@ namespace Headquarters
 
             var resultTextFixed = "";
             
+            // --------------------------------------------------------------------------------
             // PreProcess
+            // --------------------------------------------------------------------------------
             if (_script.HasPreProcess)
             {
-                var scriptFunction = _script.PreProcess;
-                var scriptResult = new ScriptResult()
-                {
-                    name = scriptFunction.Name
-                };
-                scriptResult.onPropertyChanged += () => ResultText = scriptResult.ToString();
-                
-                var invokeParameter = new PowerShellRunner.InvokeParameter()
-                {
-                    parameters = Parameters.ToDictionary(p => p.Name, object (p) => p.Value),
-                    cancelToken = cancelToken,
-                    invocationStateChanged = (_, args) => scriptResult.Info = args.InvocationStateInfo
-                };
-                
-                scriptResult.Result = await scriptFunction.Run(invokeParameter);
-                resultTextFixed = scriptResult.ToString();
+                await RunScriptFunction(_script.PreProcess, resultTextFixed, cancelToken);
+                resultTextFixed = ResultText + "\n\n";
             }
 
-#if false
-            var taskParameterSet = ipParamsList.SelectMany(ipParams =>
-                {
-                    var paramDictionary = Parameters.ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name) ?? p.Value);
-
-                    var ipStringList = IPAddressRange.TryParse(ipParams.IpString, out var range)
-                        ? range.AsEnumerable().Select(ip => ip.ToString())
-                        : [ipParams.IpString];
-
-
-                    return ipStringList.Select(ipString =>
-                        new
-                        {
-                            ip = ipString,
-                            paramDictionary = (IReadOnlyDictionary<string, object>)paramDictionary,
-                            outputData = new ScriptResult { name = ipString }
-                        }
-                    );
-                })
-                .ToList();
-
-            //　別スレッドでAddするとまずいのであらかじめAddしておく
-            _scriptResults.AddRange(taskParameterSet.Select(paramSet => paramSet.outputData));
+            // --------------------------------------------------------------------------------
+            // IpAddressProcess parallel
+            // --------------------------------------------------------------------------------
+            await RunIpAddressProcesses(ipParamsList, resultTextFixed, cancelToken);
+            resultTextFixed = ResultText + "\n\n";
             
-            
-            var semaphore = new SemaphoreSlim(MaxTaskNum);
-
-            await Task.WhenAll(
-                taskParameterSet.Select(async paramSet =>
-                {
-                    await semaphore.WaitAsync(cancelToken);
-                    await RunTask(paramSet.ip, paramSet.paramDictionary, paramSet.outputData, cancelToken);
-                    semaphore.Release();
-                })
-            );
-#endif
+            // --------------------------------------------------------------------------------
+            // PostProcess
+            // --------------------------------------------------------------------------------
+            if (_script.HasPostProcess)
+            {
+                await RunScriptFunction(_script.PostProcess, resultTextFixed, cancelToken);
+            }
             
             _cancelTokenSource = null;
         }
@@ -266,40 +216,102 @@ namespace Headquarters
             return true;
         }
 
-        private async Task RunTask(string ip, IReadOnlyDictionary<string, object> parameters,
+        private async Task RunScriptFunction(ScriptFunction scriptFunction, string resultTextFixed, CancellationToken cancellationToken)
+        {
+            var scriptResult = new ScriptResult()
+            {
+                name = scriptFunction.Name
+            };
+            scriptResult.onPropertyChanged += UpdateResultText;
+                
+            var invokeParameter = new PowerShellRunner.InvokeParameter()
+            {
+                parameters = Parameters.ToDictionary(p => p.Name, object (p) => p.Value),
+                cancellationToken = cancellationToken,
+                invocationStateChanged = (_, args) => scriptResult.Info = args.InvocationStateInfo
+            };
+                
+            scriptResult.Result = await scriptFunction.Run(invokeParameter);
+            return;
+
+            void UpdateResultText()
+            {
+                ResultText = resultTextFixed + scriptResult;
+            }
+        }
+
+        private async Task RunIpAddressProcesses(IReadOnlyList<IpParameterSet> ipParamsList, string resultTextFixed, CancellationToken cancelToken)
+        {
+            _ipAddressProcessResults.Clear();
+            
+            var ipProcessParameterList = ipParamsList.SelectMany(ipParams =>
+                {
+                    var paramDictionary =
+                        Parameters.ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name) ?? p.Value);
+
+                    var ipStringList = IPAddressRange.TryParse(ipParams.IpString, out var range)
+                        ? range.AsEnumerable().Select(ip => ip.ToString())
+                        : [ipParams.IpString];
+
+
+                    return ipStringList.Select(ipString =>
+                        {
+                            var scriptResult = new ScriptResult
+                            {
+                                name = ipString,
+                            };
+                            scriptResult.onPropertyChanged += UpdateResults;
+                            
+                            return new
+                            {
+                                ipString,
+                                paramDictionary = (IReadOnlyDictionary<string, object>)paramDictionary,
+                                scriptResult
+                            };
+                        }
+                    );
+                })
+                .ToList();
+
+            //　別スレッドでAddするとまずいのであらかじめAddしておく
+            _ipAddressProcessResults.AddRange(ipProcessParameterList.Select(paramSet => paramSet.scriptResult));
+            
+            
+            var semaphore = new SemaphoreSlim(MaxTaskCount);
+
+            await Task.WhenAll(
+                ipProcessParameterList.Select(async paramSet =>
+                {
+                    await semaphore.WaitAsync(cancelToken);
+                    await RunProcess(paramSet.ipString, paramSet.paramDictionary, paramSet.scriptResult, cancelToken);
+                    semaphore.Release();
+                })
+            );
+            return;
+
+            void UpdateResults()
+            {
+                var str = string.Join("\n", _ipAddressProcessResults.Select(data => data.ToString()));
+                ResultText = resultTextFixed + str;
+            }
+        }
+        
+        private async Task RunProcess(string ip, IReadOnlyDictionary<string, object> parameters,
              ScriptResult scriptResult, CancellationToken cancelToken)
         {
             var param = new PowerShellRunner.InvokeParameter
             {
                 parameters = parameters,
-                cancelToken = cancelToken,
-                invocationStateChanged = (_, e) =>
-                {
-                    lock (_scriptResults)
-                    {
-                        scriptResult.Info = e.InvocationStateInfo;
-                        UpdateResults();
-                    }
-                }
+                cancellationToken = cancelToken,
+                invocationStateChanged = (_, e) =>scriptResult.Info = e.InvocationStateInfo
             };
 
-            var result = await _script.Run(ip, param);
-            lock (_scriptResults)
-            {
-                scriptResult.Result = result;
-                UpdateResults();
-            }
+            scriptResult.Result = await _script.IpAddressProcess.Run(ip, param);
         }
 
         private void Stop()
         {
             _cancelTokenSource?.Cancel();
-        }
-
-        private void UpdateResults()
-        {
-            var str = string.Join("\n", _scriptResults.Select(data => data.ToString()));
-            ResultText = str;
         }
     }
 }

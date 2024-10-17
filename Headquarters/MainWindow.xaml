@@ -246,7 +246,7 @@
                                                         </Label.ToolTip>
                                                     </Label>
 
-                                                    <Label Content="{Binding MaxTaskNum, Mode=TwoWay}"
+                                                    <Label Content="{Binding MaxTaskCount, Mode=TwoWay}"
                                                            Width="32"
                                                            VerticalAlignment="Center"
                                                            />
@@ -259,7 +259,7 @@
                                                         Maximum="100"
                                                         TickFrequency="1"
                                                         IsSnapToTickEnabled="True"
-                                                        Value="{Binding MaxTaskNum, Mode=TwoWay}"
+                                                        Value="{Binding MaxTaskCount, Mode=TwoWay}"
                                                         >
                                                         <!-- <Slider.Style> -->
                                                         <!--     <Style TargetType="Slider" BasedOn="{StaticResource MaterialDesignSlider}"> -->

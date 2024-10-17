@@ -23,7 +23,7 @@ namespace Headquarters
                     { "ComputerName", ipAddress },
                     { "cred", CreateCredential(userName, passwordStr) },
                 },
-                cancelToken = param.cancelToken,
+                cancellationToken = param.cancellationToken,
                 invocationStateChanged = param.invocationStateChanged,
             };
 

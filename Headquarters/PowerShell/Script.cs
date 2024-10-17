@@ -45,7 +45,7 @@ namespace Headquarters
         public bool HasPostProcess => _scriptFunctionDictionary.ContainsKey(PostProcessFunctionName);
         
         public ScriptFunction PreProcess => _scriptFunctionDictionary[PreProcessFunctionName];
-        public ScriptFunction IpProcess => _scriptFunctionDictionary[IpAddressProcessFunctionName];
+        public ScriptFunction IpAddressProcess => _scriptFunctionDictionary[IpAddressProcessFunctionName];
         public ScriptFunction PostProcess => _scriptFunctionDictionary[PostProcessFunctionName];
 
 
@@ -86,56 +86,6 @@ namespace Headquarters
             {
                 _scriptFunctionDictionary.Add(IpAddressProcessFunctionName, new ScriptFunction(Name, ast));
             }
-        }
-        
-        
-
-        public async void Run(IReadOnlyDictionary<string, object> parameters, IReadOnlyList<IpParameterSet> ipParamsList, int maxTaskNum, CancellationToken cancellationToken)
-        {
-            if (HasPreProcess)
-            {
-                var scriptResult = new ScriptResult()
-                {
-                    name = PreProcess.Name
-                };
-                
-                var invokeParameter = new PowerShellRunner.InvokeParameter()
-                {
-                    parameters = parameters,
-                    cancelToken = cancellationToken,
-                    invocationStateChanged = (_, args) => scriptResult.Info = args.InvocationStateInfo
-                };
-                
-                await PreProcess.Run(invokeParameter);
-            }
-        }
-
-        public async Task<PowerShellRunner.Result> Run(string ipAddress, PowerShellRunner.InvokeParameter param)
-        {
-            return new PowerShellRunner.Result();
-            // if (IsSessionRequired)
-            // {
-            //     param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserName, out var userNameObject);
-            //     param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword, out var userPasswordObject);
-            //
-            //     var userName = userNameObject as string ?? "";
-            //     var userPassword = userPasswordObject as string ?? "";
-            //
-            //     var sessionResult = await SessionManager.CreateSession(ipAddress, userName, userPassword, param);
-            //     var session = sessionResult.objs?.FirstOrDefault()?.BaseObject;
-            //     if (session == null)
-            //     {
-            //         return sessionResult;
-            //     }
-            //     
-            //     param.parameters = new Dictionary<string, object>(param.parameters)
-            //     {
-            //         { ReservedParameterName.Session, session }
-            //     };
-            // }
-            //
-            //
-            // return await PowerShellRunner.InvokeAsync(_scriptString, param);
         }
     }
 }
