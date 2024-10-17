@@ -119,9 +119,9 @@ namespace Headquarters
         {
             _script.Load();
             Parameters.Clear();
-            foreach (var name in _script.ParameterNames)
+            foreach(var parameterName in _script.ParameterNames)
             {
-                Parameters.Add(new ScriptParameterViewModel(name, _ipListViewModel, scriptParameterSet));
+                Parameters.Add(new ScriptParameterViewModel(parameterName, _ipListViewModel, scriptParameterSet));
             }
 
             OnPropertyChanged(nameof(ScriptName));
@@ -166,33 +166,42 @@ namespace Headquarters
 
         private async void Run(IReadOnlyList<IpParameterSet> ipParamsList)
         {
-            // var parameters = Parameters.Concat(new[]
-            //     {
-            //         ParameterManager.UserName,
-            //         ParameterManager.UserPassword,
-            //     })
-            //     .DistinctBy(p => p.Name);
-
-            // Check so many IP on ipParamsList
-            var soManyIp = ipParamsList.Select(ipParams => IPAddressRange.TryParse(ipParams.IpString, out var range)
-                    ? new { ipStr = ipParams.IpString, count = range.AsEnumerable().Count() }
-                    : null
-                )
-                .FirstOrDefault(pair => pair != null && pair.count > 100);
-
-            if (soManyIp != null)
+            var prepareSuccess = PrepareRun(ipParamsList);
+            if ( !prepareSuccess)
             {
-                var result = MessageBox.Show($"IP[{soManyIp.ipStr}] means {soManyIp.count} targets.\n Continue?",
-                    "Many targets", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                if (result != MessageBoxResult.OK)
+                return;
+            }
+       
+
+            using var cancelTokenSource = new CancellationTokenSource();
+            _cancelTokenSource = cancelTokenSource;
+            
+            var cancelToken = _cancelTokenSource.Token;
+
+            var resultTextFixed = "";
+            
+            // PreProcess
+            if (_script.HasPreProcess)
+            {
+                var scriptFunction = _script.PreProcess;
+                var scriptResult = new ScriptResult()
                 {
-                    return;
-                }
+                    name = scriptFunction.Name
+                };
+                scriptResult.onPropertyChanged += () => ResultText = scriptResult.ToString();
+                
+                var invokeParameter = new PowerShellRunner.InvokeParameter()
+                {
+                    parameters = Parameters.ToDictionary(p => p.Name, object (p) => p.Value),
+                    cancelToken = cancelToken,
+                    invocationStateChanged = (_, args) => scriptResult.Info = args.InvocationStateInfo
+                };
+                
+                scriptResult.Result = await scriptFunction.Run(invokeParameter);
+                resultTextFixed = scriptResult.ToString();
             }
 
-            ClearOutput();
-            _script.Load();
-
+#if false
             var taskParameterSet = ipParamsList.SelectMany(ipParams =>
                 {
                     var paramDictionary = Parameters.ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name) ?? p.Value);
@@ -217,10 +226,6 @@ namespace Headquarters
             _scriptResults.AddRange(taskParameterSet.Select(paramSet => paramSet.outputData));
             
             
-            using var cancelTokenSource = new CancellationTokenSource();
-            _cancelTokenSource = cancelTokenSource;
-            
-            var cancelToken = _cancelTokenSource.Token;
             var semaphore = new SemaphoreSlim(MaxTaskNum);
 
             await Task.WhenAll(
@@ -231,8 +236,34 @@ namespace Headquarters
                     semaphore.Release();
                 })
             );
+#endif
             
             _cancelTokenSource = null;
+        }
+
+        private bool PrepareRun(IReadOnlyList<IpParameterSet> ipParamsList)
+        {
+            // Check so many IP on ipParamsList
+            var soManyIp = ipParamsList.Select(ipParams => IPAddressRange.TryParse(ipParams.IpString, out var range)
+                    ? new { ipStr = ipParams.IpString, count = range.AsEnumerable().Count() }
+                    : null
+                )
+                .FirstOrDefault(pair => pair != null && pair.count > 100);
+
+            if (soManyIp != null)
+            {
+                var result = MessageBox.Show($"IP[{soManyIp.ipStr}] means {soManyIp.count} targets.\n Continue?",
+                    "Many targets", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (result != MessageBoxResult.OK)
+                {
+                    return false;
+                }
+            }
+
+            ClearOutput();
+            _script.Load();
+
+            return true;
         }
 
         private async Task RunTask(string ip, IReadOnlyDictionary<string, object> parameters,
@@ -246,7 +277,7 @@ namespace Headquarters
                 {
                     lock (_scriptResults)
                     {
-                        scriptResult.info = e.InvocationStateInfo;
+                        scriptResult.Info = e.InvocationStateInfo;
                         UpdateResults();
                     }
                 }
@@ -255,7 +286,7 @@ namespace Headquarters
             var result = await _script.Run(ip, param);
             lock (_scriptResults)
             {
-                scriptResult.result = result;
+                scriptResult.Result = result;
                 UpdateResults();
             }
         }

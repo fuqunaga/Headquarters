@@ -27,15 +27,25 @@ namespace Headquarters
                                      (errors == null || errors.Count == 0);
         }
         
+        public static async Task<Result> InvokeAsync(string scriptString,InvokeParameter param)
+            => await InvokeAsync(scriptString, null, param);
 
-        public static async Task<Result> InvokeAsync(string scriptString, InvokeParameter param)
+        public static async Task<Result> InvokeAsync(string scriptString, string? commandName, InvokeParameter param)
         {
             using var powerShell = PowerShell.Create();
             
             powerShell.InvocationStateChanged += param.invocationStateChanged;
 
-            powerShell.AddScript(scriptString);
+            
+            powerShell.AddScript(scriptString, false);
+            if (commandName != null)
+            {
+                powerShell.AddStatement();
+                powerShell.AddCommand(commandName);
+            }
+            
             powerShell.AddParameters((IDictionary)param.parameters);
+
 
             var result = new Result();
 

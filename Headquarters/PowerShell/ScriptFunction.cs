@@ -1,0 +1,94 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Management.Automation.Language;
+using System.Threading.Tasks;
+
+namespace Headquarters;
+
+public class ScriptFunction
+{
+    private readonly string _scriptString;
+    private readonly string? _commandString;
+    
+    public string Name { get; }
+    public IReadOnlyList<string> ParameterNames { get; }
+
+    private bool IsSessionRequired => ParameterNames.Contains(Script.ReservedParameterName.Session);
+    
+    public ScriptFunction(string scriptName, ScriptBlockAst scriptBlockAst)
+    {
+        _scriptString = scriptBlockAst.Extent.Text;
+        _commandString = null;
+        
+        Name = scriptName;
+        ParameterNames = GetScriptBlockParameterNames(scriptBlockAst).ToList();
+    }
+    
+    public ScriptFunction(FunctionDefinitionAst functionDefinitionAst)
+    {
+        _scriptString = GetRootAst(functionDefinitionAst).Extent.Text;
+        _commandString = functionDefinitionAst.Name;
+        
+        Name = functionDefinitionAst.Name;
+        
+        // functionのパラメータは次の２形式ある
+        // 1. function myFunc($param1, $param2) { ... }
+        // 2. function myFunc{ param($param1, $param2); ... }
+        ParameterNames = functionDefinitionAst.Parameters != null
+                ? GetParameterNames(functionDefinitionAst.Parameters).ToList()
+                : GetScriptBlockParameterNames(functionDefinitionAst.Body).ToList()
+        ;
+    }
+    
+    private static IEnumerable<string> GetScriptBlockParameterNames(ScriptBlockAst ast)
+    {
+        var paramBlock = ast.ParamBlock;
+        return paramBlock == null ? [] : GetParameterNames(paramBlock.Parameters);
+    }
+    
+    private static Ast GetRootAst(Ast ast)
+    {
+        while (ast.Parent != null)
+        {
+            ast = ast.Parent;
+        }
+
+        return ast;
+    }
+    
+    private static IEnumerable<string> GetParameterNames(IEnumerable<ParameterAst> parameterAstEnumerable)
+    {
+        return parameterAstEnumerable.Select(p => p.Name.ToString().TrimStart('$'));
+    }
+
+    public async Task<PowerShellRunner.Result> Run(string ipAddress, PowerShellRunner.InvokeParameter param)
+    {
+        if (IsSessionRequired)
+        {
+            param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserName, out var userNameObject);
+            param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword, out var userPasswordObject);
+
+            var userName = userNameObject as string ?? "";
+            var userPassword = userPasswordObject as string ?? "";
+
+            var sessionResult = await SessionManager.CreateSession(ipAddress, userName, userPassword, param);
+            var session = sessionResult.objs?.FirstOrDefault()?.BaseObject;
+            if (session == null)
+            {
+                return sessionResult;
+            }
+                
+            param.parameters = new Dictionary<string, object>(param.parameters)
+            {
+                { Script.ReservedParameterName.Session, session }
+            };
+        }
+        
+        return await Run(param);
+    }
+    
+    public async Task<PowerShellRunner.Result> Run(PowerShellRunner.InvokeParameter param)
+    {
+        return await PowerShellRunner.InvokeAsync(_scriptString, _commandString, param);
+    }
+}

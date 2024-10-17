@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 
@@ -8,13 +9,35 @@ namespace Headquarters;
 public class ScriptResult
 {
     public required string name;
-    public PSInvocationStateInfo? info;
-    public PowerShellRunner.Result? result;
+    public event Action? onPropertyChanged;
+    
+    private PSInvocationStateInfo? _info;
+    private PowerShellRunner.Result? _result;
+
+    public PSInvocationStateInfo? Info
+    {
+        get => _info;
+        set
+        {
+            _info = value;
+            onPropertyChanged?.Invoke();
+        }
+    }
+    
+    public PowerShellRunner.Result? Result
+    {
+        get => _result;
+        set
+        {
+            _result = value;
+            onPropertyChanged?.Invoke();
+        }
+    }
 
     public override string ToString()
     {
-        var prefix = (result == null) ? "" : (result.IsSucceed ? "✔" : "⚠");
-        var label = $"{prefix} {name}: {info?.State}";
+        var prefix = (Result == null) ? "" : (Result.IsSucceed ? "✔" : "⚠");
+        var label = $"{prefix} {name}: {Info?.State}";
         var resultStr = GetResultString();
 
         return StringJoinWithoutNullOrEmpty("\n", label, resultStr);
@@ -22,10 +45,10 @@ public class ScriptResult
 
     private string GetResultString()
     {
-        if (result == null) return "";
+        if (Result == null) return "";
         
-        var objString = ListToString(result.objs);
-        var errString = ListToString(result.errors);
+        var objString = ListToString(Result.objs);
+        var errString = ListToString(Result.errors);
 
         return StringJoinWithoutNullOrEmpty("\n", objString, errString);
         
