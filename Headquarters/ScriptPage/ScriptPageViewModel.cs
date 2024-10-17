@@ -57,6 +57,11 @@ public class ScriptPageViewModel : ViewModelBase
 
     private void OnSelectScript(Script script)
     {
+        if (_tabParameterSet is null)
+        {
+            throw new NullReferenceException("TabParameterSet is not set.");
+        }
+
         if (!_scriptRunViewModelDictionary.TryGetValue(script, out var scriptRunViewModel))
         {
             if (_ipListViewModel is null)
@@ -64,11 +69,6 @@ public class ScriptPageViewModel : ViewModelBase
                 throw new NullReferenceException("IpListViewModel is not set.");
             }
             
-            if (_tabParameterSet is null)
-            {
-                throw new NullReferenceException("TabParameterSet is not set.");
-            }
-
             scriptRunViewModel = new ScriptRunViewModel(
                 script,
                 _ipListViewModel,
@@ -76,6 +76,11 @@ public class ScriptPageViewModel : ViewModelBase
             );
 
             _scriptRunViewModelDictionary[script] = scriptRunViewModel;
+        }
+        else
+        {
+            // スクリプトを編集してる場合を想定して選択するたびにViewModelをリセットする
+            scriptRunViewModel.ResetScript(_tabParameterSet.GetScriptParameterSet(script.Name));
         }
         
         CurrentScriptRunViewModel = scriptRunViewModel;

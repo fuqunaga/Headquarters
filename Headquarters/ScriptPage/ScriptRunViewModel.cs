@@ -111,11 +111,11 @@ namespace Headquarters
             _script = script;
             _ipListViewModel = ipListViewModel;
             
-            InitializeScript(scriptParameterSet);
+            ResetScript(scriptParameterSet);
             InitializeIpListViewModel();
         }
 
-        private void InitializeScript(ScriptParameterSet scriptParameterSet)
+        public void ResetScript(ScriptParameterSet scriptParameterSet)
         {
             _script.Load();
             Parameters.Clear();
