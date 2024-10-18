@@ -6,12 +6,18 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:Headquarters"
              mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:SettingPageViewModel}"
              d:DesignHeight="300" d:DesignWidth="300" Width="300">
     
     <Grid>
-        <TextBlock>Host</TextBlock>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <materialDesign:PackIcon Kind="Settings" Width="24" Height="24"/>
+            <TextBlock Text="Settings" FontSize="22"/>
+        </StackPanel>
         <Button Command="{Binding CloseCommand}"
-                HorizontalAlignment="Right">
+                HorizontalAlignment="Right"
+                Style="{StaticResource MaterialDesignIconButton}"
+                >
             <materialDesign:PackIcon Kind="WindowClose" />
         </Button>
     </Grid>
