@@ -7,6 +7,7 @@
         xmlns:local="clr-namespace:Headquarters"
         Style="{StaticResource MaterialDesignWindow}"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
         Title="Headquarters" MinHeight="600">
     
     <!-- <Window.Resources> -->
@@ -67,10 +68,10 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
       
-            <TabControl x:Name="MainTabControl">
+            <TabControl ItemsSource="{Binding TabItems, Mode=OneWay}" SelectedIndex="0">
                 <TabControl.Resources>
                     <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource MaterialDesignTabItem}">
-                        <Setter Property="Header" Value="{Binding ScriptName}"/>
+                        <Setter Property="Header" Value="{Binding Header}"/>
                     </Style>
                 </TabControl.Resources>
                 
@@ -80,265 +81,11 @@
                     </DataTemplate>
                 </TabControl.ContentTemplate>
             </TabControl>
-            
-            <!-- TODO: remove -->
-            <StackPanel Width="0">
-            <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="100">
-                <Grid Margin="16,0,0,0">
-                    <TextBlock VerticalAlignment="Center" FontSize="22">
-                       <Hyperlink
-                           NavigateUri="https://github.com/fuqunaga/Headquaters"
-                           RequestNavigate="Hyperlink_RequestNavigate"
-                           >
-                           <Hyperlink.Style>
-                               <Style TargetType="Hyperlink">
-                                   <Setter Property="Foreground" Value="{Binding Foreground,RelativeSource={RelativeSource FindAncestor,AncestorType=TextBlock}}"/>
-                                   <Setter Property="TextDecorations" Value="None" />
-                               </Style>
-                           </Hyperlink.Style>                       
-                           HQ</Hyperlink>
-                    </TextBlock>
-                    <TextBlock HorizontalAlignment="Right">
-                        <materialDesign:PackIcon Kind="Account" Foreground="{Binding ElementName=tbUserName, Path=BorderBrush}" />
-                        <TextBox x:Name="tbUserName"
-                                 Text="{Binding Value}"
-                                 IsEnabled="{Binding IsIndependentIp}"
-                                 materialDesign:HintAssist.Hint="Name" Width="200"  
-                                 >
-                            <TextBox.Style>
-                                <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
-                                    <Setter Property="CaretBrush" Value="{DynamicResource PrimaryHueLightBrush}" />
-                                </Style>
-                            </TextBox.Style>
-                        </TextBox>
-                
-                        <!-- <ContentControl  -->
-                        <!--     Name="UserPassword" Margin="16,0,0,0" -->
-                        <!--     IsTabStop="False" -->
-                        <!--     Content="{Binding}" -->
-                        <!--     ContentTemplateSelector="{StaticResource passwordBoxTemplateSelector}" -->
-                        <!--     /> -->
-                    </TextBlock>
 
-                </Grid>
-            </materialDesign:ColorZone>
-
-            <Grid DockPanel.Dock="Left">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="300" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <!-- IPList -->
-                <DockPanel Grid.Column="0" Margin="0">
-
-                    <local:IpList x:Name="IpList" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="1" />
-                    
-                </DockPanel>
-
-
-                <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
-
-                <materialDesign:Transitioner Name="psScripts" SelectedIndex="0"  Panel.ZIndex="-10" Grid.Column="2" >
-                    <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect SlideInFromLeft}">
-                        <materialDesign:TransitionerSlide.ForwardWipe>
-                            <local:CustomFadeWipe />
-                        </materialDesign:TransitionerSlide.ForwardWipe>
-
-                        <!-- Select script -->
-                        <DockPanel >
-                            <materialDesign:ColorZone Mode="PrimaryMid" Padding="16" materialDesign:ElevationAssist.Elevation="Dp2" DockPanel.Dock="Top">
-                                <DockPanel>
-                                    <materialDesign:PackIcon Kind="ScriptText"/>
-                                    <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">Scripts</TextBlock>
-                                </DockPanel>
-                            </materialDesign:ColorZone>
-
-                            <ScrollViewer DockPanel.Dock="Top"
-                                Margin="8,8,8,8"
-                                VerticalScrollBarVisibility="Disabled"
-                                HorizontalScrollBarVisibility="Auto">
-
-                                <ItemsControl Name="ScriptButtons" ItemsSource="{Binding Items}">
-
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <WrapPanel Orientation="Vertical"/>
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Button
-                                                Margin="8"
-                                                Style="{StaticResource MaterialDesignRaisedLightButton}"
-                                                Content="{Binding ScriptName}"
-                                                HorizontalAlignment="Left"
-                                                />
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </DockPanel>
-                    </materialDesign:TransitionerSlide>
-
-                    <materialDesign:TransitionerSlide DataContext="{Binding ScriptRunViewModel}" OpeningEffect="{materialDesign:TransitionEffect SlideInFromRight}">
-                        <materialDesign:TransitionerSlide.BackwardWipe>
-                            <local:CustomFadeWipe />
-                        </materialDesign:TransitionerSlide.BackwardWipe>
-                        <DockPanel>
-                            <materialDesign:ColorZone Mode="PrimaryMid" Padding="8,0,0,0" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2">
-                                <DockPanel>
-                                    <!-- Return Button -->
-                                    <Button 
-                                        materialDesign:ElevationAssist.Elevation="Dp0"
-                                        Command="{x:Static materialDesign:Transitioner.MovePreviousCommand}"
-                                        HorizontalAlignment="Left">
-                                        <materialDesign:PackIcon Kind="ArrowLeft" />
-                                    </Button>
-
-                                    <materialDesign:PackIcon Kind="ScriptText" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                                    <Label Content="{Binding ScriptName}" VerticalAlignment="Center" />
-
-                                    <!-- Run Button -->
-                                    <materialDesign:Transitioner Name="RunButtonSelector" SelectedIndex="1" Margin="16,0,8,0">
-                                        <materialDesign:TransitionerSlide>
-                                            <materialDesign:TransitionerSlide.ForwardWipe>
-                                                <local:CustomFadeWipe />
-                                            </materialDesign:TransitionerSlide.ForwardWipe>
-                                            <Button 
-                                                Style="{StaticResource MaterialDesignFloatingActionSecondaryButton}"
-                                                HorizontalAlignment="Left"
-                                                IsEnabled="False"
-                                                Content="Select IP" />
-                                        </materialDesign:TransitionerSlide>
-
-                                        <materialDesign:TransitionerSlide>
-                                            <materialDesign:TransitionerSlide.BackwardWipe>
-                                                <local:CustomFadeWipe />
-                                            </materialDesign:TransitionerSlide.BackwardWipe>
-                                            <materialDesign:TransitionerSlide.ForwardWipe>
-                                                <local:CustomFadeWipe />
-                                            </materialDesign:TransitionerSlide.ForwardWipe>
-
-                                            <DockPanel>
-                                                <Button 
-                                                    Margin="8"
-                                                    Name="RunButton"
-                                                    Style="{StaticResource MaterialDesignFloatingActionSecondaryButton}"
-                                                    materialDesign:ElevationAssist.Elevation="Dp3"
-                                                    Click="OnClickRun"
-                                                    >
-                                                    <materialDesign:PackIcon Kind="MenuRight" Height="32" Width="32" />
-                                                </Button>
-
-                                                <DockPanel HorizontalAlignment="Right">
-                                                    <Label VerticalAlignment="Center" Margin="4" Content="MaxTaskNum" ToolTipService.ShowDuration="10000">
-                                                        <Label.ToolTip>
-                                                            <TextBlock>
-                                                                Limit the number of concurrent tasks.<LineBreak />
-                                                                If you are getting OutOfMemory exceptions, try a smaller number than IP List.
-                                                            </TextBlock>
-                                                        </Label.ToolTip>
-                                                    </Label>
-
-                                                    <Label Content="{Binding MaxTaskCount, Mode=TwoWay}"
-                                                           Width="32"
-                                                           VerticalAlignment="Center"
-                                                           />
-
-                                                    <Slider
-                                                        Margin="16"
-                                                        VerticalAlignment="Center"
-                                                        Width="200"
-                                                        Minimum="1"
-                                                        Maximum="100"
-                                                        TickFrequency="1"
-                                                        IsSnapToTickEnabled="True"
-                                                        Value="{Binding MaxTaskCount, Mode=TwoWay}"
-                                                        >
-                                                        <!-- <Slider.Style> -->
-                                                        <!--     <Style TargetType="Slider" BasedOn="{StaticResource MaterialDesignSlider}"> -->
-                                                        <!--         <Setter Property="Foreground" Value="{DynamicResource PrimaryHueLightBrush}" /> -->
-                                                        <!--     </Style> -->
-                                                        <!-- </Slider.Style> -->
-                                                    </Slider>
-
-                                                </DockPanel>
-                                            </DockPanel>
-                                        </materialDesign:TransitionerSlide>
-
-                                        <materialDesign:TransitionerSlide>
-                                            <materialDesign:TransitionerSlide.BackwardWipe>
-                                                <local:CustomFadeWipe />
-                                            </materialDesign:TransitionerSlide.BackwardWipe>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <ProgressBar Grid.Column="0" IsIndeterminate="True"/>
-                                                <Button 
-                                                Grid.Column="1"
-                                                Margin="16,0,8,0"
-                                                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                                                Click="OnClickStop"
-                                                Content="{materialDesign:PackIcon Kind=Stop}"                                           
-                                            />
-                                            </Grid>
-                                        </materialDesign:TransitionerSlide>
-                                    </materialDesign:Transitioner>
-                                </DockPanel>
-                            </materialDesign:ColorZone>
-
-                            <!-- Paramters -->
-                            <ListBox ItemsSource="{Binding Parameters}" MaxHeight="200" Margin="0,16,0,0" DockPanel.Dock="Top"
-                                     KeyboardNavigation.TabNavigation="Continue"
-                                     ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                     ScrollViewer.HorizontalScrollBarVisibility="Auto">
-                                <ListBox.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel IsItemsHost="True" Orientation="Vertical"/>
-                                    </ItemsPanelTemplate>
-                                </ListBox.ItemsPanel>
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock>
-                                            <Label Content="{Binding Name}" MinWidth="100"/>
-                                            <TextBox Text="{Binding Value}" IsEnabled="{Binding IsIndependentIp}" MinWidth="100" IsTabStop="True"/>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                                <ListBox.ItemContainerStyle>
-                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                                        <Setter Property="IsTabStop" Value="False" />
-                                    </Style>
-                                </ListBox.ItemContainerStyle>
-                            </ListBox>
-
-                            <!-- Output -->
-                            <TextBox Text="{Binding ResultText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 TextWrapping="Wrap" 
-                                 VerticalAlignment="Stretch"
-                                 IsReadOnly="True"
-                                 AcceptsReturn="True"
-                                 VerticalScrollBarVisibility="Auto"
-                                 Margin="8,32,8,8"
-                                 MinHeight="50"
-                                 />
-
-
-                        </DockPanel>
-                    </materialDesign:TransitionerSlide>
-                </materialDesign:Transitioner>
-            </Grid>
-            </StackPanel>
+            <Button Grid.Column="1" 
+                Command="{Binding OpenSettingWindowCommand}">
+                <materialDesign:PackIcon Kind="Settings" />
+            </Button>
             
         </Grid>
     </materialDesign:DialogHost>
