@@ -9,8 +9,25 @@ namespace Headquarters;
 
 public class SettingManager
 {
+    /// <summary>
+    /// Jsonによる設定データ
+    /// </summary>
     public struct SettingData
     {
+        public static SettingData Default => new()
+        {
+            GlobalParameterSet = new Dictionary<string, string>(),
+            MainTabDataList =
+            [
+                new MainTabData()
+                {
+                    TabHeader = "New Tab",
+                    IpList = []
+                }
+            ]
+        };
+        
+        public Dictionary<string, string> GlobalParameterSet { get; init; }
         public List<MainTabData> MainTabDataList { get; init; }
     }
 
@@ -39,7 +56,7 @@ public class SettingManager
         File.WriteAllText(filepath, str);
     }
 
-    public SettingData? Load(string filepath)
+    public static SettingData? Load(string filepath)
     {
         if (!File.Exists(filepath))
         {

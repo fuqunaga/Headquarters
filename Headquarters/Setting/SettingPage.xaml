@@ -7,18 +7,35 @@
              xmlns:local="clr-namespace:Headquarters"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:SettingPageViewModel}"
-             d:DesignHeight="300" d:DesignWidth="300" Width="300">
-    
-    <Grid>
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-            <materialDesign:PackIcon Kind="Settings" Width="24" Height="24"/>
-            <TextBlock Text="Settings" FontSize="22"/>
-        </StackPanel>
-        <Button Command="{Binding CloseCommand}"
-                HorizontalAlignment="Right"
-                Style="{StaticResource MaterialDesignIconButton}"
-                >
-            <materialDesign:PackIcon Kind="WindowClose" />
-        </Button>
-    </Grid>
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <StackPanel>
+        <Grid>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <materialDesign:PackIcon Kind="Settings" Width="24" Height="24" />
+                <TextBlock Text="Settings" FontSize="22" />
+            </StackPanel>
+
+            <Button HorizontalAlignment="Right"
+                    Command="{Binding CloseCommand}"
+                    Style="{StaticResource MaterialDesignIconButton}">
+
+                <materialDesign:PackIcon Kind="WindowClose" />
+            </Button>
+        </Grid>
+
+        <Rectangle Height="1"
+                   Margin="0,24,0,0"
+                   Fill="{DynamicResource MaterialDesignDivider}" />
+
+        <ListBox ItemsSource="{Binding ParameterSetViewModels}"
+                 materialDesign:ListBoxItemAssist.ShowSelection="False">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type local:ParameterSetViewModel}">
+                    <local:ParameterSetView />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        
+    </StackPanel>
 </UserControl>

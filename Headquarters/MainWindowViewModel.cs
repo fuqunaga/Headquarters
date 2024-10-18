@@ -10,10 +10,9 @@ public class MainWindowViewModel : ViewModelBase
 {
     private bool _isSettingPageOpen;
     
+    
     public SettingPageViewModel SettingPageViewModel { get; } = new();
-    
     public ObservableCollection<MainTabViewModel> TabItems { get;  } = [];
-    
     public ICommand OpenSettingPageCommand { get; }
 
     public bool IsSettingPageOpen
@@ -38,24 +37,11 @@ public class MainWindowViewModel : ViewModelBase
 
     private void LoadSettings()
     {
-        var settingData = SettingManager.Instance.Load(".\\setting.json")
-                          ?? new SettingManager.SettingData()
-                          {
-                              MainTabDataList =
-                              [
-                                  new MainTabData
-                                  {
-                                      TabHeader = "Tab0",
-                                      IpList =
-                                      [
-                                          new Dictionary<string, string>()
-                                          {
-                                              { "Value1", "1" }
-                                          }
-                                      ]
-                                  }
-                              ]
-                          };
+        var settingData = SettingManager.Load(".\\setting.json")
+                          ?? SettingManager.SettingData.Default;
+
+        var globalParameterSet = new ParameterSet(settingData.GlobalParameterSet);
+        SettingPageViewModel.SetParameterSet(globalParameterSet);
 
         foreach (var data in settingData.MainTabDataList)
         {
@@ -67,6 +53,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         var settingData = new SettingManager.SettingData()
         {
+            GlobalParameterSet = SettingPageViewModel.GetParameterSet()?.Parameters ?? new Dictionary<string, string>(),
             MainTabDataList = TabItems.Select(vm => vm.CreateMainTabData()).ToList()
         };
             

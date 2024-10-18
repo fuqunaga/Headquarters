@@ -32,7 +32,7 @@ namespace Headquarters
 
         private readonly IpListViewModel _ipListViewModel;
         private readonly Script _script;
-        private readonly ScriptParameterSet _scriptParameterSet;
+        private readonly ParameterSet _scriptParameterSet;
         
         private CancellationTokenSource? _cancelTokenSource;
         private readonly List<ScriptResult> _ipAddressProcessResults = [];
@@ -84,11 +84,11 @@ namespace Headquarters
         #endregion
 
 
-        public ScriptRunViewModel() : this(Script.Empty, new IpListViewModel(), new ScriptParameterSet(new Dictionary<string, string>()))
+        public ScriptRunViewModel() : this(Script.Empty, new IpListViewModel(), new ParameterSet(new Dictionary<string, string>()))
         {
         }
 
-        public ScriptRunViewModel(Script script, IpListViewModel ipListViewModel, ScriptParameterSet scriptParameterSet)
+        public ScriptRunViewModel(Script script, IpListViewModel ipListViewModel, ParameterSet scriptParameterSet)
         {
             RunCommand = new DelegateCommand(RunCommandExecute);
             StopCommand = new DelegateCommand(_ => Stop());
@@ -101,7 +101,7 @@ namespace Headquarters
             InitializeIpListViewModel();
         }
 
-        public void ResetScript(ScriptParameterSet scriptParameterSet)
+        public void ResetScript(ParameterSet scriptParameterSet)
         {
             _script.Load();
             Parameters.Clear();
