@@ -62,31 +62,43 @@
     <!-- </Window.Resources> -->
 
     <materialDesign:DialogHost Identifier="RootDialog">
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-      
-            <TabControl ItemsSource="{Binding TabItems, Mode=OneWay}" SelectedIndex="0">
-                <TabControl.Resources>
-                    <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource MaterialDesignTabItem}">
-                        <Setter Property="Header" Value="{Binding Header}"/>
-                    </Style>
-                </TabControl.Resources>
-                
-                <TabControl.ContentTemplate>
-                    <DataTemplate>
-                        <local:MainTab />
-                    </DataTemplate>
-                </TabControl.ContentTemplate>
-            </TabControl>
 
-            <Button Grid.Column="1" 
-                Command="{Binding OpenSettingWindowCommand}">
-                <materialDesign:PackIcon Kind="Settings" />
-            </Button>
-            
-        </Grid>
+        <materialDesign:DrawerHost
+            IsTopDrawerOpen="{Binding IsSettingPageOpen, Mode=TwoWay}"
+            TopDrawerCornerRadius="0 20 20 0"
+            OpenMode="Modal">
+
+            <materialDesign:DrawerHost.TopDrawerContent>
+                <local:SettingPage DataContext="{Binding SettingPageViewModel}"/>
+            </materialDesign:DrawerHost.TopDrawerContent>
+
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TabControl ItemsSource="{Binding TabItems, Mode=OneWay}" SelectedIndex="0">
+                    <TabControl.Resources>
+                        <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource MaterialDesignTabItem}">
+                            <Setter Property="Header" Value="{Binding Header}" />
+                        </Style>
+                    </TabControl.Resources>
+
+                    <TabControl.ContentTemplate>
+                        <DataTemplate>
+                            <local:MainTab />
+                        </DataTemplate>
+                    </TabControl.ContentTemplate>
+                </TabControl>
+
+                <Button Grid.Column="1"
+                        Command="{Binding OpenSettingPageCommand}">
+                    <materialDesign:PackIcon Kind="Settings" />
+                </Button>
+
+            </Grid>
+        </materialDesign:DrawerHost>
     </materialDesign:DialogHost>
 </Window>
