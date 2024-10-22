@@ -153,8 +153,9 @@ namespace Headquarters
         {
             var ipAndParameterList = ipParamsList.SelectMany(ipParams =>
                 {
-                    var paramDictionary =
-                        Parameters.ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name) ?? p.Value);
+                    var paramDictionary = Parameters
+                        .ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name) ?? p.Value)
+                        .AsReadOnly();
 
                     var ipStringList = IPAddressRange.TryParse(ipParams.IpString, out var range)
                         ? range.AsEnumerable().Select(ip => ip.ToString())
@@ -244,23 +245,21 @@ namespace Headquarters
             }
         }
 
-        private async Task RunIpAddressProcesses(IReadOnlyList<(string ipString, Dictionary<string, object> parameters)> ipAndParameterList, string resultTextFixed, CancellationToken cancelToken)
+        private async Task RunIpAddressProcesses(List<(string ipString, ReadOnlyDictionary<string, object> parameters)> ipAndParameterList, string resultTextFixed, CancellationToken cancelToken)
         {
             _ipAddressProcessResults.Clear();
 
             var ipProcessParameterList = ipAndParameterList.Select(ipAndParameter =>
-                {
-                    var (ipString, paramDictionary) = ipAndParameter;
+                { 
                     var scriptResult = new ScriptResult
                     {
-                        name = ipString,
+                        name = ipAndParameter.ipString,
                     };
                     scriptResult.onPropertyChanged += UpdateResults;
 
                     return new
                     {
-                        ipString,
-                        paramDictionary = (IReadOnlyDictionary<string, object>)paramDictionary,
+                        ipAndParameter,
                         scriptResult
                     };
                 }
@@ -277,7 +276,10 @@ namespace Headquarters
                 ipProcessParameterList.Select(async paramSet =>
                 {
                     await semaphore.WaitAsync(cancelToken);
-                    await RunProcess(paramSet.ipString, paramSet.paramDictionary, paramSet.scriptResult, cancelToken);
+                    await RunProcess(
+                        paramSet.ipAndParameter.ipString,
+                        paramSet.ipAndParameter.parameters, 
+                        paramSet.scriptResult, cancelToken);
                     semaphore.Release();
                 })
             );
