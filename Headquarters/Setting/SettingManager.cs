@@ -16,7 +16,10 @@ public class SettingManager
     {
         public static SettingData Default => new()
         {
-            GlobalParameterSet = new Dictionary<string, string>(),
+            GlobalParameterSet = new Dictionary<string, string>
+            {
+                [GlobalParameter.ConfirmationProcessCountParameterName] = "10"
+            },
             MainTabDataList =
             [
                 new MainTabData()

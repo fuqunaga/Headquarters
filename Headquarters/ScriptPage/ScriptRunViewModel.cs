@@ -151,12 +151,41 @@ namespace Headquarters
 
         private async void Run(IReadOnlyList<IpParameterSet> ipParamsList)
         {
-            var prepareSuccess = PrepareRun(ipParamsList);
-            if ( !prepareSuccess)
+            var ipAndParameterList = ipParamsList.SelectMany(ipParams =>
+                {
+                    var paramDictionary =
+                        Parameters.ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name) ?? p.Value);
+
+                    var ipStringList = IPAddressRange.TryParse(ipParams.IpString, out var range)
+                        ? range.AsEnumerable().Select(ip => ip.ToString())
+                        : [ipParams.IpString];
+
+
+                    return ipStringList.Select(ipString => (ipString, paramDictionary));
+                })
+                .ToList();
+
+            if (ipAndParameterList.Count >= GlobalParameter.ConfirmationProcessCount)
             {
-                return;
+                var ip = string.Join(", ", ipAndParameterList.Select(data => data.ipString));
+                
+                var result = MessageBox.Show(
+                    $"{ipAndParameterList.Count}個のIPアドレスへ実行します\n\n{ip}\n\nよろしいですか？",
+                    "確認",
+                    MessageBoxButton.OKCancel,
+                    MessageBoxImage.Warning
+                );
+                
+                if (result != MessageBoxResult.OK)
+                {
+                    return;
+                }
             }
-       
+            
+            
+            ClearOutput();
+            _script.Load();
+            
 
             using var cancelTokenSource = new CancellationTokenSource();
             _cancelTokenSource = cancelTokenSource;
@@ -177,7 +206,7 @@ namespace Headquarters
             // --------------------------------------------------------------------------------
             // IpAddressProcess parallel
             // --------------------------------------------------------------------------------
-            await RunIpAddressProcesses(ipParamsList, resultTextFixed, cancelToken);
+            await RunIpAddressProcesses(ipAndParameterList, resultTextFixed, cancelToken);
             resultTextFixed = ResultText + "\n\n";
             
             // --------------------------------------------------------------------------------
@@ -189,31 +218,6 @@ namespace Headquarters
             }
             
             _cancelTokenSource = null;
-        }
-
-        private bool PrepareRun(IReadOnlyList<IpParameterSet> ipParamsList)
-        {
-            // Check so many IP on ipParamsList
-            var soManyIp = ipParamsList.Select(ipParams => IPAddressRange.TryParse(ipParams.IpString, out var range)
-                    ? new { ipStr = ipParams.IpString, count = range.AsEnumerable().Count() }
-                    : null
-                )
-                .FirstOrDefault(pair => pair != null && pair.count > 100);
-
-            if (soManyIp != null)
-            {
-                var result = MessageBox.Show($"IP[{soManyIp.ipStr}] means {soManyIp.count} targets.\n Continue?",
-                    "Many targets", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                if (result != MessageBoxResult.OK)
-                {
-                    return false;
-                }
-            }
-
-            ClearOutput();
-            _script.Load();
-
-            return true;
         }
 
         private async Task RunScriptFunction(ScriptFunction scriptFunction, string resultTextFixed, CancellationToken cancellationToken)
@@ -240,38 +244,28 @@ namespace Headquarters
             }
         }
 
-        private async Task RunIpAddressProcesses(IReadOnlyList<IpParameterSet> ipParamsList, string resultTextFixed, CancellationToken cancelToken)
+        private async Task RunIpAddressProcesses(IReadOnlyList<(string ipString, Dictionary<string, object> parameters)> ipAndParameterList, string resultTextFixed, CancellationToken cancelToken)
         {
             _ipAddressProcessResults.Clear();
-            
-            var ipProcessParameterList = ipParamsList.SelectMany(ipParams =>
+
+            var ipProcessParameterList = ipAndParameterList.Select(ipAndParameter =>
                 {
-                    var paramDictionary =
-                        Parameters.ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name) ?? p.Value);
+                    var (ipString, paramDictionary) = ipAndParameter;
+                    var scriptResult = new ScriptResult
+                    {
+                        name = ipString,
+                    };
+                    scriptResult.onPropertyChanged += UpdateResults;
 
-                    var ipStringList = IPAddressRange.TryParse(ipParams.IpString, out var range)
-                        ? range.AsEnumerable().Select(ip => ip.ToString())
-                        : [ipParams.IpString];
-
-
-                    return ipStringList.Select(ipString =>
-                        {
-                            var scriptResult = new ScriptResult
-                            {
-                                name = ipString,
-                            };
-                            scriptResult.onPropertyChanged += UpdateResults;
-                            
-                            return new
-                            {
-                                ipString,
-                                paramDictionary = (IReadOnlyDictionary<string, object>)paramDictionary,
-                                scriptResult
-                            };
-                        }
-                    );
-                })
-                .ToList();
+                    return new
+                    {
+                        ipString,
+                        paramDictionary = (IReadOnlyDictionary<string, object>)paramDictionary,
+                        scriptResult
+                    };
+                }
+            ).ToList();
+                
 
             //　別スレッドでAddするとまずいのであらかじめAddしておく
             _ipAddressProcessResults.AddRange(ipProcessParameterList.Select(paramSet => paramSet.scriptResult));

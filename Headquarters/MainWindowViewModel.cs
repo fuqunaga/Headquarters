@@ -39,9 +39,9 @@ public class MainWindowViewModel : ViewModelBase
     {
         var settingData = SettingManager.Load(".\\setting.json")
                           ?? SettingManager.SettingData.Default;
-
-        var globalParameterSet = new ParameterSet(settingData.GlobalParameterSet);
-        SettingPageViewModel.SetParameterSet(globalParameterSet);
+        
+        GlobalParameter.ParameterSet = new ParameterSet(settingData.GlobalParameterSet);
+        SettingPageViewModel.AddGlobalParameterViewModel();
 
         foreach (var data in settingData.MainTabDataList)
         {
@@ -53,7 +53,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         var settingData = new SettingManager.SettingData()
         {
-            GlobalParameterSet = SettingPageViewModel.GetParameterSet()?.Parameters ?? new Dictionary<string, string>(),
+            GlobalParameterSet = GlobalParameter.ParameterSet?.Parameters ?? new Dictionary<string, string>(),
             MainTabDataList = TabItems.Select(vm => vm.CreateMainTabData()).ToList()
         };
             

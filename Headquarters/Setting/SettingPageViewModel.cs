@@ -8,9 +8,6 @@ public class SettingPageViewModel : ViewModelBase
 {
     public event Action? closeRequested;
     
-    private ParameterSet? _parameterSet;
-    
-    
     public ObservableCollection<ParameterSetViewModel> ParameterSetViewModels { get; } = [];
     
     public ICommand CloseCommand { get; }
@@ -22,14 +19,11 @@ public class SettingPageViewModel : ViewModelBase
         CloseCommand = new DelegateCommand(_ => closeRequested?.Invoke());
     }
 
-    public void SetParameterSet(ParameterSet parameterSet)
+    public void AddGlobalParameterViewModel()
     {
-        _parameterSet = parameterSet;
-        foreach (var parameterSetViewModel in GlobalParameter.CreateParameterSetViewModels(parameterSet))
+        foreach (var parameterSetViewModel in GlobalParameter.CreateParameterSetViewModels())
         {
             ParameterSetViewModels.Add(parameterSetViewModel);
         }
     }
-
-    public ParameterSet? GetParameterSet() => _parameterSet;
 }
