@@ -4,11 +4,20 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:dragablz="clr-namespace:Dragablz;assembly=Dragablz"
         xmlns:local="clr-namespace:Headquarters"
         Style="{StaticResource MaterialDesignWindow}"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
         Title="Headquarters" MinHeight="600">
+    
+    <Window.Resources>
+        <ResourceDictionary>
+            <DataTemplate DataType="{x:Type local:MainTabViewModel}">
+                <ContentControl Content="{Binding Header}" Margin="4 4 4 4" FontSize="14" />
+            </DataTemplate>
+        </ResourceDictionary>
+    </Window.Resources>
     
     <!-- <Window.Resources> -->
     <!--     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}"> -->
@@ -72,26 +81,25 @@
                 <local:SettingPage DataContext="{Binding SettingPageViewModel}"/>
             </materialDesign:DrawerHost.TopDrawerContent>
 
-
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TabControl ItemsSource="{Binding TabItems, Mode=OneWay}" SelectedIndex="0">
-                    <TabControl.Resources>
-                        <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource MaterialDesignTabItem}">
-                            <Setter Property="Header" Value="{Binding Header}" />
-                        </Style>
-                    </TabControl.Resources>
-
+                <dragablz:TabablzControl 
+                    ShowDefaultAddButton="True"
+                    ShowDefaultCloseButton="True"
+                    NewItemFactory="{x:Static local:MainTabViewModel.Factory}"
+                    ItemsSource="{Binding TabItems, Mode=OneWay}" 
+                    SelectedIndex="0">
+   
                     <TabControl.ContentTemplate>
                         <DataTemplate>
                             <local:MainTab />
                         </DataTemplate>
                     </TabControl.ContentTemplate>
-                </TabControl>
+                </dragablz:TabablzControl>
 
                 <Button Grid.Column="1"
                         Command="{Binding OpenSettingPageCommand}">

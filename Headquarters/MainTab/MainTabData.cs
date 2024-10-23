@@ -10,7 +10,7 @@ namespace Headquarters;
 /// </summary>
 public readonly struct MainTabData
 {
-    public string TabHeader { get;  init ; } = string.Empty;
+    public string TabHeader { get;  init ; } = "New Tab";
     public List<Dictionary<string, string>> IpList { get; init; }
     public Dictionary<string, Dictionary<string, string>> TabParameterDictionary { get; init; }
 

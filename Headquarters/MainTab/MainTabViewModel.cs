@@ -1,13 +1,17 @@
-﻿namespace Headquarters;
+﻿using System;
+
+namespace Headquarters;
 
 public class MainTabViewModel : ViewModelBase
 {
+    public static Func<MainTabViewModel> Factory => () => new MainTabViewModel();
+
     private readonly TabParameterSet _tabParameterSet;
     
     public IpListViewModel IpListViewModel { get; } = new();
     public ScriptPageViewModel ScriptPageViewModel { get; } = new();
     
-    public string Header { get; }
+    public string Header { get; set; }
     
 
     public MainTabViewModel(MainTabData data)
@@ -19,7 +23,7 @@ public class MainTabViewModel : ViewModelBase
         ScriptPageViewModel.Initialize(IpListViewModel,_tabParameterSet);
     }
 
-    private MainTabViewModel() : this(new MainTabData())
+    public MainTabViewModel() : this(new MainTabData())
     {
     }
     
