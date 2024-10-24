@@ -81,17 +81,38 @@
                 <local:SettingPage DataContext="{Binding SettingPageViewModel}"/>
             </materialDesign:DrawerHost.TopDrawerContent>
 
+            <StackPanel>
+                
+                <TabControl>
+                <TabItem Header="Tab 0" />
+                <TabItem Header="Tab 1" />
+                <TabItem Header="Tab 2" />
+                <TabItem Header="Tab 3" />
+                <TabItem Header="Tab 4" />
+                <TabItem Header="Tab 5" />
+                <TabItem Header="Tab 6" />
+                <TabItem Header="Tab 7" />
+                <TabItem Header="Tab 8" />
+                <TabItem Header="Tab 9" />
+                <TabItem Header="Tab 10" />
+                <TabItem Header="Tab 11" />
+                <TabItem Header="Tab 12" />
+                <TabItem Header="Tab 13" />
+                <TabItem Header="Tab 14" />
+                <TabItem Header="Tab 15" />
+                <TabItem Header="Tab 16" />
+                <TabItem Header="Tab 17" />
+                <TabItem Header="Tab 18" />
+                <TabItem Header="Tab 19" />
+            </TabControl>
+            
+                
             <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <dragablz:TabablzControl 
+                <dragablz:TabablzControl
+                    ItemsSource="{Binding TabItems, Mode=OneWay}"
+                    NewItemFactory="{x:Static local:MainTabViewModel.Factory}"
                     ShowDefaultAddButton="True"
                     ShowDefaultCloseButton="True"
-                    NewItemFactory="{x:Static local:MainTabViewModel.Factory}"
-                    ItemsSource="{Binding TabItems, Mode=OneWay}" 
                     SelectedIndex="0">
    
                     <TabControl.ContentTemplate>
@@ -99,14 +120,21 @@
                             <local:MainTab />
                         </DataTemplate>
                     </TabControl.ContentTemplate>
+                    
+                    <dragablz:TabablzControl.HeaderSuffixContent>
+                        <Grid>
+                            <Button HorizontalAlignment="Right"
+                                    Command="{Binding OpenSettingPageCommand}">
+                                <materialDesign:PackIcon Kind="Settings" />
+                            </Button>
+                        </Grid>
+                    </dragablz:TabablzControl.HeaderSuffixContent>
+                    
                 </dragablz:TabablzControl>
 
-                <Button Grid.Column="1"
-                        Command="{Binding OpenSettingPageCommand}">
-                    <materialDesign:PackIcon Kind="Settings" />
-                </Button>
-
             </Grid>
+                
+            </StackPanel>
         </materialDesign:DrawerHost>
     </materialDesign:DialogHost>
 </Window>

@@ -16,12 +16,8 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
                 
                 <!-- Include the Dragablz Material Design style -->
-                <ResourceDictionary Source="CustomDragblz/MaterialDesign.xaml"/>                
+                <ResourceDictionary Source="CustomDragablz/CustomDragablzMaterialDesign.xaml" />                
             </ResourceDictionary.MergedDictionaries>
-            
-            <!-- tell Dragablz tab control to use the Material Design theme -->
-            <Style TargetType="{x:Type dragablz:TabablzControl}" BasedOn="{StaticResource MaterialDesignTabablzControlStyle}" />
-
         </ResourceDictionary>
     </Application.Resources>
 </Application>
