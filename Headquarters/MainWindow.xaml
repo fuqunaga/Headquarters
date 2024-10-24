@@ -111,7 +111,6 @@
                 <dragablz:TabablzControl
                     ItemsSource="{Binding TabItems, Mode=OneWay}"
                     NewItemFactory="{x:Static local:MainTabViewModel.Factory}"
-                    ShowDefaultAddButton="True"
                     ShowDefaultCloseButton="True"
                     SelectedIndex="0">
    
@@ -122,9 +121,24 @@
                     </TabControl.ContentTemplate>
                     
                     <dragablz:TabablzControl.HeaderSuffixContent>
-                        <Grid>
+                        <Grid MinWidth="64">
+                            <Button HorizontalAlignment="Left"
+                                    Command="{x:Static dragablz:TabablzControl.AddItemCommand}"
+                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                    Width="24"
+                                    Height="24">
+                                <materialDesign:PackIcon
+                                    Kind="Plus"
+                                    Width="18"
+                                    Height="18" />
+                            </Button>
+                            
                             <Button HorizontalAlignment="Right"
-                                    Command="{Binding OpenSettingPageCommand}">
+                                    Command="{Binding OpenSettingPageCommand}"
+                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                    Width="32"
+                                    Height="32"
+                            >
                                 <materialDesign:PackIcon Kind="Settings" />
                             </Button>
                         </Grid>
