@@ -14,8 +14,25 @@
     <Window.Resources>
         <ResourceDictionary>
             <DataTemplate DataType="{x:Type local:MainTabViewModel}">
-                <ContentControl Content="{Binding Header}" Margin="4 4 4 4" FontSize="14" />
+                <!-- <ContentControl Content="{Binding Header}" Margin="4 4 4 4" FontSize="14" /> -->
+                <local:MainTabHeader />
             </DataTemplate>
+            
+            <ContextMenu x:Key="TabItemContextMenu"
+                         DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                         d:DataContext="{d:DesignInstance local:MainTabViewModel}">
+                <MenuItem Header="New tab to the right" Command="{Binding NewTabCommand}" />
+                <MenuItem Header="Duplicate" />
+                <Separator />
+                <MenuItem Header="Lock" />
+                <Separator />
+                <MenuItem Header="Close" Command="{x:Static dragablz:TabablzControl.CloseItemCommand}"/>
+            </ContextMenu>
+
+            <Style x:Key="TabItemStyle"  TargetType="{x:Type dragablz:DragablzItem}" BasedOn="{StaticResource CustomMaterialDesignDragableTabItemStyle}">
+                <Setter Property="ContextMenu" Value="{StaticResource TabItemContextMenu}" />
+            </Style>
+
         </ResourceDictionary>
     </Window.Resources>
     
@@ -81,8 +98,10 @@
                 <local:SettingPage DataContext="{Binding SettingPageViewModel}"/>
             </materialDesign:DrawerHost.TopDrawerContent>
 
-            <StackPanel>
+            <!--<StackPanel>
                 
+                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
                 <TabControl>
                 <TabItem Header="Tab 0" />
                 <TabItem Header="Tab 1" />
@@ -105,13 +124,14 @@
                 <TabItem Header="Tab 18" />
                 <TabItem Header="Tab 19" />
             </TabControl>
+                </ScrollViewer>-->
             
                 
             <Grid>
                 <dragablz:TabablzControl
                     ItemsSource="{Binding TabItems, Mode=OneWay}"
                     NewItemFactory="{x:Static local:MainTabViewModel.Factory}"
-                    ShowDefaultCloseButton="True"
+                    ItemContainerStyle="{StaticResource  TabItemStyle}"
                     SelectedIndex="0">
    
                     <TabControl.ContentTemplate>
@@ -148,7 +168,7 @@
 
             </Grid>
                 
-            </StackPanel>
+            <!-- </StackPanel> -->
         </materialDesign:DrawerHost>
     </materialDesign:DialogHost>
 </Window>

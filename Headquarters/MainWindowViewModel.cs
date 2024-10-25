@@ -3,13 +3,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
+using Dragablz;
 
 namespace Headquarters;
 
 public class MainWindowViewModel : ViewModelBase
 {
     private bool _isSettingPageOpen;
-    
     
     public SettingPageViewModel SettingPageViewModel { get; } = new();
     public ObservableCollection<MainTabViewModel> TabItems { get;  } = [];
@@ -27,6 +27,8 @@ public class MainWindowViewModel : ViewModelBase
         OpenSettingPageCommand = new DelegateCommand(_ => IsSettingPageOpen = true);
         SettingPageViewModel.closeRequested += () => IsSettingPageOpen = false;
         LoadSettings();
+        
+        MainTabViewModel.newTabEvent += NewTab;
     }
 
     public void OnClosing(object? sender, CancelEventArgs e)
@@ -58,5 +60,10 @@ public class MainWindowViewModel : ViewModelBase
         };
             
         SettingManager.Instance.Save(".\\setting.json", settingData);
+    }
+    
+    private void NewTab(MainTabViewModel sender)
+    {
+        TabablzControl.AddItem(new MainTabViewModel(), sender, AddLocationHint.After);
     }
 }
