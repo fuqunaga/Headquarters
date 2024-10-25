@@ -6,6 +6,7 @@ namespace Headquarters;
 public class MainTabViewModel : ViewModelBase
 {
     public static event Action<MainTabViewModel>? newTabEvent;
+    public static event Action<MainTabViewModel>? duplicateTabEvent;
     
     public static Func<MainTabViewModel> Factory => () => new MainTabViewModel();
 
@@ -14,6 +15,7 @@ public class MainTabViewModel : ViewModelBase
     private bool _isLocked;
 
     public ICommand NewTabCommand { get; set; }
+    public ICommand DuplicateTabCommand { get; set; }
 
     public string Header
     {
@@ -37,6 +39,7 @@ public class MainTabViewModel : ViewModelBase
         IsLocked = data.IsLocked;
         
         NewTabCommand = new DelegateCommand(_ => newTabEvent?.Invoke(this));
+        DuplicateTabCommand = new DelegateCommand(_ => duplicateTabEvent?.Invoke(this));
         
         IpListViewModel.DataGridViewModel.Items = data.CreateIpListDataTable();
 

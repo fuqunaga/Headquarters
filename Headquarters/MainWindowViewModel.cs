@@ -32,6 +32,7 @@ public class MainWindowViewModel : ViewModelBase
         LoadSettings();
         
         MainTabViewModel.newTabEvent += NewTab;
+        MainTabViewModel.duplicateTabEvent += DuplicateTab;
     }
 
     public void OnClosing(object? sender, CancelEventArgs e)
@@ -67,6 +68,16 @@ public class MainWindowViewModel : ViewModelBase
     
     private static void NewTab(MainTabViewModel sender)
     {
-        TabablzControl.AddItem(new MainTabViewModel(), sender, AddLocationHint.After);
+        var newItem = new MainTabViewModel();
+        TabablzControl.AddItem(newItem, sender, AddLocationHint.After);
+        TabablzControl.SelectItem(newItem);
+    }
+
+    private static void DuplicateTab(MainTabViewModel sender)
+    {
+        var data = sender.CreateMainTabData();
+        var newItem = new MainTabViewModel(data);
+        TabablzControl.AddItem(newItem, sender, AddLocationHint.After);
+        TabablzControl.SelectItem(newItem);
     }
 }
