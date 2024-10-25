@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Windows.Input;
+using Dragablz;
 
 namespace Headquarters;
 
 public class MainTabViewModel : ViewModelBase
 {
-    public static event Action<MainTabViewModel>? newTabEvent;
-    public static event Action<MainTabViewModel>? duplicateTabEvent;
-    
     public static Func<MainTabViewModel> Factory => () => new MainTabViewModel();
 
     private readonly TabParameterSet _tabParameterSet;
@@ -17,6 +15,8 @@ public class MainTabViewModel : ViewModelBase
     public ICommand NewTabCommand { get; }
     public ICommand DuplicateTabCommand { get; }
     public ICommand ToggleLockCommand { get; private set; }
+    
+    public ICommand CloseTabCommand { get; private set; }
 
     public string Header
     {
@@ -39,9 +39,10 @@ public class MainTabViewModel : ViewModelBase
         _header = data.TabHeader;
         IsLocked = data.IsLocked;
         
-        NewTabCommand = new DelegateCommand(_ => newTabEvent?.Invoke(this));
-        DuplicateTabCommand = new DelegateCommand(_ => duplicateTabEvent?.Invoke(this));
+        NewTabCommand = new DelegateCommand(_ => NewTab(this));
+        DuplicateTabCommand = new DelegateCommand(_ => DuplicateTab(this));
         ToggleLockCommand = new DelegateCommand(_ => IsLocked = !IsLocked);
+        CloseTabCommand = new DelegateCommand(_ => TabablzControl.CloseItem(this), _ => !IsLocked);
         
         IpListViewModel.DataGridViewModel.Items = data.CreateIpListDataTable();
 
@@ -68,5 +69,21 @@ public class MainTabViewModel : ViewModelBase
         {
             TabHeader = Header
         };
+    }
+    
+        
+    private static void NewTab(MainTabViewModel sender)
+    {
+        var newItem = new MainTabViewModel();
+        TabablzControl.AddItem(newItem, sender, AddLocationHint.After);
+        TabablzControl.SelectItem(newItem);
+    }
+
+    private static void DuplicateTab(MainTabViewModel sender)
+    {
+        var data = sender.CreateMainTabData();
+        var newItem = new MainTabViewModel(data);
+        TabablzControl.AddItem(newItem, sender, AddLocationHint.After);
+        TabablzControl.SelectItem(newItem);
     }
 }

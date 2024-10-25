@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
-using Dragablz;
 
 namespace Headquarters;
 
@@ -30,9 +29,6 @@ public class MainWindowViewModel : ViewModelBase
         OpenSettingPageCommand = new DelegateCommand(_ => IsSettingPageOpen = true);
         SettingPageViewModel.closeRequested += () => IsSettingPageOpen = false;
         LoadSettings();
-        
-        MainTabViewModel.newTabEvent += NewTab;
-        MainTabViewModel.duplicateTabEvent += DuplicateTab;
     }
 
     public void OnClosing(object? sender, CancelEventArgs e)
@@ -64,20 +60,5 @@ public class MainWindowViewModel : ViewModelBase
         };
             
         SettingManager.Instance.Save(".\\setting.json", settingData);
-    }
-    
-    private static void NewTab(MainTabViewModel sender)
-    {
-        var newItem = new MainTabViewModel();
-        TabablzControl.AddItem(newItem, sender, AddLocationHint.After);
-        TabablzControl.SelectItem(newItem);
-    }
-
-    private static void DuplicateTab(MainTabViewModel sender)
-    {
-        var data = sender.CreateMainTabData();
-        var newItem = new MainTabViewModel(data);
-        TabablzControl.AddItem(newItem, sender, AddLocationHint.After);
-        TabablzControl.SelectItem(newItem);
     }
 }

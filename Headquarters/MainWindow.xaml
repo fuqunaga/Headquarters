@@ -38,7 +38,7 @@
                 <Separator />
                 <MenuItem Command="{Binding ToggleLockCommand}" Style="{StaticResource LockMenuItemStyle}" />
                 <Separator />
-                <MenuItem Header="Close" Command="{x:Static dragablz:TabablzControl.CloseItemCommand}"/>
+                <MenuItem Header="Close" Command="{Binding CloseTabCommand}"/>
             </ContextMenu>
 
             <Style x:Key="TabItemStyle"  TargetType="{x:Type dragablz:DragablzItem}" BasedOn="{StaticResource CustomMaterialDesignDragableTabItemStyle}">
