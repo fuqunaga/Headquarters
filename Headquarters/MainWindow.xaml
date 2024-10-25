@@ -128,7 +128,7 @@
             
                 
             <Grid>
-                <dragablz:TabablzControl
+                <dragablz:TabablzControl x:Name="MainTabControl"
                     ItemsSource="{Binding TabItems, Mode=OneWay}"
                     NewItemFactory="{x:Static local:MainTabViewModel.Factory}"
                     ItemContainerStyle="{StaticResource  TabItemStyle}"
