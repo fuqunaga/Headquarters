@@ -29,6 +29,7 @@
         <materialDesign:PackIcon
             Visibility="{Binding IsLocked, Converter={StaticResource BoolToVisibilityConverter}}"
             Kind="Lock"
+            Margin="8, 0"
             Width="16"
             Height="16" />
 

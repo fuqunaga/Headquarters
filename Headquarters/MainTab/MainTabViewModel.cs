@@ -14,8 +14,9 @@ public class MainTabViewModel : ViewModelBase
     private string _header;
     private bool _isLocked;
 
-    public ICommand NewTabCommand { get; set; }
-    public ICommand DuplicateTabCommand { get; set; }
+    public ICommand NewTabCommand { get; }
+    public ICommand DuplicateTabCommand { get; }
+    public ICommand ToggleLockCommand { get; private set; }
 
     public string Header
     {
@@ -40,6 +41,7 @@ public class MainTabViewModel : ViewModelBase
         
         NewTabCommand = new DelegateCommand(_ => newTabEvent?.Invoke(this));
         DuplicateTabCommand = new DelegateCommand(_ => duplicateTabEvent?.Invoke(this));
+        ToggleLockCommand = new DelegateCommand(_ => IsLocked = !IsLocked);
         
         IpListViewModel.DataGridViewModel.Items = data.CreateIpListDataTable();
 
