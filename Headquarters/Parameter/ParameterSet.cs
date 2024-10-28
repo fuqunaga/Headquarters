@@ -3,11 +3,15 @@
 namespace Headquarters;
 
 /// <summary>
-/// １つのスクリプトファイルに対応するパラメータ群
-/// IPアドレスごとに別のパラメータを持つ場合はIpParameterSetでアクセスする
+/// Dictionaryベースのパラメータ群
+/// 
+/// SettingsのGlobalパラメータと、
+/// １つのスクリプトファイルに対応するパラメータを表す際に使用している
 /// </summary>
-public class ScriptParameterSet(Dictionary<string, string> parameters)
+public class ParameterSet(Dictionary<string, string> parameters)
 {
+    public Dictionary<string, string> Parameters => parameters;
+    
     public string Get(string name) => parameters.GetValueOrDefault(name, "");
     public bool Set(string name, string value)
     {

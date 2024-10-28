@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="Headquarters.SettingPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:Headquarters"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:SettingPageViewModel}"
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <StackPanel>
+        <Grid>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <materialDesign:PackIcon Kind="Settings" Width="24" Height="24" />
+                <TextBlock Text="Settings" FontSize="22" />
+            </StackPanel>
+
+            <Button HorizontalAlignment="Right"
+                    Command="{Binding CloseCommand}"
+                    Style="{StaticResource MaterialDesignIconButton}">
+
+                <materialDesign:PackIcon Kind="WindowClose" />
+            </Button>
+        </Grid>
+
+        <Rectangle Height="1"
+                   Margin="0,24,0,0"
+                   Fill="{DynamicResource MaterialDesignDivider}" />
+
+        <ListBox ItemsSource="{Binding ParameterSetViewModels}"
+                 materialDesign:ListBoxItemAssist.ShowSelection="False">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type local:ParameterSetViewModel}">
+                    <local:ParameterSetView />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        
+    </StackPanel>
+</UserControl>

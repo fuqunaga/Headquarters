@@ -10,7 +10,7 @@ public class TabParameterSet(Dictionary<string, Dictionary<string, string>> scri
 {
     public Dictionary<string, Dictionary<string, string>> ScriptParameterSetTable => scriptParameterSetTable;
     
-    public ScriptParameterSet GetScriptParameterSet(string scriptName)
+    public ParameterSet GetScriptParameterSet(string scriptName)
     {
         if (!scriptParameterSetTable.TryGetValue(scriptName, out var scriptParameterDictionary))
         {
@@ -18,6 +18,6 @@ public class TabParameterSet(Dictionary<string, Dictionary<string, string>> scri
             scriptParameterSetTable[scriptName] = scriptParameterDictionary;
         }
 
-        return new ScriptParameterSet(scriptParameterDictionary);
+        return new ParameterSet(scriptParameterDictionary);
     }
 }

@@ -65,11 +65,11 @@ public class ScriptFunction
     {
         if (IsSessionRequired)
         {
-            param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserName, out var userNameObject);
-            param.parameters.TryGetValue(ParameterManager.SpecialParamName.UserPassword, out var userPasswordObject);
+            param.parameters.TryGetValue(GlobalParameter.UserNameParameterName, out var userNameObject);
+            param.parameters.TryGetValue(GlobalParameter.UserPasswordParameterName, out var userPasswordObject);
 
-            var userName = userNameObject as string ?? "";
-            var userPassword = userPasswordObject as string ?? "";
+            var userName = userNameObject as string ?? GlobalParameter.UserName;
+            var userPassword = userPasswordObject as string ?? GlobalParameter.UserPassword;
 
             var sessionResult = await SessionManager.CreateSession(ipAddress, userName, userPassword, param);
             var session = sessionResult.objs?.FirstOrDefault()?.BaseObject;
