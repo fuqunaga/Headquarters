@@ -21,12 +21,11 @@
 
             <!-- Select script -->
             <StackPanel>
-                <materialDesign:ColorZone Mode="PrimaryMid" Padding="16"
-                                          materialDesign:ElevationAssist.Elevation="Dp2">
-                    <DockPanel>
+                <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="ScriptText" />
                         <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">Scripts</TextBlock>
-                    </DockPanel>
+                    </StackPanel>
                 </materialDesign:ColorZone>
 
                 <ScrollViewer Margin="8,8,8,8"

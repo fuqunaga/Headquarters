@@ -16,7 +16,7 @@
         </Grid.RowDefinitions>
         
         <materialDesign:ColorZone Grid.Row="0" 
-            Mode="PrimaryMid" Padding="16,0" VerticalAlignment="Stretch">
+            Mode="PrimaryDark" Padding="16,0" VerticalAlignment="Stretch">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />
