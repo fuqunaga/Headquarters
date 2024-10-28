@@ -14,6 +14,9 @@ public class ScriptFunction
     public IReadOnlyList<string> ParameterNames { get; }
 
     private bool IsSessionRequired => ParameterNames.Contains(Script.ReservedParameterName.Session);
+    private bool IsIpRequired => ParameterNames.Contains(Script.ReservedParameterName.Ip);
+    private bool IsCredentialRequired => ParameterNames.Contains(Script.ReservedParameterName.Credential);
+    
     
     public ScriptFunction(string scriptName, ScriptBlockAst scriptBlockAst)
     {
@@ -63,25 +66,22 @@ public class ScriptFunction
 
     public async Task<PowerShellRunner.Result> Run(string ipAddress, PowerShellRunner.InvokeParameter param)
     {
+        var needCredential = IsCredentialRequired || IsSessionRequired;
+        if (needCredential)
+        {
+            param.parameters[Script.ReservedParameterName.Credential] = SessionManager.CreateCredential(param.parameters);
+        }
+        
         if (IsSessionRequired)
         {
-            param.parameters.TryGetValue(GlobalParameter.UserNameParameterName, out var userNameObject);
-            param.parameters.TryGetValue(GlobalParameter.UserPasswordParameterName, out var userPasswordObject);
-
-            var userName = userNameObject as string ?? GlobalParameter.UserName;
-            var userPassword = userPasswordObject as string ?? GlobalParameter.UserPassword;
-
-            var sessionResult = await SessionManager.CreateSession(ipAddress, userName, userPassword, param);
+            var sessionResult = await SessionManager.CreateSession(ipAddress, param);
             var session = sessionResult.objs?.FirstOrDefault()?.BaseObject;
             if (session == null)
             {
                 return sessionResult;
             }
                 
-            param.parameters = new Dictionary<string, object>(param.parameters)
-            {
-                { Script.ReservedParameterName.Session, session }
-            };
+            param.parameters[Script.ReservedParameterName.Session] = session;
         }
         
         return await Run(param);

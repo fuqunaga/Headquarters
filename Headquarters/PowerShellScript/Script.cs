@@ -29,7 +29,16 @@ namespace Headquarters
         public static class ReservedParameterName
         {
             public const string Session = "session";
+            public const string Ip = "ip";
+            public const string Credential = "credential";
         }
+        
+        public static readonly IReadOnlyList<string> ReservedParameterNames =
+        [
+            ReservedParameterName.Session,
+            ReservedParameterName.Ip,
+            ReservedParameterName.Credential
+        ];
         
         #endregion
 
@@ -39,7 +48,8 @@ namespace Headquarters
         
         public string Name { get; } = Path.GetFileNameWithoutExtension(filepath);
         
-        public IEnumerable<string> ParameterNames => _scriptFunctionDictionary.Values.SelectMany(f => f.ParameterNames).Distinct();
+        
+        public IEnumerable<string> EditableParameterNames => _scriptFunctionDictionary.Values.SelectMany(f => f.ParameterNames).Distinct().Except(ReservedParameterNames);
 
         public bool HasPreProcess => _scriptFunctionDictionary.ContainsKey(PreProcessFunctionName);
         public bool HasPostProcess => _scriptFunctionDictionary.ContainsKey(PostProcessFunctionName);

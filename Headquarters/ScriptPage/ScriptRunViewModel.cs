@@ -39,7 +39,7 @@ namespace Headquarters
         
         
         private RunButtonMode _runButtonMode = RunButtonMode.Run;
-        private ObservableCollection<ScriptParameterViewModel> _parameters = [];
+        private ObservableCollection<ScriptParameterViewModel> _parameterViewModels = [];
         private string _resultText = "";
 
 
@@ -58,8 +58,8 @@ namespace Headquarters
 
         public ObservableCollection<ScriptParameterViewModel> Parameters
         {
-            get => _parameters;
-            private set => SetProperty(ref _parameters, value);
+            get => _parameterViewModels;
+            private set => SetProperty(ref _parameterViewModels, value);
         }
         
         public string ResultText
@@ -105,7 +105,7 @@ namespace Headquarters
         {
             _script.Load();
             Parameters.Clear();
-            foreach(var parameterName in _script.ParameterNames)
+            foreach(var parameterName in _script.EditableParameterNames)
             {
                 Parameters.Add(new ScriptParameterViewModel(parameterName, _ipListViewModel, scriptParameterSet));
             }
@@ -153,8 +153,11 @@ namespace Headquarters
         {
             var ipAndParameterList = ipParamsList.SelectMany(ipParams =>
                 {
-                    var paramDictionary = Parameters
-                        .ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name) ?? p.Value)
+                    var ipParamsTable = Parameters
+                        .ToDictionary(
+                            p => p.Name, 
+                            object (p) => ipParams.Get(p.Name) ?? p.Value
+                        )
                         .AsReadOnly();
 
                     var ipStringList = IPAddressRange.TryParse(ipParams.IpString, out var range)
@@ -162,7 +165,24 @@ namespace Headquarters
                         : [ipParams.IpString];
 
 
-                    return ipStringList.Select(ipString => (ipString, paramDictionary));
+                    return ipStringList.Select(ipString =>
+                    {
+                        var parameters = new Dictionary<string, object>(ipParamsTable, StringComparer.OrdinalIgnoreCase)
+                        {
+                            { Script.ReservedParameterName.Ip, ipString }
+                        };
+                        
+                        if ( !parameters.ContainsKey(GlobalParameter.UserNameParameterName))
+                        {
+                            parameters[GlobalParameter.UserNameParameterName] = GlobalParameter.UserName;
+                        }
+                        if ( !parameters.ContainsKey(GlobalParameter.UserPasswordParameterName))
+                        {
+                            parameters[GlobalParameter.UserPasswordParameterName] = GlobalParameter.UserPassword;
+                        }
+                        
+                        return (ipString, parameters);
+                    });
                 })
                 .ToList();
 
@@ -245,7 +265,7 @@ namespace Headquarters
             }
         }
 
-        private async Task RunIpAddressProcesses(List<(string ipString, ReadOnlyDictionary<string, object> parameters)> ipAndParameterList, string resultTextFixed, CancellationToken cancelToken)
+        private async Task RunIpAddressProcesses(List<(string ipString, Dictionary<string, object> parameters)> ipAndParameterList, string resultTextFixed, CancellationToken cancelToken)
         {
             _ipAddressProcessResults.Clear();
 
@@ -292,7 +312,7 @@ namespace Headquarters
             }
         }
         
-        private async Task RunProcess(string ip, IReadOnlyDictionary<string, object> parameters,
+        private async Task RunProcess(string ip, Dictionary<string, object> parameters,
              ScriptResult scriptResult, CancellationToken cancelToken)
         {
             var param = new PowerShellRunner.InvokeParameter

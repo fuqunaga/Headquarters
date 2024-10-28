@@ -12,7 +12,7 @@ namespace Headquarters
     {
         public class InvokeParameter
         {
-            public required IReadOnlyDictionary<string, object> parameters;
+            public required Dictionary<string, object> parameters;
             public CancellationToken cancellationToken;
             public required EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged;
         }
