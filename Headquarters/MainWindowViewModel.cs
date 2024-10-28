@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -10,6 +11,7 @@ public class MainWindowViewModel : ViewModelBase
 {
     private bool _isSettingPageOpen;
     
+    public Func<IEnumerable<MainTabViewModel>>? GetOrderedTabsFunc { get; set; }
     
     public SettingPageViewModel SettingPageViewModel { get; } = new();
     public ObservableCollection<MainTabViewModel> TabItems { get;  } = [];
@@ -54,7 +56,7 @@ public class MainWindowViewModel : ViewModelBase
         var settingData = new SettingManager.SettingData()
         {
             GlobalParameterSet = GlobalParameter.ParameterSet?.Parameters ?? new Dictionary<string, string>(),
-            MainTabDataList = TabItems.Select(vm => vm.CreateMainTabData()).ToList()
+            MainTabDataList = GetOrderedTabsFunc?.Invoke().Select(vm => vm.CreateMainTabData()).ToList() ?? []
         };
             
         SettingManager.Instance.Save(".\\setting.json", settingData);

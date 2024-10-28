@@ -8,8 +8,12 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:ScriptPageViewModel}"
              d:DesignHeight="500">
+    
+    <UserControl.Resources>
+        <local:EnumToIntConverter x:Key="EnumToIntConverter" />
+    </UserControl.Resources>
 
-    <materialDesign:Transitioner SelectedIndex="{Binding PageIndex}" Panel.ZIndex="-10">
+    <materialDesign:Transitioner SelectedIndex="{Binding Path=CurrentPage, Converter={StaticResource EnumToIntConverter}}">
         <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect SlideInFromLeft}">
             <materialDesign:TransitionerSlide.ForwardWipe>
                 <local:CustomFadeWipe />

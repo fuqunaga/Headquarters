@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 
 namespace Headquarters
 {
@@ -13,6 +14,9 @@ namespace Headquarters
             var viewModel = new MainWindowViewModel();
             DataContext = viewModel;
             Closing += viewModel.OnClosing;
+
+            viewModel.GetOrderedTabsFunc = () => MainTabControl.GetOrderedHeaders()
+                .Select(item => item.DataContext).OfType<MainTabViewModel>();
         }
     }
 }

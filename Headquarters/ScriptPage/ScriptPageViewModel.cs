@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 
@@ -8,18 +9,24 @@ namespace Headquarters;
 
 public class ScriptPageViewModel : ViewModelBase
 {
-    private int _pageIndex;
+    public enum Page
+    {
+        SelectScript,
+        RunScript
+    }
+    
+    private Page _currentPage;
     private IpListViewModel? _ipListViewModel;
     private TabParameterSet? _tabParameterSet;
     private readonly Dictionary<Script, ScriptRunViewModel> _scriptRunViewModelDictionary = new();
     private ScriptRunViewModel _currentScriptRunViewModel = new();
 
-    public int PageIndex
+    public Page CurrentPage
     {
-        get => _pageIndex;
-        set => SetProperty(ref _pageIndex, value);
+        get => _currentPage;
+        set => SetProperty(ref _currentPage, value);
     }
-    
+  
     public ObservableCollection<ScriptButtonViewModel> Items { get; }
 
     public ScriptRunViewModel CurrentScriptRunViewModel
@@ -84,6 +91,6 @@ public class ScriptPageViewModel : ViewModelBase
         }
         
         CurrentScriptRunViewModel = scriptRunViewModel;
-        PageIndex = 1;
+        CurrentPage = Page.RunScript;
     }
 }

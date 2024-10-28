@@ -7,6 +7,10 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:MainTabViewModel}"
              d:DesignHeight="300">
+    <UserControl.Resources>
+        <local:InverseBoolConverter x:Key="InverseBoolConverter" />
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -18,7 +22,8 @@
         </Grid.ColumnDefinitions>
 
         <local:IpList Grid.Column="0"
-                      DataContext="{Binding IpListViewModel}" />
+                      DataContext="{Binding IpListViewModel}"
+                      IsEnabled="{Binding DataContext.IsLocked, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainTab}}, Converter={StaticResource InverseBoolConverter}}" />
 
         <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
 

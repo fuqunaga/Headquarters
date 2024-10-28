@@ -4,11 +4,49 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:dragablz="clr-namespace:Dragablz;assembly=Dragablz"
         xmlns:local="clr-namespace:Headquarters"
         Style="{StaticResource MaterialDesignWindow}"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
         Title="Headquarters" MinHeight="600">
+    
+    <Window.Resources>
+        <ResourceDictionary>
+            <DataTemplate DataType="{x:Type local:MainTabViewModel}">
+                <!-- <ContentControl Content="{Binding Header}" Margin="4 4 4 4" FontSize="14" /> -->
+                <local:MainTabHeader />
+            </DataTemplate>
+            
+            <Style x:Key="LockMenuItemStyle" TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}" 
+                   d:DataContext="{d:DesignInstance local:MainTabViewModel}">
+                <Setter Property="Header" Value="Lock" />
+                <Setter Property="Icon" Value="{materialDesign:PackIcon Kind=Lock}" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                        <Setter Property="Header" Value="Unlock"/>
+                        <Setter Property="Icon" Value="{materialDesign:PackIcon Kind=LockOpenVariant}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            
+            <ContextMenu x:Key="TabItemContextMenu"
+                         DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                         d:DataContext="{d:DesignInstance local:MainTabViewModel}">
+                <MenuItem Header="New tab to the right" Command="{Binding NewTabCommand}" />
+                <MenuItem Header="Duplicate" Command="{Binding DuplicateTabCommand}" />
+                <Separator />
+                <MenuItem Command="{Binding ToggleLockCommand}" Style="{StaticResource LockMenuItemStyle}" />
+                <Separator />
+                <MenuItem Header="Close" Command="{Binding CloseTabCommand}"/>
+            </ContextMenu>
+
+            <Style x:Key="TabItemStyle"  TargetType="{x:Type dragablz:DragablzItem}" BasedOn="{StaticResource CustomMaterialDesignDragableTabItemStyle}">
+                <Setter Property="ContextMenu" Value="{StaticResource TabItemContextMenu}" />
+            </Style>
+
+        </ResourceDictionary>
+    </Window.Resources>
     
     <!-- <Window.Resources> -->
     <!--     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}"> -->
@@ -72,33 +110,77 @@
                 <local:SettingPage DataContext="{Binding SettingPageViewModel}"/>
             </materialDesign:DrawerHost.TopDrawerContent>
 
-
+            <!--<StackPanel>
+                
+                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
+                <TabControl>
+                <TabItem Header="Tab 0" />
+                <TabItem Header="Tab 1" />
+                <TabItem Header="Tab 2" />
+                <TabItem Header="Tab 3" />
+                <TabItem Header="Tab 4" />
+                <TabItem Header="Tab 5" />
+                <TabItem Header="Tab 6" />
+                <TabItem Header="Tab 7" />
+                <TabItem Header="Tab 8" />
+                <TabItem Header="Tab 9" />
+                <TabItem Header="Tab 10" />
+                <TabItem Header="Tab 11" />
+                <TabItem Header="Tab 12" />
+                <TabItem Header="Tab 13" />
+                <TabItem Header="Tab 14" />
+                <TabItem Header="Tab 15" />
+                <TabItem Header="Tab 16" />
+                <TabItem Header="Tab 17" />
+                <TabItem Header="Tab 18" />
+                <TabItem Header="Tab 19" />
+            </TabControl>
+                </ScrollViewer>-->
+            
+                
             <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <TabControl ItemsSource="{Binding TabItems, Mode=OneWay}" SelectedIndex="0">
-                    <TabControl.Resources>
-                        <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource MaterialDesignTabItem}">
-                            <Setter Property="Header" Value="{Binding Header}" />
-                        </Style>
-                    </TabControl.Resources>
-
+                <dragablz:TabablzControl x:Name="MainTabControl"
+                    ItemsSource="{Binding TabItems, Mode=OneWay}"
+                    NewItemFactory="{x:Static local:MainTabViewModel.Factory}"
+                    ItemContainerStyle="{StaticResource  TabItemStyle}"
+                    SelectedIndex="0">
+   
                     <TabControl.ContentTemplate>
                         <DataTemplate>
                             <local:MainTab />
                         </DataTemplate>
                     </TabControl.ContentTemplate>
-                </TabControl>
-
-                <Button Grid.Column="1"
-                        Command="{Binding OpenSettingPageCommand}">
-                    <materialDesign:PackIcon Kind="Settings" />
-                </Button>
+                    
+                    <dragablz:TabablzControl.HeaderSuffixContent>
+                        <Grid MinWidth="64">
+                            <Button HorizontalAlignment="Left"
+                                    Command="{x:Static dragablz:TabablzControl.AddItemCommand}"
+                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                    Width="24"
+                                    Height="24">
+                                <materialDesign:PackIcon
+                                    Kind="Plus"
+                                    Width="18"
+                                    Height="18" />
+                            </Button>
+                            
+                            <Button HorizontalAlignment="Right"
+                                    Command="{Binding OpenSettingPageCommand}"
+                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                    Width="32"
+                                    Height="32"
+                            >
+                                <materialDesign:PackIcon Kind="Settings" />
+                            </Button>
+                        </Grid>
+                    </dragablz:TabablzControl.HeaderSuffixContent>
+                    
+                </dragablz:TabablzControl>
 
             </Grid>
+                
+            <!-- </StackPanel> -->
         </materialDesign:DrawerHost>
     </materialDesign:DialogHost>
 </Window>
