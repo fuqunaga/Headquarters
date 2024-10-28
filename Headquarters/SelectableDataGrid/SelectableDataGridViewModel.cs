@@ -1,89 +1,114 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
-using System.Windows.Controls;
-using System.Windows.Input;
 
-namespace Headquarters
+namespace Headquarters;
+
+public class SelectableDataGridViewModel : ViewModelBase
 {
-    public class SelectableDataGridViewModel : ViewModelBase
+    private static DataTable? _tempDataTableForRefresh;
+        
+    public const string SelectedPropertyName = "IsSelected";
+        
+    private DataTable _items = new();
+
+    public DataTable Items
     {
-        private static DataTable? _tempDataTableForRefresh;
-        
-        public const string SelectedPropertyName = "IsSelected";
-        
-        private DataTable _items;
-
-        public DataTable Items
+        get => _items;
+        set
         {
-            get => _items;
-            set => SetProperty(ref _items, value);
-        }
+            if (EqualityComparer<DataTable>.Default.Equals(_items, value))
+            {
+                return;
+            }
 
-
-        public SelectableDataGridViewModel()
-        {
-            _items = new DataTable();
-            _items.Columns.Add(SelectedPropertyName, typeof(bool));
-            
-
-            // if (Items.Columns[IPParams.ipPropertyName] == null)
-            // {
-            //     Items.Columns.Add(IPParams.ipPropertyName, typeof(string));
-            // }
-            
+            _items = value;
+            VerifyAndSettingSelectedColumnIfNeed();
             AddItemsCallback();
-        }
-        
-        protected void AddItemsCallback()
-        {
-            Items.ColumnChanged += (_, e) =>
-            {
-                if (e.Column?.ColumnName == SelectedPropertyName)
-                {
-                    OnPropertyChanged(nameof(IsAllItemSelected));
-                }
-            };
-
-            Items.RowChanged += (_, e) =>
-            {
-                if (e.Action == DataRowAction.Add)
-                {
-                    e.Row[SelectedPropertyName] = true;
-                    Debug.WriteLine(e);
-                }
-            };
-        }
-
-        public bool? IsAllItemSelected
-        {
-            get
-            {
-                var list = Items.AsEnumerable().Select(row => row[SelectedPropertyName]).Cast<bool>();
-
-                var uniqList = list.Distinct().ToList();
-                return (uniqList.Count == 1) ? uniqList.Single() : null;
-            }
-            set
-            {
-                if (!value.HasValue) return;
-                
-                foreach (var row in Items.AsEnumerable())
-                {
-                    row[SelectedPropertyName] = value;
-                }
-                OnPropertyChanged();
-            }
-        }
-        
-        // https://stackoverflow.com/questions/36215919/datatable-is-not-updating-datagrid-after-clearing-and-refilling-data-mvvm
-        public void RefreshDataGrid()
-        {
-            _tempDataTableForRefresh ??= new DataTable();
             
-            var temp = Items;
-            Items = _tempDataTableForRefresh;
-            Items = temp;
+            OnPropertyChanged();
         }
+    }
+
+    private void VerifyAndSettingSelectedColumnIfNeed()
+    {
+        var selectedColumn = Items.Columns[SelectedPropertyName];
+        if (selectedColumn == null)
+        {
+            selectedColumn = Items.Columns.Add(SelectedPropertyName, typeof(bool));
+            selectedColumn.SetOrdinal(0);
+        }
+
+        foreach (DataRow row in Items.Rows)
+        {
+            if (row[SelectedPropertyName] is not bool)
+            {
+                row[SelectedPropertyName] = false;
+            }
+        }
+                
+        selectedColumn.DefaultValue = false;
+    }
+    
+
+    protected void AddItemsCallback()
+    {
+        Items.ColumnChanged += (_, e) =>
+        {
+            if (e.Column?.ColumnName == SelectedPropertyName)
+            {
+                OnPropertyChanged(nameof(IsAllItemSelected));
+            }
+        };
+        
+        Items.RowDeleted += (_, _) =>
+        {
+            OnPropertyChanged(nameof(IsAllItemSelected));
+        };
+        
+        Items.RowChanged += (_, e) =>
+        {
+            if (e.Action is DataRowAction.Add)
+            {
+                OnPropertyChanged(nameof(IsAllItemSelected));
+            }
+        };
+    }
+
+    public bool? IsAllItemSelected
+    {
+        get
+        {
+            var list = Items.AsEnumerable().Select(row => row[SelectedPropertyName]).Cast<bool>();
+
+            var uniqList = list.Distinct().ToList();
+            return uniqList.Count switch
+            {
+                0 => false,
+                1 => uniqList.Single(),
+                _ => null
+            };
+        }
+        set
+        {
+            if (!value.HasValue) return;
+                
+            foreach (var row in Items.AsEnumerable())
+            {
+                row[SelectedPropertyName] = value;
+            }
+            OnPropertyChanged();
+        }
+    }
+        
+    // https://stackoverflow.com/questions/36215919/datatable-is-not-updating-datagrid-after-clearing-and-refilling-data-mvvm
+    public void RefreshDataGrid()
+    {
+        _tempDataTableForRefresh ??= new DataTable();
+            
+        var temp = Items;
+        Items = _tempDataTableForRefresh;
+        Items = temp;
     }
 }

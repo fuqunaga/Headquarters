@@ -15,7 +15,7 @@
 
         public bool IsIndependentIP => !IsDependIP;
 
-        public bool IsDependIP => IpListDataGridViewModel.Instance.Contains(Name);
+        public bool IsDependIP => false;//IpListDataGridViewModel.Instance.Contains(Name);
 
         public string Get(IPParams ipParam)
         {
