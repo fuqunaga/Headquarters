@@ -17,7 +17,7 @@ namespace Headquarters
     {
         // private readonly IpListBarViewModel _ipListViewModel;
         private readonly IpListDataGridViewModel _ipListDataGrid;
-        private readonly ScriptsViewModel _scriptsVM;
+        // private readonly ScriptsViewModel _scriptsVM;
 
         public MainWindow()
         {
@@ -69,44 +69,38 @@ namespace Headquarters
             // IpList.DataContext = _ipListViewModel;
             // _ipListViewModel.Initialize(_ipListDataGrid);
             
-            _scriptsVM = new ScriptsViewModel(".", @".\Scripts");
-            ScriptButtons.DataContext = _scriptsVM;
+            // _scriptsVM = new ScriptsViewModel(@".\Scripts");
+            // ScriptButtons.DataContext = _scriptsVM;
 
 
-            var pb = Resources["TopPasswordBox"] as PasswordBox;
-            pb.Password = ParameterManager.UserPassword.Value;
+            // var pb = Resources["TopPasswordBox"] as PasswordBox;
+            // pb.Password = ParameterManager.UserPassword.Value;
 
-            UpdateRunButton();
-            OnChangeIPList();
+            // UpdateRunButton();
+            // OnChangeIPList();
         }
 
         private void OnChangeIPList()
         {
             psScripts.DataContext = null;
-            psScripts.DataContext = _scriptsVM;
+            // psScripts.DataContext = _scriptsVM;
 
-            tbUserName.DataContext = ParameterManager.UserName;
-            UserPassword.DataContext = ParameterManager.UserPassword;
+            // tbUserName.DataContext = ParameterManager.UserName;
+            // UserPassword.DataContext = ParameterManager.UserPassword;
         }
-
-        private void OnClickSelectScript(object sender, RoutedEventArgs e)
-        {
-            _scriptsVM.SetCurrent(((Button)sender).Content.ToString());
-            psScripts.SelectedIndex += 1;
-        }
-
+        
         private void OnClickRun(object sender, RoutedEventArgs e)
         {
-            var task = _scriptsVM.Current?.Run(_ipListDataGrid.SelectedParams.ToList());
-            if (task != null)
-            {
-                RunButtonSelector.SelectedIndex = 2;
-
-                task.ContinueWith((t) =>
-                {
-                    UpdateRunButton();
-                });
-            }
+            // var task = _scriptsVM.ScriptViewModel?.Run(_ipListDataGrid.SelectedParams.ToList());
+            // if (task != null)
+            // {
+            //     RunButtonSelector.SelectedIndex = 2;
+            //
+            //     task.ContinueWith((t) =>
+            //     {
+            //         UpdateRunButton();
+            //     });
+            // }
         }
 
         private void UpdateRunButton()
@@ -117,8 +111,8 @@ namespace Headquarters
 
         private void OnClickStop(object sender, RoutedEventArgs e)
         {
-            _scriptsVM.Current?.Stop();
-            RunButtonSelector.SelectedIndex = 1;
+            // _scriptsVM.ScriptViewModel?.Stop();
+            // RunButtonSelector.SelectedIndex = 1;
         }
 
 
@@ -138,13 +132,6 @@ namespace Headquarters
             base.OnClosed(e);
         }
 
-        private void OnTopPasswordChanged(object sender, RoutedEventArgs e)
-        {
-            if (UserPassword.DataContext is Parameter p)
-            {
-                p.Value = ((PasswordBox)sender).Password;
-            }
-        }
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {

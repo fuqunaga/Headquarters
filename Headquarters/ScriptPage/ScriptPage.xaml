@@ -1,0 +1,64 @@
+﻿<UserControl x:Class="Headquarters.ScriptPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:Headquarters"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:ScriptPageViewModel}"
+             d:DesignHeight="500">
+
+    <materialDesign:Transitioner SelectedIndex="{Binding PageIndex}" Panel.ZIndex="-10">
+        <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect SlideInFromLeft}">
+            <materialDesign:TransitionerSlide.ForwardWipe>
+                <local:CustomFadeWipe />
+            </materialDesign:TransitionerSlide.ForwardWipe>
+
+            <!-- Select script -->
+            <StackPanel>
+                <materialDesign:ColorZone Mode="PrimaryMid" Padding="16"
+                                          materialDesign:ElevationAssist.Elevation="Dp2">
+                    <DockPanel>
+                        <materialDesign:PackIcon Kind="ScriptText" />
+                        <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">Scripts</TextBlock>
+                    </DockPanel>
+                </materialDesign:ColorZone>
+
+                <ScrollViewer Margin="8,8,8,8"
+                              VerticalScrollBarVisibility="Disabled"
+                              HorizontalScrollBarVisibility="Auto">
+
+                    <ItemsControl ItemsSource="{Binding Items}">
+
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Vertical" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button
+                                    Content="{Binding Name}"
+                                    Command="{Binding SelectCommand}"
+                                    Margin="8"
+                                    HorizontalAlignment="Left" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+        </materialDesign:TransitionerSlide>
+
+        <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect SlideInFromRight}">
+            <materialDesign:TransitionerSlide.BackwardWipe>
+                <local:CustomFadeWipe />
+            </materialDesign:TransitionerSlide.BackwardWipe>
+            
+            <local:ScriptRunPage DataContext="{Binding CurrentScriptRunViewModel}" />
+            
+        </materialDesign:TransitionerSlide>
+    </materialDesign:Transitioner>
+
+</UserControl>

@@ -40,12 +40,21 @@
     <PackageReference Include="MaterialDesignColors" Version="3.1.0" />
     <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.PowerShell.5.ReferenceAssemblies" Version="1.1.0" />
+    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.5" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="NameDialog\NameDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <XamlRuntime>Wpf</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="ScriptPage\ScriptPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <XamlRuntime>Wpf</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="ScriptPage\ScriptRunPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <XamlRuntime>Wpf</XamlRuntime>
       <SubType>Designer</SubType>

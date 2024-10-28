@@ -9,62 +9,68 @@
         mc:Ignorable="d"
         Title="Headquarters" MinHeight="600">
     
-    <Window.Resources>
-        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
-            <Setter Property="CaretBrush" Value="{DynamicResource PrimaryHueLightBrush}" />
-        </Style>
-
-        <PasswordBox
-            x:Key="TopPasswordBox"
-            PasswordChanged="OnTopPasswordChanged"
-            materialDesign:HintAssist.Hint="Password"
-            Width="200"
-            >
-            <!-- For strange font color,size when delete "UserPassword" column at IPList -->
-            <PasswordBox.Style>
-                <Style TargetType="PasswordBox" BasedOn="{StaticResource MaterialDesignFloatingHintPasswordBox}" >
-                    <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialDesignBody}" />
-                    <Setter Property="FontFamily" Value="{DynamicResource MaterialDesignFont}" />
-                </Style>
-            </PasswordBox.Style>
-        </PasswordBox>
-
-
-        <DataTemplate x:Key="PasswordBoxTemplate">
-            <TextBlock>
-                <materialDesign:PackIcon
-                    Kind="Key" Foreground="{Binding Content.BorderBrush, ElementName=TopPasswordBox}"/>
-                <ContentControl Content="{StaticResource TopPasswordBox}" Name="TopPasswordBox" IsTabStop="False"/>
-            </TextBlock>
-        </DataTemplate>
-
-        <DataTemplate x:Key="PasswordTextBoxTemplate">
-            <TextBlock>
-                <materialDesign:PackIcon Grid.Column="0"
-                    Kind="Key" Foreground="{Binding BorderBrush, ElementName=TopPasswordBox}"/>
-                <TextBox Grid.Column="1"
-                    Name="TopPasswordBox"
-                    Text="{Binding Value}"
-                    IsEnabled="{Binding IsIndependentIP}"
-                    materialDesign:HintAssist.Hint="Password"
-                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                         Width="200"/>
-            </TextBlock>
-        </DataTemplate>
-
-        <local:BoolDataTemplateSelector x:Key="passwordBoxTemplateSelector"
-                                        BoolPropertyName="IsIndependentIP"
-                                        TrueTemplate="{StaticResource PasswordBoxTemplate}"
-                                        FalseTemplate="{StaticResource PasswordTextBoxTemplate}"/>
-    </Window.Resources>
+    <!-- <Window.Resources> -->
+    <!--     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}"> -->
+    <!--         <Setter Property="CaretBrush" Value="{DynamicResource PrimaryHueLightBrush}" /> -->
+    <!--     </Style> -->
+    <!-- -->
+    <!--      -->
+    <!--     <PasswordBox -->
+    <!--         x:Key="TopPasswordBox" -->
+    <!--         PasswordChanged="OnTopPasswordChanged" -->
+    <!--         materialDesign:HintAssist.Hint="Password" -->
+    <!--         Width="200" -->
+    <!--         > -->
+    <!--         ~1~ For strange font color,size when delete "UserPassword" column at IPList @1@ -->
+    <!--         <PasswordBox.Style> -->
+    <!--             <Style TargetType="PasswordBox" BasedOn="{StaticResource MaterialDesignFloatingHintPasswordBox}" > -->
+    <!--                 <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialDesignBody}" /> -->
+    <!--                 <Setter Property="FontFamily" Value="{DynamicResource MaterialDesignFont}" /> -->
+    <!--             </Style> -->
+    <!--         </PasswordBox.Style> -->
+    <!--     </PasswordBox> -->
+    <!-- -->
+    <!-- -->
+    <!--     <DataTemplate x:Key="PasswordBoxTemplate"> -->
+    <!--         <TextBlock> -->
+    <!--             <materialDesign:PackIcon -->
+    <!--                 Kind="Key" Foreground="{Binding Content.BorderBrush, ElementName=TopPasswordBox}"/> -->
+    <!--             <ContentControl Content="{StaticResource TopPasswordBox}" Name="TopPasswordBox" IsTabStop="False"/> -->
+    <!--         </TextBlock> -->
+    <!--     </DataTemplate> -->
+    <!-- -->
+    <!--     <DataTemplate x:Key="PasswordTextBoxTemplate"> -->
+    <!--         <TextBlock> -->
+    <!--             <materialDesign:PackIcon Grid.Column="0" -->
+    <!--                 Kind="Key" Foreground="{Binding BorderBrush, ElementName=TopPasswordBox}"/> -->
+    <!--             <TextBox Grid.Column="1" -->
+    <!--                 Name="TopPasswordBox" -->
+    <!--                 Text="{Binding Value}" -->
+    <!--                 IsEnabled="{Binding IsIndependentIp}" -->
+    <!--                 materialDesign:HintAssist.Hint="Password" -->
+    <!--                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" -->
+    <!--                      Width="200"/> -->
+    <!--         </TextBlock> -->
+    <!--     </DataTemplate> -->
+    <!-- -->
+    <!--      -->
+    <!--     <local:BoolDataTemplateSelector x:Key="passwordBoxTemplateSelector" -->
+    <!--                                     BoolPropertyName="IsIndependentIP" -->
+    <!--                                     TrueTemplate="{StaticResource PasswordBoxTemplate}" -->
+    <!--                                     FalseTemplate="{StaticResource PasswordTextBoxTemplate}"/> -->
+    <!-- </Window.Resources> -->
 
     <materialDesign:DialogHost Identifier="RootDialog">
-        <DockPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
       
             <TabControl x:Name="MainTabControl">
                 <TabControl.Resources>
                     <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource MaterialDesignTabItem}">
-                        <Setter Property="Header" Value="{Binding Header}"/>
+                        <Setter Property="Header" Value="{Binding ScriptName}"/>
                     </Style>
                 </TabControl.Resources>
                 
@@ -75,7 +81,8 @@
                 </TabControl.ContentTemplate>
             </TabControl>
             
-            
+            <!-- TODO: remove -->
+            <StackPanel Width="0">
             <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" DockPanel.Dock="Top" materialDesign:ElevationAssist.Elevation="Dp2" Panel.ZIndex="100">
                 <Grid Margin="16,0,0,0">
                     <TextBlock VerticalAlignment="Center" FontSize="22">
@@ -95,7 +102,7 @@
                         <materialDesign:PackIcon Kind="Account" Foreground="{Binding ElementName=tbUserName, Path=BorderBrush}" />
                         <TextBox x:Name="tbUserName"
                                  Text="{Binding Value}"
-                                 IsEnabled="{Binding IsIndependentIP}"
+                                 IsEnabled="{Binding IsIndependentIp}"
                                  materialDesign:HintAssist.Hint="Name" Width="200"  
                                  >
                             <TextBox.Style>
@@ -105,12 +112,12 @@
                             </TextBox.Style>
                         </TextBox>
                 
-                        <ContentControl 
-                            Name="UserPassword" Margin="16,0,0,0"
-                            IsTabStop="False"
-                            Content="{Binding}"
-                            ContentTemplateSelector="{StaticResource passwordBoxTemplateSelector}"
-                            />
+                        <!-- <ContentControl  -->
+                        <!--     Name="UserPassword" Margin="16,0,0,0" -->
+                        <!--     IsTabStop="False" -->
+                        <!--     Content="{Binding}" -->
+                        <!--     ContentTemplateSelector="{StaticResource passwordBoxTemplateSelector}" -->
+                        <!--     /> -->
                     </TextBlock>
 
                 </Grid>
@@ -169,8 +176,7 @@
                                             <Button
                                                 Margin="8"
                                                 Style="{StaticResource MaterialDesignRaisedLightButton}"
-                                                Click="OnClickSelectScript"
-                                                Content="{Binding Header}"
+                                                Content="{Binding ScriptName}"
                                                 HorizontalAlignment="Left"
                                                 />
                                         </DataTemplate>
@@ -180,7 +186,7 @@
                         </DockPanel>
                     </materialDesign:TransitionerSlide>
 
-                    <materialDesign:TransitionerSlide DataContext="{Binding Current}" OpeningEffect="{materialDesign:TransitionEffect SlideInFromRight}">
+                    <materialDesign:TransitionerSlide DataContext="{Binding ScriptRunViewModel}" OpeningEffect="{materialDesign:TransitionEffect SlideInFromRight}">
                         <materialDesign:TransitionerSlide.BackwardWipe>
                             <local:CustomFadeWipe />
                         </materialDesign:TransitionerSlide.BackwardWipe>
@@ -196,7 +202,7 @@
                                     </Button>
 
                                     <materialDesign:PackIcon Kind="ScriptText" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                                    <Label Content="{Binding Header}" VerticalAlignment="Center" />
+                                    <Label Content="{Binding ScriptName}" VerticalAlignment="Center" />
 
                                     <!-- Run Button -->
                                     <materialDesign:Transitioner Name="RunButtonSelector" SelectedIndex="1" Margin="16,0,8,0">
@@ -240,7 +246,7 @@
                                                         </Label.ToolTip>
                                                     </Label>
 
-                                                    <Label Content="{Binding MaxTaskNum, Mode=TwoWay}"
+                                                    <Label Content="{Binding MaxTaskCount, Mode=TwoWay}"
                                                            Width="32"
                                                            VerticalAlignment="Center"
                                                            />
@@ -253,7 +259,7 @@
                                                         Maximum="100"
                                                         TickFrequency="1"
                                                         IsSnapToTickEnabled="True"
-                                                        Value="{Binding MaxTaskNum, Mode=TwoWay}"
+                                                        Value="{Binding MaxTaskCount, Mode=TwoWay}"
                                                         >
                                                         <!-- <Slider.Style> -->
                                                         <!--     <Style TargetType="Slider" BasedOn="{StaticResource MaterialDesignSlider}"> -->
@@ -304,7 +310,7 @@
                                     <DataTemplate>
                                         <TextBlock>
                                             <Label Content="{Binding Name}" MinWidth="100"/>
-                                            <TextBox Text="{Binding Value}" IsEnabled="{Binding IsIndependentIP}" MinWidth="100" IsTabStop="True"/>
+                                            <TextBox Text="{Binding Value}" IsEnabled="{Binding IsIndependentIp}" MinWidth="100" IsTabStop="True"/>
                                         </TextBlock>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
@@ -332,6 +338,8 @@
                     </materialDesign:TransitionerSlide>
                 </materialDesign:Transitioner>
             </Grid>
-        </DockPanel>
+            </StackPanel>
+            
+        </Grid>
     </materialDesign:DialogHost>
 </Window>

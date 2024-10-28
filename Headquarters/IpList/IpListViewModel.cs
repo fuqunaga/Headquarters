@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Input;
 using Microsoft.Win32;
 
-
 namespace Headquarters;
 
 public class IpListViewModel : ViewModelBase
@@ -54,9 +53,9 @@ public class IpListViewModel : ViewModelBase
             dataTable.Columns.Add(header, typeof(string));
         }
 
-        if (dataTable.Columns[IPParams.ipPropertyName] == null)
+        if (dataTable.Columns[IpParameterSet.IpPropertyName] == null)
         {
-            dataTable.Columns.Add(IPParams.ipPropertyName, typeof(string));
+            dataTable.Columns.Add(IpParameterSet.IpPropertyName, typeof(string));
         }
 
         try
