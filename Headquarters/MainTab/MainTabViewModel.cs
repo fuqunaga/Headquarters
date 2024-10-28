@@ -15,7 +15,6 @@ public class MainTabViewModel : ViewModelBase
     public ICommand NewTabCommand { get; }
     public ICommand DuplicateTabCommand { get; }
     public ICommand ToggleLockCommand { get; private set; }
-    
     public ICommand CloseTabCommand { get; private set; }
 
     public string Header
