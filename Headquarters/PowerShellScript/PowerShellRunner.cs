@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading;
@@ -20,7 +21,7 @@ namespace Headquarters
         public class Result
         {
             public bool canceled;
-            public PSDataCollection<PSObject>? objs;
+            public Collection<PSObject>? objs;
             public List<ErrorRecord>? errors;
 
             public bool IsSucceed => !canceled &&
@@ -64,7 +65,7 @@ namespace Headquarters
 
             try
             {
-                result.objs = await powerShell.InvokeAsync();
+                result.objs = await Task.Run(() => powerShell.Invoke());
             }
             catch (Exception e)
             {
