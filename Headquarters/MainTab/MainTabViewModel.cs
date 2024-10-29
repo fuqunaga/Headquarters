@@ -46,7 +46,7 @@ public class MainTabViewModel : ViewModelBase
         IpListViewModel.DataGridViewModel.Items = data.CreateIpListDataTable();
 
         _tabParameterSet = data.CreateTabParameterSet();
-        ScriptPageViewModel.Initialize(IpListViewModel,_tabParameterSet);
+        ScriptPageViewModel.Initialize(IpListViewModel, _tabParameterSet);
         ScriptPageViewModel.PropertyChanged += (sender, args) =>
         {
             if (args.PropertyName == nameof(ScriptPageViewModel.CurrentPage))

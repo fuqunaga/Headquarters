@@ -12,7 +12,7 @@ public class ParameterSet(Dictionary<string, string> parameters)
 {
     public Dictionary<string, string> Parameters => parameters;
     
-    public string Get(string name) => parameters.GetValueOrDefault(name, "");
+    public string Get(string name) => parameters.TryGetValue(name, out var value) ? value : "";
     public bool Set(string name, string value)
     {
         if (parameters.TryGetValue(name, out var oldValue))

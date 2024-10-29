@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading;
@@ -10,17 +11,20 @@ namespace Headquarters
 {
     public static class PowerShellRunner
     {
-        public class InvokeParameter
+        public class InvokeParameter(
+            Dictionary<string, object> parameters,
+            CancellationToken cancellationToken,
+            EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged)
         {
-            public required Dictionary<string, object> parameters;
-            public CancellationToken cancellationToken;
-            public required EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged;
+            public Dictionary<string, object> parameters = parameters;
+            public CancellationToken cancellationToken = cancellationToken;
+            public EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged = invocationStateChanged;
         }
 
         public class Result
         {
             public bool canceled;
-            public PSDataCollection<PSObject>? objs;
+            public Collection<PSObject>? objs;
             public List<ErrorRecord>? errors;
 
             public bool IsSucceed => !canceled &&
@@ -49,7 +53,7 @@ namespace Headquarters
 
             var result = new Result();
 
-            await using var _ = param.cancellationToken.Register(state =>
+            using var _ = param.cancellationToken.Register(state =>
                 {
                     if (state is PowerShell ps)
                     {
@@ -64,7 +68,7 @@ namespace Headquarters
 
             try
             {
-                result.objs = await powerShell.InvokeAsync();
+                result.objs = await Task.Run(() => powerShell.Invoke());
             }
             catch (Exception e)
             {

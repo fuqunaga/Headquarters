@@ -8,12 +8,12 @@ namespace Headquarters;
 /// MainTabに相当するデータクラス
 /// JsonSerializer対応
 /// </summary>
-public readonly struct MainTabData
+public struct MainTabData
 {
-    public string TabHeader { get;  init ; } = "New Tab";
-    public bool IsLocked { get; init; }
-    public List<Dictionary<string, string>> IpList { get; init; }
-    public Dictionary<string, Dictionary<string, string>> TabParameterDictionary { get; init; }
+    public string TabHeader { get; set; } = "New Tab";
+    public bool IsLocked { get; set; }
+    public List<Dictionary<string, string>> IpList { get; set; }
+    public Dictionary<string, Dictionary<string, string>> TabParameterDictionary { get; set; }
 
     
     public MainTabData()
@@ -36,8 +36,11 @@ public readonly struct MainTabData
         foreach (var rowDictionary in IpList)
         {
             var row = dataTable.NewRow();
-            foreach (var (key, stringValue) in rowDictionary)
+            foreach (var pair in rowDictionary)
             {
+                var key = pair.Key;
+                var stringValue = pair.Value;
+                
                 var isSelected = (key == IpParameterSet.IsSelectedPropertyName);
                 object value = isSelected 
                     ?  (bool.TryParse(stringValue, out var v) && v) 
@@ -65,10 +68,10 @@ public readonly struct MainTabData
 
     private static List<Dictionary<string, string>> CreateIpList(DataTable dataTable)
     {
-        return dataTable.AsEnumerable().Select(
+        return dataTable.Rows.Cast<DataRow>().Select(
             row => dataTable.Columns.Cast<DataColumn>().ToDictionary(
                 column => column.ColumnName,
-                column => row[column].ToString() ?? string.Empty
+                column => row[column].ToString()
             )).ToList();
 
     }
