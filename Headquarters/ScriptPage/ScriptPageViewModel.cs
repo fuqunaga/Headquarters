@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 
@@ -26,17 +25,15 @@ public class ScriptPageViewModel : ViewModelBase
         get => _currentPage;
         set => SetProperty(ref _currentPage, value);
     }
-  
-    public ObservableCollection<ScriptButtonViewModel> Items { get; }
+
+    public ObservableCollection<ScriptButtonViewModel> Items { get; } = [];
 
     public ScriptRunViewModel CurrentScriptRunViewModel
     {
         get => _currentScriptRunViewModel;
         private set => SetProperty(ref _currentScriptRunViewModel, value);
     }
-    
-    public IReadOnlyDictionary<Script, ScriptRunViewModel> ScriptRunViewModelDictionary => _scriptRunViewModelDictionary;
-        
+
 
     public ScriptPageViewModel() : this(@".\Scripts")
     {
@@ -44,6 +41,11 @@ public class ScriptPageViewModel : ViewModelBase
 
     public ScriptPageViewModel(string folderPath)
     {
+        if (!Directory.Exists(folderPath))
+        {
+            return;
+        }
+        
         var filePaths = Directory.GetFiles(folderPath, "*.ps1")
             .Where(s => s.EndsWith(".ps1")) // GetFiles includes *.ps1*. (*.ps1~, *.ps1_, etc.)
             .OrderBy(Path.GetFileName);

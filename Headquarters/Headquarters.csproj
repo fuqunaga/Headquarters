@@ -1,17 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <OutputType>WinExe</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <Nullable>enable</Nullable>
+    <LangVersion>12</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Images\icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <None Update="app.manifest">
@@ -25,24 +33,16 @@
     <Resource Include="Images\icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Scripts\CopyItemFromRemote.ps1" />
-    <Content Include="Scripts\ShutdownPC.ps1" />
-    <Content Include="Scripts\StopProcess.ps1" />
-    <Content Include="Scripts\StopProcessAndCopyItem.ps1" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Costura.Fody" Version="5.7.0" />
-    <PackageReference Include="Dragablz" Version="0.0.3.234" />
-    <PackageReference Include="Fody" Version="6.8.2">
+    <PackageReference Include="Costura.Fody" Version="5.7.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Dragablz" Version="0.0.3.234" />
     <PackageReference Include="IPAddressRange" Version="6.0.0" />
     <PackageReference Include="MaterialDesignColors" Version="3.1.0" />
     <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.5" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="PowerShellStandard.Library" Version="5.1.1" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="NameDialog\NameDialog.xaml">
@@ -61,7 +61,6 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-  <PropertyGroup />
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="xcopy $(ProjectDir)Scripts $(TargetDir)Scripts /D/E/C/I/H/Y" />
   </Target>

@@ -16,16 +16,16 @@ namespace Headquarters
 
         public static async Task<PowerShellRunner.Result> CreateSession(string ipAddress, string? userName, string passwordStr, PowerShellRunner.InvokeParameter param)
         {
-            var p = new PowerShellRunner.InvokeParameter()
-            {
-                parameters = new Dictionary<string, object>()
+            var p = new PowerShellRunner.InvokeParameter(
+                parameters: new Dictionary<string, object>()
                 {
                     { "ComputerName", ipAddress },
                     { "cred", CreateCredential(userName, passwordStr) },
                 },
-                cancellationToken = param.cancellationToken,
-                invocationStateChanged = param.invocationStateChanged,
-            };
+                cancellationToken: param.cancellationToken,
+                invocationStateChanged: param.invocationStateChanged
+            );
+            
 
             return await PowerShellRunner.InvokeAsync(CreateSessionString, p);
         }

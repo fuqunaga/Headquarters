@@ -6,9 +6,9 @@ using System.Management.Automation;
 namespace Headquarters;
 
 
-public class ScriptResult
+public class ScriptResult(string name)
 {
-    public required string name;
+    public string name = name;
     public event Action? onPropertyChanged;
     
     private PSInvocationStateInfo? _info;

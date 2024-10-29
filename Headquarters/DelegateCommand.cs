@@ -3,23 +3,15 @@ using System.Windows.Input;
 
 namespace Headquarters;
 
-public class DelegateCommand : ICommand
+public class DelegateCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
+    : ICommand
 {
-    private readonly Action<object?> _execute;
-    private readonly Func<object?, bool> _canExecute;
+    private readonly Func<object?, bool> _canExecute = canExecute ?? (_ => true);
 
 
-    public DelegateCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
-    {
-        ArgumentNullException.ThrowIfNull(execute);
-
-        _execute = execute;
-        _canExecute = canExecute ?? (_ => true);
-    }
-    
     public bool CanExecute(object? parameter) => _canExecute(parameter);
 
-    public void Execute(object? parameter) => _execute(parameter);
+    public void Execute(object? parameter) => execute(parameter);
     
     public event EventHandler? CanExecuteChanged
     {

@@ -18,10 +18,6 @@ public class CustomFadeWipe : ITransitionWipe
 
     public void Wipe(TransitionerSlide fromSlide, TransitionerSlide toSlide, Point origin, IZIndexController zIndexController)
     {
-        ArgumentNullException.ThrowIfNull(fromSlide);
-        ArgumentNullException.ThrowIfNull(toSlide);
-        ArgumentNullException.ThrowIfNull(zIndexController);
-
         // Set up time points
         var endKeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(Duration.TotalSeconds / 2));
 

@@ -11,13 +11,13 @@ namespace Headquarters
         public static string IsSelectedPropertyName  => SelectableDataGridViewModel.SelectedPropertyName;
         public const string IpPropertyName = "IP";
 
-        public bool IsSelected => dataRow.Field<bool>(IsSelectedPropertyName);
-        public string IpString => dataRow.Field<string>(IpPropertyName) ?? string.Empty;
+        public bool IsSelected => (bool)dataRow[IsSelectedPropertyName];
+        public string IpString => (string)dataRow[IpPropertyName];
 
 
         public string? Get(string name)
         {
-            return dataRow.Table.Columns.Contains(name) ? dataRow.Field<string>(name) : null;
+            return dataRow.Table.Columns.Contains(name) ? (string)dataRow[name] : null;
         }
     }
 }

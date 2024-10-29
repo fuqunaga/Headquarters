@@ -154,8 +154,8 @@ namespace Headquarters
             var ipAndParameterList = ipParamsList.SelectMany(ipParams =>
                 {
                     var paramDictionary = Parameters
-                        .ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name) ?? p.Value)
-                        .AsReadOnly();
+                        .ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name) ?? p.Value);
+                        
 
                     var ipStringList = IPAddressRange.TryParse(ipParams.IpString, out var range)
                         ? range.AsEnumerable().Select(ip => ip.ToString())
@@ -223,18 +223,14 @@ namespace Headquarters
 
         private async Task RunScriptFunction(ScriptFunction scriptFunction, string resultTextFixed, CancellationToken cancellationToken)
         {
-            var scriptResult = new ScriptResult()
-            {
-                name = scriptFunction.Name
-            };
+            var scriptResult = new ScriptResult(scriptFunction.Name);
             scriptResult.onPropertyChanged += UpdateResultText;
                 
-            var invokeParameter = new PowerShellRunner.InvokeParameter()
-            {
-                parameters = Parameters.ToDictionary(p => p.Name, object (p) => p.Value),
-                cancellationToken = cancellationToken,
-                invocationStateChanged = (_, args) => scriptResult.Info = args.InvocationStateInfo
-            };
+            var invokeParameter = new PowerShellRunner.InvokeParameter(
+                parameters: Parameters.ToDictionary(p => p.Name, object (p) => p.Value),
+                cancellationToken: cancellationToken,
+                invocationStateChanged: (_, args) => scriptResult.Info = args.InvocationStateInfo
+            );
                 
             scriptResult.Result = await scriptFunction.Run(invokeParameter);
             return;
@@ -245,16 +241,13 @@ namespace Headquarters
             }
         }
 
-        private async Task RunIpAddressProcesses(List<(string ipString, ReadOnlyDictionary<string, object> parameters)> ipAndParameterList, string resultTextFixed, CancellationToken cancelToken)
+        private async Task RunIpAddressProcesses(List<(string ipString, Dictionary<string, object> parameters)> ipAndParameterList, string resultTextFixed, CancellationToken cancelToken)
         {
             _ipAddressProcessResults.Clear();
 
             var ipProcessParameterList = ipAndParameterList.Select(ipAndParameter =>
-                { 
-                    var scriptResult = new ScriptResult
-                    {
-                        name = ipAndParameter.ipString,
-                    };
+                {
+                    var scriptResult = new ScriptResult(ipAndParameter.ipString);
                     scriptResult.onPropertyChanged += UpdateResults;
 
                     return new
@@ -292,15 +285,14 @@ namespace Headquarters
             }
         }
         
-        private async Task RunProcess(string ip, IReadOnlyDictionary<string, object> parameters,
+        private async Task RunProcess(string ip, Dictionary<string, object> parameters,
              ScriptResult scriptResult, CancellationToken cancelToken)
         {
-            var param = new PowerShellRunner.InvokeParameter
-            {
-                parameters = parameters,
-                cancellationToken = cancelToken,
-                invocationStateChanged = (_, e) =>scriptResult.Info = e.InvocationStateInfo
-            };
+            var param = new PowerShellRunner.InvokeParameter(
+                parameters: parameters,
+                cancellationToken: cancelToken,
+                invocationStateChanged: (_, e) => scriptResult.Info = e.InvocationStateInfo
+            );
 
             scriptResult.Result = await _script.IpAddressProcess.Run(ip, param);
         }
