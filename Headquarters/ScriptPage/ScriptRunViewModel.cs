@@ -154,8 +154,8 @@ namespace Headquarters
             var ipAndParameterList = ipParamsList.SelectMany(ipParams =>
                 {
                     var paramDictionary = Parameters
-                        .ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name) ?? p.Value)
-                        .AsReadOnly();
+                        .ToDictionary(p => p.Name, object (p) => ipParams.Get(p.Name) ?? p.Value);
+                        
 
                     var ipStringList = IPAddressRange.TryParse(ipParams.IpString, out var range)
                         ? range.AsEnumerable().Select(ip => ip.ToString())
@@ -245,7 +245,7 @@ namespace Headquarters
             }
         }
 
-        private async Task RunIpAddressProcesses(List<(string ipString, ReadOnlyDictionary<string, object> parameters)> ipAndParameterList, string resultTextFixed, CancellationToken cancelToken)
+        private async Task RunIpAddressProcesses(List<(string ipString, Dictionary<string, object> parameters)> ipAndParameterList, string resultTextFixed, CancellationToken cancelToken)
         {
             _ipAddressProcessResults.Clear();
 
@@ -292,7 +292,7 @@ namespace Headquarters
             }
         }
         
-        private async Task RunProcess(string ip, IReadOnlyDictionary<string, object> parameters,
+        private async Task RunProcess(string ip, Dictionary<string, object> parameters,
              ScriptResult scriptResult, CancellationToken cancelToken)
         {
             var param = new PowerShellRunner.InvokeParameter

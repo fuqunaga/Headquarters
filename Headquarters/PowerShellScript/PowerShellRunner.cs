@@ -13,9 +13,9 @@ namespace Headquarters
     {
         public class InvokeParameter
         {
-            public required IReadOnlyDictionary<string, object> parameters;
+            public Dictionary<string, object> parameters;
             public CancellationToken cancellationToken;
-            public required EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged;
+            public EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged;
         }
 
         public class Result
@@ -50,7 +50,7 @@ namespace Headquarters
 
             var result = new Result();
 
-            await using var _ = param.cancellationToken.Register(state =>
+            using var _ = param.cancellationToken.Register(state =>
                 {
                     if (state is PowerShell ps)
                     {

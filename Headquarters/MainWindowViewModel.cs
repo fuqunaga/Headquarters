@@ -59,6 +59,6 @@ public class MainWindowViewModel : ViewModelBase
             MainTabDataList = GetOrderedTabsFunc?.Invoke().Select(vm => vm.CreateMainTabData()).ToList() ?? []
         };
             
-        SettingManager.Instance.Save(".\\setting.json", settingData);
+        SettingManager.Save(".\\setting.json", settingData);
     }
 }

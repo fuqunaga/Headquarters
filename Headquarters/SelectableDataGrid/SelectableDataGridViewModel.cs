@@ -79,7 +79,7 @@ public class SelectableDataGridViewModel : ViewModelBase
     {
         get
         {
-            var list = Items.AsEnumerable().Select(row => row[SelectedPropertyName]).Cast<bool>();
+            var list = Items.Rows.Cast<DataRow>().Select(row => row[SelectedPropertyName]).Cast<bool>();
 
             var uniqList = list.Distinct().ToList();
             return uniqList.Count switch
@@ -93,7 +93,7 @@ public class SelectableDataGridViewModel : ViewModelBase
         {
             if (!value.HasValue) return;
                 
-            foreach (var row in Items.AsEnumerable())
+            foreach (var row in Items.Rows.Cast<DataRow>())
             {
                 row[SelectedPropertyName] = value;
             }

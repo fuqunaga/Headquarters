@@ -8,7 +8,7 @@ namespace Headquarters;
 
 public class ScriptResult
 {
-    public required string name;
+    public string name;
     public event Action? onPropertyChanged;
     
     private PSInvocationStateInfo? _info;

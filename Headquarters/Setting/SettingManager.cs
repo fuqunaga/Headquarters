@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
 using System.Windows;
-using MaterialDesignThemes.Wpf;
-
+using Newtonsoft.Json;
 
 namespace Headquarters;
 
@@ -30,8 +28,8 @@ public class SettingManager
             ]
         };
         
-        public Dictionary<string, string> GlobalParameterSet { get; init; }
-        public List<MainTabData> MainTabDataList { get; init; }
+        public Dictionary<string, string> GlobalParameterSet { get; set; }
+        public List<MainTabData> MainTabDataList { get; set; }
     }
 
     
@@ -41,21 +39,14 @@ public class SettingManager
     
     #endregion
     
-    
-    private readonly JsonSerializerOptions _serializerOptions = new()
-    {
-        WriteIndented = true
-    };
-    
-    
     private SettingManager()
     {
     }
     
     
-    public void Save(string filepath, SettingData settingData)
+    public static void Save(string filepath, SettingData settingData)
     {
-        var str = JsonSerializer.Serialize(settingData, _serializerOptions);
+        var str = JsonConvert.SerializeObject(settingData, Formatting.Indented);
         File.WriteAllText(filepath, str);
     }
 
@@ -71,7 +62,7 @@ public class SettingManager
         SettingData? data = null;
         try
         {
-            data = JsonSerializer.Deserialize<SettingData>(str);
+            data = JsonConvert.DeserializeObject<SettingData>(str);
         }
         catch (JsonException)
         {
