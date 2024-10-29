@@ -11,11 +11,14 @@ namespace Headquarters
 {
     public static class PowerShellRunner
     {
-        public class InvokeParameter
+        public class InvokeParameter(
+            Dictionary<string, object> parameters,
+            CancellationToken cancellationToken,
+            EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged)
         {
-            public Dictionary<string, object> parameters;
-            public CancellationToken cancellationToken;
-            public EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged;
+            public Dictionary<string, object> parameters = parameters;
+            public CancellationToken cancellationToken = cancellationToken;
+            public EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged = invocationStateChanged;
         }
 
         public class Result
