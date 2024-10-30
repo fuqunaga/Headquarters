@@ -9,10 +9,11 @@ public class ScriptFunction
 {
     private readonly string _scriptString;
     private readonly string? _commandString;
+    private readonly CommentHelpInfo? _helpInfo;
     
     public string Name { get; }
     public IReadOnlyList<string> ParameterNames { get; }
-
+    
     private bool IsSessionRequired => ParameterNames.Contains(Script.ReservedParameterName.Session);
     private bool IsIpRequired => ParameterNames.Contains(Script.ReservedParameterName.Ip);
     private bool IsCredentialRequired => ParameterNames.Contains(Script.ReservedParameterName.Credential);
@@ -25,6 +26,8 @@ public class ScriptFunction
         
         Name = scriptName;
         ParameterNames = GetScriptBlockParameterNames(scriptBlockAst).ToList();
+
+        _helpInfo = scriptBlockAst.GetHelpContent();
     }
     
     public ScriptFunction(FunctionDefinitionAst functionDefinitionAst)
@@ -41,6 +44,8 @@ public class ScriptFunction
                 ? GetParameterNames(functionDefinitionAst.Parameters).ToList()
                 : GetScriptBlockParameterNames(functionDefinitionAst.Body).ToList()
         ;
+        
+        _helpInfo = functionDefinitionAst.GetHelpContent();
     }
     
     private static IEnumerable<string> GetScriptBlockParameterNames(ScriptBlockAst ast)

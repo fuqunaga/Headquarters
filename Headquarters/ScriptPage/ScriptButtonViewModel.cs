@@ -8,6 +8,8 @@ public class ScriptButtonViewModel : ViewModelBase
     public Script Script { get; }
     
     public string Name  => Script.Name;
+    public string Synopsis => Script.Synopsis;
+    
     public ICommand SelectCommand { get; }
 
 

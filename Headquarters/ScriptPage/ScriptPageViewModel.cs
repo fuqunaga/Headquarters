@@ -50,7 +50,12 @@ public class ScriptPageViewModel : ViewModelBase
             .Where(s => s.EndsWith(".ps1")) // GetFiles includes *.ps1*. (*.ps1~, *.ps1_, etc.)
             .OrderBy(Path.GetFileName);
 
-        var scripts = filePaths.Select(path => new Script(path));
+        var scripts = filePaths.Select(path =>
+        {
+            var script = new Script(path);
+            script.Load();
+            return script;
+        });
 
         Items = new ObservableCollection<ScriptButtonViewModel>(
             scripts.Select(s => new ScriptButtonViewModel(s, OnSelectScript))

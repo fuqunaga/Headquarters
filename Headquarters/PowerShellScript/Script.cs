@@ -44,11 +44,14 @@ namespace Headquarters
 
         
         private readonly Dictionary<string, ScriptFunction> _scriptFunctionDictionary = [];
-        
+        private CommentHelpInfo? _helpInfo;
         
         public string Name { get; } = Path.GetFileNameWithoutExtension(filepath);
+        public bool HasError => _parseErrors.Length > 0;
+        public string Synopsis => _helpInfo?.Synopsis ?? "";
+        public string Description => _helpInfo?.Description ?? "";
         
-        
+        private ParseError[] _parseErrors = [];        
         public IEnumerable<string> EditableParameterNames => _scriptFunctionDictionary.Values.SelectMany(f => f.ParameterNames).Distinct().Except(ReservedParameterNames);
 
         public bool HasPreProcess => _scriptFunctionDictionary.ContainsKey(PreProcessFunctionName);
@@ -63,15 +66,10 @@ namespace Headquarters
 
         private void ParseScript()
         {
-            var ast = Parser.ParseFile(filepath, out _, out var errors);
-            
-            //TODO: error handling
-            if (errors is {Length: > 0})
+            var ast = Parser.ParseFile(filepath, out _, out _parseErrors);
+
+            if (_parseErrors.Length > 0)
             {
-                foreach (var e in errors)
-                {
-                    Console.WriteLine($@"{e}{Environment.NewLine}");
-                }
                 return;
             }
             
@@ -96,6 +94,8 @@ namespace Headquarters
             {
                 _scriptFunctionDictionary.Add(IpAddressProcessFunctionName, new ScriptFunction(Name, ast));
             }
+            
+            _helpInfo = ast.GetHelpContent();
         }
     }
 }
