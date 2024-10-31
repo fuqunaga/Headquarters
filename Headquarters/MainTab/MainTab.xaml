@@ -7,9 +7,6 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:MainTabViewModel}"
              d:DesignHeight="300">
-    <UserControl.Resources>
-        <local:InverseBoolConverter x:Key="InverseBoolConverter" />
-    </UserControl.Resources>
     
     <Grid>
         <Grid.RowDefinitions>
