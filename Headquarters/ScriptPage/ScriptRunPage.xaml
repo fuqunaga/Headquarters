@@ -10,6 +10,15 @@
              d:DesignWidth="800"
              d:DesignHeight="500">
 
+    <UserControl.Resources>
+        <Style x:Key="HorizontalDividerBorder" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
+            <Setter Property="Height" Value="1" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+        </Style>
+    </UserControl.Resources>
+
 
     <DockPanel>
         <materialDesign:ColorZone Mode="PrimaryDark" Padding="8,0,0,0" DockPanel.Dock="Top"
@@ -28,18 +37,18 @@
 
                 <!-- Run Button -->
                 <materialDesign:Transitioner SelectedIndex="{Binding RunButtonIndex, Mode=OneWay}" Margin="16,0,8,0">
-                    
+
                     <materialDesign:TransitionerSlide>
                         <materialDesign:TransitionerSlide.ForwardWipe>
                             <local:CustomFadeWipe />
                         </materialDesign:TransitionerSlide.ForwardWipe>
-                        
+
                         <Button
                             Style="{StaticResource MaterialDesignFloatingActionSecondaryButton}"
                             HorizontalAlignment="Left"
                             IsEnabled="False"
                             Content="Select IP" />
-                        
+
                     </materialDesign:TransitionerSlide>
 
                     <materialDesign:TransitionerSlide>
@@ -51,15 +60,15 @@
                         </materialDesign:TransitionerSlide.ForwardWipe>
 
                         <DockPanel>
-                
+
                             <Button
                                 Margin="8"
                                 Style="{StaticResource MaterialDesignFloatingActionSecondaryButton}"
                                 Command="{Binding RunCommand}"
                                 >
-                                
+
                                 <materialDesign:PackIcon Kind="MenuRight" Height="32" Width="32" />
-                                
+
                             </Button>
 
 
@@ -130,13 +139,25 @@
             </DockPanel>
         </materialDesign:ColorZone>
 
-        
+
         <!-- Description -->
-        <TextBlock DockPanel.Dock="Top" 
-                   Text="{Binding Description}"
-                   Visibility="{Binding Description, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"
-                   Margin="8" />
-        
+        <Expander DockPanel.Dock="Top"
+                  HorizontalAlignment="Stretch"
+                  Visibility="{Binding Description, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}">
+            <Expander.Header>
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="TextBox" Margin="4 0 4 0" />
+                    <TextBlock Text="Description" />
+                </StackPanel>
+            </Expander.Header>
+
+            <TextBlock Text="{Binding Description}"
+                       Margin="32 0 16 0"
+                       TextWrapping="Wrap"
+                         Opacity="0.7" />
+        </Expander>
+        <Border DockPanel.Dock="Top" Style="{StaticResource HorizontalDividerBorder}" />
+
         <!-- Parameters -->
         <ListBox ItemsSource="{Binding Parameters}" MaxHeight="200" Margin="0,16,0,0" DockPanel.Dock="Top"
                  KeyboardNavigation.TabNavigation="Continue"
