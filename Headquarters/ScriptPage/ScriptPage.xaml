@@ -12,6 +12,7 @@
 
     <UserControl.Resources>
         <local:EnumToIntConverter x:Key="EnumToIntConverter" />
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     </UserControl.Resources>
 
     <materialDesign:Transitioner SelectedIndex="{Binding Path=CurrentPage, Converter={StaticResource EnumToIntConverter}}">
@@ -39,9 +40,7 @@
                 <ScrollViewer Grid.Row="1"
                               VerticalScrollBarVisibility="Auto"
                               >
-
-
-                    <ItemsControl Grid.Row="1" ItemsSource="{Binding Items}">
+                    <ItemsControl ItemsSource="{Binding Items}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button
@@ -77,7 +76,11 @@
                                                     </Style>
                                                 </TextBlock.Style>
                                             </TextBlock>
-
+                                            
+                                            <TextBlock Text="スクリプトパース時にエラーが発生しました"
+                                                       Foreground="Crimson"
+                                                       Visibility="{Binding Converter={StaticResource BoolToVisibilityConverter}, Path=HasError}"
+                                                       />
                                         </StackPanel>
 
 

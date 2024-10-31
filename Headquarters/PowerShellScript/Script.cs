@@ -47,11 +47,10 @@ namespace Headquarters
         private CommentHelpInfo? _helpInfo;
         
         public string Name { get; } = Path.GetFileNameWithoutExtension(filepath);
-        public bool HasError => _parseErrors.Length > 0;
+        public bool HasError => ParseErrors.Length > 0;
         public string Synopsis => _helpInfo?.Synopsis.TrimEnd('\r', '\n') ?? "";
         public string Description => _helpInfo?.Description.TrimEnd('\r', '\n') ?? "";
-        
-        private ParseError[] _parseErrors = [];        
+        public ParseError[] ParseErrors { get; private set; } = [];        
         public IEnumerable<string> EditableParameterNames => _scriptFunctionDictionary.Values.SelectMany(f => f.ParameterNames).Distinct().Except(ReservedParameterNames);
 
         public bool HasPreProcess => _scriptFunctionDictionary.ContainsKey(PreProcessFunctionName);
@@ -66,10 +65,11 @@ namespace Headquarters
 
         private void ParseScript()
         {
-            var ast = Parser.ParseFile(filepath, out _, out _parseErrors);
+            var ast = Parser.ParseFile(filepath, out _, out var parseErrors);
 
-            if (_parseErrors.Length > 0)
+            if (parseErrors.Length > 0)
             {
+                ParseErrors = parseErrors;
                 return;
             }
             
