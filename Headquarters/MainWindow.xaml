@@ -9,7 +9,7 @@
         Style="{StaticResource MaterialDesignWindow}"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
-        Title="Headquarters" MinHeight="600">
+        Title="Headquarters">
     
     <Window.Resources>
         <ResourceDictionary>
