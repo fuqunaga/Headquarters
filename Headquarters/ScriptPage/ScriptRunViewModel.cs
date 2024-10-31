@@ -46,6 +46,8 @@ namespace Headquarters
         #region Binding Properties
 
         public string ScriptName => _script.Name;
+        
+        public string Description => _script.Description;
 
         public int RunButtonIndex
         {

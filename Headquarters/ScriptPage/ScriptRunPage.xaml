@@ -130,6 +130,13 @@
             </DockPanel>
         </materialDesign:ColorZone>
 
+        
+        <!-- Description -->
+        <TextBlock DockPanel.Dock="Top" 
+                   Text="{Binding Description}"
+                   Visibility="{Binding Description, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"
+                   Margin="8" />
+        
         <!-- Parameters -->
         <ListBox ItemsSource="{Binding Parameters}" MaxHeight="200" Margin="0,16,0,0" DockPanel.Dock="Top"
                  KeyboardNavigation.TabNavigation="Continue"

@@ -19,6 +19,7 @@
                 <ResourceDictionary Source="CustomDragablz/CustomDragablzMaterialDesign.xaml" />                
             </ResourceDictionary.MergedDictionaries>
             
+            <local:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
             <local:EnumToIntConverter x:Key="EnumToIntConverter" />
             <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
             <local:InverseBoolConverter x:Key="InverseBoolConverter" />
