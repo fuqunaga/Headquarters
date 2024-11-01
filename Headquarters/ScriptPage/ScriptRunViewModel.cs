@@ -118,6 +118,11 @@ namespace Headquarters
             }
 
             OnPropertyChanged(nameof(ScriptName));
+
+            if (_script.HasError)
+            {
+                ResultText = $"❌Script Parse Error\n\n{string.Join("\n\n", _script.ParseErrors.Select(e => e.ToString()))}";
+            }
         }
         
         private void InitializeIpListViewModel()
@@ -151,7 +156,7 @@ namespace Headquarters
             Run(_ipListViewModel.DataGridViewModel.SelectedParams.ToList());
         }
 
-        private void ClearOutput()
+        private void ClearResult()
         {
             ResultText = "";
         }
@@ -211,7 +216,7 @@ namespace Headquarters
             }
             
             
-            ClearOutput();
+            ClearResult();
             _script.Load();
             
 

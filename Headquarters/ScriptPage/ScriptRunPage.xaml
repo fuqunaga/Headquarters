@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
              xmlns:local="clr-namespace:Headquarters"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:ScriptRunViewModel}"
@@ -233,15 +234,18 @@
         </ItemsControl>
 
         <!-- Output -->
-        <TextBox Text="{Binding ResultText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                 TextWrapping="Wrap"
-                 VerticalAlignment="Stretch"
-                 IsReadOnly="True"
-                 AcceptsReturn="True"
-                 VerticalScrollBarVisibility="Auto"
-                 Margin="8,32,8,8"
-                 MinHeight="50" />
-
+        <emoji:TextBox  DockPanel.Dock="Bottom"
+                        Text="{Binding ResultText, Mode=OneWay}"
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        IsReadOnly="True"
+                        VerticalScrollBarVisibility="Auto"
+                        Margin="8,32,8,8">
+            <emoji:TextBox.Resources>
+                <Style TargetType="emoji:RichTextBox" BasedOn="{StaticResource MaterialDesignOutlinedRichTextBox}" >
+                    <Setter Property="VerticalContentAlignment" Value="Top" />
+                </Style>
+            </emoji:TextBox.Resources>
+        </emoji:TextBox>
+        
     </DockPanel>
 </UserControl>
