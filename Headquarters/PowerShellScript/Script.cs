@@ -48,8 +48,8 @@ namespace Headquarters
         
         public string Name { get; } = Path.GetFileNameWithoutExtension(filepath);
         public bool HasError => ParseErrors.Length > 0;
-        public string Synopsis => _helpInfo?.Synopsis.TrimEnd('\r', '\n') ?? "";
-        public string Description => _helpInfo?.Description.TrimEnd('\r', '\n') ?? "";
+        public string Synopsis => _helpInfo?.Synopsis?.TrimEnd('\r', '\n') ?? "";
+        public string Description => _helpInfo?.Description?.TrimEnd('\r', '\n') ?? "";
         
         public ParseError[] ParseErrors { get; private set; } = [];        
         public IEnumerable<string> EditableParameterNames => _scriptFunctionDictionary.Values.SelectMany(f => f.ParameterNames).Distinct().Except(ReservedParameterNames);
