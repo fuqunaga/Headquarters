@@ -107,9 +107,14 @@ namespace Headquarters
         {
             _script.Load();
             Parameters.Clear();
-            foreach(var parameterName in _script.EditableParameterNames)
+            foreach (var parameterName in _script.EditableParameterNames)
             {
-                Parameters.Add(new ScriptParameterViewModel(parameterName, _ipListViewModel, scriptParameterSet));
+                Parameters.Add(new ScriptParameterViewModel(
+                    parameterName,
+                    _script.GetParameterHelp(parameterName),
+                    _ipListViewModel,
+                    scriptParameterSet)
+                );
             }
 
             OnPropertyChanged(nameof(ScriptName));

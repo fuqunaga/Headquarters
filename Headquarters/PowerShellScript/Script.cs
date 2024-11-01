@@ -50,6 +50,7 @@ namespace Headquarters
         public bool HasError => ParseErrors.Length > 0;
         public string Synopsis => _helpInfo?.Synopsis.TrimEnd('\r', '\n') ?? "";
         public string Description => _helpInfo?.Description.TrimEnd('\r', '\n') ?? "";
+        
         public ParseError[] ParseErrors { get; private set; } = [];        
         public IEnumerable<string> EditableParameterNames => _scriptFunctionDictionary.Values.SelectMany(f => f.ParameterNames).Distinct().Except(ReservedParameterNames);
 
@@ -61,6 +62,17 @@ namespace Headquarters
         public ScriptFunction PostProcess => _scriptFunctionDictionary[PostProcessFunctionName];
 
 
+        public string GetParameterHelp(string parameterName)
+        {
+            if ( _helpInfo?.Parameters.TryGetValue(parameterName.ToUpper(), out var help) ?? false)
+            {
+                return help.TrimEnd('\r', '\n');
+            }
+
+            return string.Empty;
+        }
+        
+        
         public void Load() => ParseScript();
 
         private void ParseScript()
