@@ -234,18 +234,80 @@
         </ItemsControl>
 
         <!-- Output -->
-        <emoji:TextBox  DockPanel.Dock="Bottom"
-                        Text="{Binding ResultText, Mode=OneWay}"
-                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                        IsReadOnly="True"
-                        VerticalScrollBarVisibility="Auto"
-                        Margin="8,32,8,8">
-            <emoji:TextBox.Resources>
-                <Style TargetType="emoji:RichTextBox" BasedOn="{StaticResource MaterialDesignOutlinedRichTextBox}" >
-                    <Setter Property="VerticalContentAlignment" Value="Top" />
-                </Style>
-            </emoji:TextBox.Resources>
-        </emoji:TextBox>
         
+        <Border DockPanel.Dock="Bottom"
+                x:Name="border"
+                BorderBrush="{DynamicResource MaterialDesign.Brush.TextBox.OutlineBorder}"
+                BorderThickness="{x:Static materialDesign:Constants.DefaultOutlinedBorderInactiveThickness}"
+                CornerRadius="4"
+                Margin="4 32 4 4">
+            
+            <!-- GridのBackgroundがないとClippoingBorderが効かないので適当に設定しておく -->
+            <Grid>
+                <Grid.Clip>
+                    <MultiBinding Converter="{StaticResource BorderClipConverter}">
+                        <Binding ElementName="border" Path="ActualWidth" />
+                        <Binding ElementName="border" Path="ActualHeight" />
+                        <Binding ElementName="border" Path="CornerRadius" />
+                        <Binding ElementName="border" Path="BorderThickness" />
+                    </MultiBinding>
+                </Grid.Clip>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0"
+                      Background="{DynamicResource MaterialDesign.Brush.ToolBar.Background}"
+                      >
+                    <ListBox
+                             SelectionMode="Multiple"
+                             materialDesign:ListBoxAssist.CanUserToggleSelectedItem="True"
+                             Style="{StaticResource MaterialDesignToolToggleFlatListBox}"
+                             HorizontalAlignment="Right"
+                             Height="24"
+                             >
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="Padding" Value="4 0" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        
+
+                        <ListBoxItem>
+                            <StackPanel Orientation="Horizontal">
+                                <emoji:TextBlock Text="✅" FontSize="12"/>
+                                <TextBlock Text="100" Width="24" />
+                            </StackPanel>
+                        </ListBoxItem>
+
+                        <ListBoxItem>
+                            <StackPanel Orientation="Horizontal" >
+                                <emoji:TextBlock Text="❌" FontSize="12"/>
+                                <TextBlock Text="100" />
+                            </StackPanel>
+                        </ListBoxItem>
+                    </ListBox>
+                </Grid>
+
+                <emoji:TextBox  Grid.Row="1"
+                                Text="{Binding ResultText, Mode=OneWay}"
+                                Style="{StaticResource MaterialDesignTextBox}"
+                                IsReadOnly="True"
+                                VerticalScrollBarVisibility="Auto"
+                                Margin="8,0"
+                                >
+                    <emoji:TextBox.Resources>
+                        <Style TargetType="emoji:RichTextBox" BasedOn="{StaticResource MaterialDesignOutlinedRichTextBox}" >
+                            <Setter Property="VerticalContentAlignment" Value="Top" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="materialDesign:TextFieldAssist.OutlinedBorderActiveThickness" Value="0" />
+                        </Style>
+                    </emoji:TextBox.Resources>
+                </emoji:TextBox>
+                
+            </Grid>
+        </Border>
     </DockPanel>
 </UserControl>
