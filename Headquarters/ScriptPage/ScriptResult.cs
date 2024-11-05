@@ -8,7 +8,6 @@ namespace Headquarters;
 
 public class ScriptResult(string name)
 {
-    public string name = name;
     public event Action? onPropertyChanged;
     
     private PSInvocationStateInfo? _info;
@@ -36,7 +35,7 @@ public class ScriptResult(string name)
 
     public override string ToString()
     {
-        var prefix = (Result == null) ? "" : (Result.IsSucceed ? "✔" : "⚠");
+        var prefix = (Result == null) ? "" : (Result.IsSucceed ? "✅" : "❌");
         var label = $"{prefix} {name}: {Info?.State}";
         var resultStr = GetResultString();
 
