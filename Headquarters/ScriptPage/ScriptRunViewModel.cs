@@ -35,12 +35,9 @@ namespace Headquarters
         private readonly ParameterSet _scriptParameterSet;
         
         private CancellationTokenSource? _cancelTokenSource;
-        private readonly List<ScriptResult> _ipAddressProcessResults = [];
-        
         
         private RunButtonMode _runButtonMode = RunButtonMode.Run;
         private ObservableCollection<ScriptParameterViewModel> _parameterViewModels = [];
-        private string _resultText = "";
 
 
         #region Binding Properties
@@ -54,7 +51,7 @@ namespace Headquarters
             get => (int)_runButtonMode;
             set => SetProperty(ref _runButtonMode, (RunButtonMode)value);
         }
-
+        
         public ICommand RunCommand { get; }
         public ICommand StopCommand { get; }
 
@@ -64,12 +61,6 @@ namespace Headquarters
             private set => SetProperty(ref _parameterViewModels, value);
         }
         
-        public string ResultText
-        {
-            get => _resultText;
-            private set => SetProperty(ref _resultText, value);
-        }
-
         public int MaxTaskCount
         {
             get => int.TryParse(_scriptParameterSet.Get(ReservedParameterName.MaxTaskCount), out var num) ? num : 100;
@@ -82,6 +73,8 @@ namespace Headquarters
                 }
             }
         }
+        
+        public OutputFieldViewModel OutputFieldViewModel { get; } = new();
 
         #endregion
 
@@ -118,10 +111,13 @@ namespace Headquarters
             }
 
             OnPropertyChanged(nameof(ScriptName));
+            
+            OutputFieldViewModel.Clear();
 
             if (_script.HasError)
             {
-                ResultText = $"❌Script Parse Error\n\n{string.Join("\n\n", _script.ParseErrors.Select(e => e.ToString()))}";
+                OutputFieldViewModel.AddOutputUnit(new TextOutput(OutputIcon.Failed, "Script Parse Error", $"{string.Join("\n\n", _script.ParseErrors.Select(e => e.ToString()))}"));
+                OutputFieldViewModel.UpdateOutput();
             }
         }
         
@@ -154,11 +150,6 @@ namespace Headquarters
         private void RunCommandExecute(object? _)
         {
             Run(_ipListViewModel.DataGridViewModel.SelectedParams.ToList());
-        }
-
-        private void ClearResult()
-        {
-            ResultText = "";
         }
 
         private async void Run(IReadOnlyList<IpParameterSet> ipParamsList)
@@ -216,7 +207,7 @@ namespace Headquarters
             }
             
             
-            ClearResult();
+            OutputFieldViewModel.Clear();
             _script.Load();
             
 
@@ -224,39 +215,37 @@ namespace Headquarters
             _cancelTokenSource = cancelTokenSource;
             
             var cancelToken = _cancelTokenSource.Token;
-
-            var resultTextFixed = "";
             
             // --------------------------------------------------------------------------------
             // PreProcess
             // --------------------------------------------------------------------------------
             if (_script.HasPreProcess)
             {
-                await RunScriptFunction(_script.PreProcess, resultTextFixed, cancelToken);
-                resultTextFixed = ResultText + "\n\n";
+                await RunScriptFunction(_script.PreProcess, cancelToken);
             }
 
             // --------------------------------------------------------------------------------
             // IpAddressProcess parallel
             // --------------------------------------------------------------------------------
-            await RunIpAddressProcesses(ipAndParameterList, resultTextFixed, cancelToken);
-            resultTextFixed = ResultText + "\n\n";
+            await RunIpAddressProcesses(ipAndParameterList, cancelToken);
             
             // --------------------------------------------------------------------------------
             // PostProcess
             // --------------------------------------------------------------------------------
             if (_script.HasPostProcess)
             {
-                await RunScriptFunction(_script.PostProcess, resultTextFixed, cancelToken);
+                await RunScriptFunction(_script.PostProcess, cancelToken);
             }
             
             _cancelTokenSource = null;
         }
 
-        private async Task RunScriptFunction(ScriptFunction scriptFunction, string resultTextFixed, CancellationToken cancellationToken)
+        private async Task RunScriptFunction(ScriptFunction scriptFunction, CancellationToken cancellationToken)
         {
             var scriptResult = new ScriptResult(scriptFunction.Name);
-            scriptResult.onPropertyChanged += UpdateResultText;
+            scriptResult.onPropertyChanged += OutputFieldViewModel.UpdateOutput;
+            
+            OutputFieldViewModel.AddScriptResult(scriptResult);
                 
             var invokeParameter = new PowerShellRunner.InvokeParameter(
                 parameters: Parameters.ToDictionary(p => p.Name, object (p) => p.Value),
@@ -265,23 +254,17 @@ namespace Headquarters
             );
                 
             scriptResult.Result = await scriptFunction.Run(invokeParameter);
-            return;
-
-            void UpdateResultText()
-            {
-                ResultText = resultTextFixed + scriptResult;
-            }
         }
 
-        private async Task RunIpAddressProcesses(List<(string ipString, Dictionary<string, object> parameters)> ipAndParameterList, string resultTextFixed, CancellationToken cancelToken)
+        private async Task RunIpAddressProcesses(List<(string ipString, Dictionary<string, object> parameters)> ipAndParameterList, CancellationToken cancelToken)
         {
-            _ipAddressProcessResults.Clear();
-
             var ipProcessParameterList = ipAndParameterList.Select(ipAndParameter =>
                 {
                     var scriptResult = new ScriptResult(ipAndParameter.ipString);
-                    scriptResult.onPropertyChanged += UpdateResults;
+                    scriptResult.onPropertyChanged += OutputFieldViewModel.UpdateOutput;
 
+                    OutputFieldViewModel.AddScriptResult(scriptResult);
+                    
                     return new
                     {
                         ipAndParameter,
@@ -289,11 +272,6 @@ namespace Headquarters
                     };
                 }
             ).ToList();
-                
-
-            //　別スレッドでAddするとまずいのであらかじめAddしておく
-            _ipAddressProcessResults.AddRange(ipProcessParameterList.Select(paramSet => paramSet.scriptResult));
-            
             
             var semaphore = new SemaphoreSlim(MaxTaskCount);
 
@@ -308,13 +286,6 @@ namespace Headquarters
                     semaphore.Release();
                 })
             );
-            return;
-
-            void UpdateResults()
-            {
-                var str = string.Join("\n", _ipAddressProcessResults.Select(data => data.ToString()));
-                ResultText = resultTextFixed + str;
-            }
         }
         
         private async Task RunProcess(string ip, Dictionary<string, object> parameters,

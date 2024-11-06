@@ -13,6 +13,7 @@ public class ScriptResult(string name)
     private PSInvocationStateInfo? _info;
     private PowerShellRunner.Result? _result;
 
+    
     public PSInvocationStateInfo? Info
     {
         get => _info;
@@ -32,17 +33,10 @@ public class ScriptResult(string name)
             onPropertyChanged?.Invoke();
         }
     }
+    
+    public string Label => $"{name}: {Info?.State}";
 
-    public override string ToString()
-    {
-        var prefix = (Result == null) ? "" : (Result.IsSucceed ? "✅" : "❌");
-        var label = $"{prefix} {name}: {Info?.State}";
-        var resultStr = GetResultString();
-
-        return StringJoinWithoutNullOrEmpty("\n", label, resultStr);
-    }
-
-    private string GetResultString()
+    public string GetResultString()
     {
         if (Result == null) return "";
         
