@@ -17,7 +17,20 @@ namespace Headquarters
 
         public string? Get(string name)
         {
-            return dataRow.Table.Columns.Contains(name) ? (string)dataRow[name] : null;
+            // カラムが無ければnull
+            if (!dataRow.Table.Columns.Contains(name))
+            {
+                return null;
+            }
+            
+            // カラムがあるが値が無い場合は空文字
+            // nullを返さずIPListのパラメータを参照してもらう
+            if (dataRow.IsNull(name))
+            {
+                return "";
+            }
+
+            return dataRow[name] as string;
         }
     }
 }
