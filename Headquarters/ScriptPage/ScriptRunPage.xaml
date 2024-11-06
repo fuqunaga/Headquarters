@@ -267,9 +267,17 @@
                              Style="{StaticResource MaterialDesignToolToggleFlatListBox}"
                              HorizontalAlignment="Right"
                              Height="24"
+                             Padding="2 0"
                              >
+                        <ListBox.Resources>
+                            <Style x:Key="FilterTextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                <Setter Property="MinWidth" Value="24" />
+                                <Setter Property="Padding" Value="2 1 0 0" />
+                            </Style>
+                        </ListBox.Resources>
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="Margin" Value="0 1" />
                                 <Setter Property="Padding" Value="4 0" />
                             </Style>
                         </ListBox.ItemContainerStyle>
@@ -277,15 +285,21 @@
 
                         <ListBoxItem  IsSelected="{Binding IsCompletedVisible, Mode=TwoWay}">
                             <StackPanel Orientation="Horizontal">
-                                <emoji:TextBlock Text="✅" FontSize="12"/>
-                                <TextBlock Text="{Binding CompletedCount}" Width="24" />
+                                <emoji:TextBlock Text="✅" FontSize="12" />
+                                <TextBlock Text="{Binding CompletedCount}"
+                                           d:Text="123"
+                                           Style="{StaticResource FilterTextBlock}"
+                                           />
+                                
                             </StackPanel>
                         </ListBoxItem>
 
                         <ListBoxItem IsSelected="{Binding IsFailedVisible, Mode=TwoWay}">
                             <StackPanel Orientation="Horizontal" >
                                 <emoji:TextBlock Text="❌" FontSize="12"/>
-                                <TextBlock Text="{Binding FailedCount}" Width="24" />
+                                <TextBlock Text="{Binding FailedCount}"
+                                           d:Text="456"
+                                           Style="{StaticResource FilterTextBlock}" />
                             </StackPanel>
                         </ListBoxItem>
                     </ListBox>
@@ -296,13 +310,13 @@
                                 Style="{StaticResource MaterialDesignTextBox}"
                                 IsReadOnly="True"
                                 VerticalScrollBarVisibility="Auto"
-                                Margin="8,0"
+                                Margin="8 0 0 0"
                                 >
                     <emoji:TextBox.Resources>
-                        <Style TargetType="emoji:RichTextBox" BasedOn="{StaticResource MaterialDesignOutlinedRichTextBox}" >
+                        <Style TargetType="emoji:RichTextBox" BasedOn="{StaticResource MaterialDesignRichTextBox}" >
                             <Setter Property="VerticalContentAlignment" Value="Top" />
                             <Setter Property="BorderThickness" Value="0" />
-                            <Setter Property="materialDesign:TextFieldAssist.OutlinedBorderActiveThickness" Value="0" />
+                            <Setter Property="materialDesign:TextFieldAssist.DecorationVisibility" Value="Collapsed" />
                         </Style>
                     </emoji:TextBox.Resources>
                 </emoji:TextBox>
