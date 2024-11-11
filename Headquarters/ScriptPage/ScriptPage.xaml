@@ -74,7 +74,7 @@
                                             
                                             <TextBlock Text="スクリプトパース時にエラーが発生しました"
                                                        Foreground="Crimson"
-                                                       Visibility="{Binding Converter={StaticResource BoolToVisibilityConverter}, Path=HasError}"
+                                                       Visibility="{Binding Converter={StaticResource BooleanToVisibilityConverter}, Path=HasError}"
                                                        />
                                         </StackPanel>
 

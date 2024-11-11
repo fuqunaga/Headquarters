@@ -9,10 +9,6 @@
              d:DataContext="{d:DesignInstance local:MainTabViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
     
-    <UserControl.Resources>
-        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
-    </UserControl.Resources>
-    
     <StackPanel Orientation="Horizontal">
         <Grid VerticalAlignment="Center">
             <TextBlock Text="{Binding Header}" d:Text="DummyText"/>
@@ -27,7 +23,7 @@
         <!-- >X</Button> -->
         
         <materialDesign:PackIcon
-            Visibility="{Binding IsLocked, Converter={StaticResource BoolToVisibilityConverter}}"
+            Visibility="{Binding IsLocked, Converter={StaticResource BooleanToVisibilityConverter}}"
             Kind="Lock"
             Margin="8, 0"
             Width="16"
