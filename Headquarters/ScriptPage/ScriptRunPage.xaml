@@ -69,45 +69,27 @@
                                 Margin="8"
                                 Style="{StaticResource MaterialDesignFloatingActionSecondaryButton}"
                                 Command="{Binding RunCommand}"
-                                >
-
-                                <materialDesign:PackIcon Kind="MenuRight" Height="32" Width="32" />
-
-                            </Button>
-
+                                Content="{materialDesign:PackIcon Kind=MenuRight, Size=32}" />
+                            
+                            <ToggleButton IsChecked="{Binding IsStopOnError, Mode=TwoWay}"
+                                Margin="16 0 8 0"/>
+                            <Label Content="エラー時にすべてのタスクを停止する"
+                                   VerticalAlignment="Center" />
 
                             <DockPanel HorizontalAlignment="Right">
-                                <Label VerticalAlignment="Center" Margin="4" Content="MaxTaskCount"
+                                <Label VerticalAlignment="Center" Margin="4" 
+                                       Content="最大同時実行数"
                                        ToolTipService.ShowDuration="10000">
                                     <Label.ToolTip>
-                                        <TextBlock>
-                                            Limit the number of concurrent tasks.<LineBreak />
-                                            If you are getting OutOfMemory exceptions, try a smaller number than IP List.
-                                        </TextBlock>
+                                        <TextBlock Text="並列実行する処理数を制限します" />
                                     </Label.ToolTip>
                                 </Label>
+                                
+                                <TextBox Text="{Binding MaxTaskCount, Mode=TwoWay}"
+                                         Width="32"
+                                         VerticalAlignment="Center" />
 
-                                <Label Content="{Binding MaxTaskCount, Mode=TwoWay}"
-                                       Width="32"
-                                       VerticalAlignment="Center" />
-
-                                <Slider
-                                    Margin="16"
-                                    VerticalAlignment="Center"
-                                    Width="200"
-                                    Minimum="1"
-                                    Maximum="100"
-                                    TickFrequency="1"
-                                    IsSnapToTickEnabled="True"
-                                    Value="{Binding MaxTaskCount, Mode=TwoWay}">
-                                    <!-- <Slider.Style> -->
-                                    <!--     <Style TargetType="Slider" BasedOn="{StaticResource MaterialDesignSlider}"> -->
-                                    <!--         <Setter Property="Foreground" Value="{DynamicResource PrimaryHueLightBrush}" /> -->
-                                    <!--     </Style> -->
-                                    <!-- </Slider.Style> -->
-                                </Slider>
-
-                            </DockPanel>
+                           </DockPanel>
                         </DockPanel>
                     </materialDesign:TransitionerSlide>
 

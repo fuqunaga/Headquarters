@@ -27,8 +27,8 @@ namespace Headquarters
             public Collection<PSObject>? objs;
             public List<ErrorRecord>? errors;
 
-            public bool IsSucceed => !canceled &&
-                                     (errors == null || errors.Count == 0);
+            public bool IsSucceed => !canceled && !HasError;
+            public bool HasError => errors is { Count: > 0 };
         }
         
         public static async Task<Result> InvokeAsync(string scriptString,InvokeParameter param)
