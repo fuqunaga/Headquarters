@@ -236,7 +236,6 @@
         <!-- Output Field -->
         <Border DockPanel.Dock="Bottom"
                 DataContext="{Binding OutputFieldViewModel}"
-                x:Name="OutputBorder"
                 BorderBrush="{DynamicResource MaterialDesign.Brush.TextBox.OutlineBorder}"
                 BorderThickness="{x:Static materialDesign:Constants.DefaultOutlinedBorderInactiveThickness}"
                 CornerRadius="4"
@@ -245,7 +244,7 @@
             <!-- 中のコンテンツが丸角でもクリッピングされるトリック
                  https://stackoverflow.com/a/28344788/2015881 -->
             <!-- Inner Border for Content clipping -->
-            <Border CornerRadius="4" >
+            <Border CornerRadius="{Binding CornerRadius, RelativeSource={RelativeSource AncestorType=Border}}" >
                 <!--OpacityMask for clipping the content inside the inner border-->
                 <Border.OpacityMask>
                     <VisualBrush>
