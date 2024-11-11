@@ -37,14 +37,16 @@
                 <Label Content="{Binding ScriptName}" VerticalAlignment="Center" />
 
                 <!-- Run Button -->
-                <materialDesign:Transitioner SelectedIndex="{Binding RunButtonIndex, Mode=OneWay}" Margin="16,0,8,0">
+                <materialDesign:Transitioner SelectedIndex="{Binding RunButton, Mode=OneWay, Converter={StaticResource EnumToIntConverter}}" Margin="16,0,8,0">
 
+                    <!-- Select IP -->
                     <materialDesign:TransitionerSlide>
                         <materialDesign:TransitionerSlide.ForwardWipe>
                             <local:CustomFadeWipe />
                         </materialDesign:TransitionerSlide.ForwardWipe>
 
                         <Button
+                            Margin="8"
                             Style="{StaticResource MaterialDesignFloatingActionSecondaryButton}"
                             HorizontalAlignment="Left"
                             IsEnabled="False"
@@ -52,6 +54,7 @@
 
                     </materialDesign:TransitionerSlide>
 
+                    <!-- Prepare Run -->
                     <materialDesign:TransitionerSlide>
                         <materialDesign:TransitionerSlide.BackwardWipe>
                             <local:CustomFadeWipe />
@@ -108,6 +111,7 @@
                         </DockPanel>
                     </materialDesign:TransitionerSlide>
 
+                    <!-- Running -->
                     <materialDesign:TransitionerSlide>
                         <materialDesign:TransitionerSlide.BackwardWipe>
                             <local:CustomFadeWipe />
@@ -119,21 +123,13 @@
                             </Grid.ColumnDefinitions>
 
                             <ProgressBar Grid.Column="0" IsIndeterminate="True" />
-                            <!--
-                                    <Button
-                                        Grid.Column="1"
-                                        Margin="16,0,8,0"
-                                        Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                                        Click="OnClickStop"
-                                        Content="{materialDesign:PackIcon Kind=Stop}" />
-                                    -->
-
+                            
                             <Button
                                 Grid.Column="1"
                                 Margin="16,0,8,0"
                                 Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                Command="{Binding StopCommand}"
                                 Content="{materialDesign:PackIcon Kind=Stop}" />
-
                         </Grid>
                     </materialDesign:TransitionerSlide>
                 </materialDesign:Transitioner>
