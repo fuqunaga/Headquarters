@@ -94,8 +94,11 @@ public class OutputFieldViewModel : ViewModelBase
             OutputIcon.Failed => "❌ ",
             _ => ""
         };
-        
-        return $"{icon} {unit.Label}\n{unit.Text}";
+
+        var text = unit.Text;
+        return string.IsNullOrEmpty(text) 
+            ? $"{icon} {unit.Label}" 
+            : $"{icon} {unit.Label}\n{unit.Text}";
     }
     
     public void Clear()
