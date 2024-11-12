@@ -16,18 +16,11 @@
     <StackPanel Margin="16">
         <Label Content="{Binding Title}" />
         <TextBox x:Name="NameTextBox"
+                 Text = "{Binding Name}"
                  IsEnabled="{Binding IsEnabled}"
                  materialDesign:TextFieldAssist.SuffixText="{Binding Suffix}"
                  Margin="0 8 0 0"
-                 FontSize="18">
-            <TextBox.Text>
-                <Binding Path="Name" UpdateSourceTrigger="PropertyChanged" >
-                    <Binding.ValidationRules>
-                        <local:NotEmptyValidationRule ValidatesOnTargetUpdated="True" />
-                    </Binding.ValidationRules>
-                </Binding>
-            </TextBox.Text>
-        </TextBox>
+                 FontSize="18" />
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button IsDefault="True"
                     Content="ACCEPT"

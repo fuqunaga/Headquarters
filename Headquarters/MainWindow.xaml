@@ -36,6 +36,8 @@
                 <MenuItem Header="New tab to the right" Command="{Binding NewTabCommand}" />
                 <MenuItem Header="Duplicate" Command="{Binding DuplicateTabCommand}" />
                 <Separator />
+                <MenuItem Header="Rename" Command="{Binding RenameTabCommand}" />
+                <Separator />
                 <MenuItem Command="{Binding ToggleLockCommand}" Style="{StaticResource LockMenuItemStyle}" />
                 <Separator />
                 <MenuItem Header="Close" Command="{Binding CloseTabCommand}"/>

@@ -5,19 +5,16 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Input;
-using MaterialDesignThemes.Wpf;
 
 namespace Headquarters;
 
 public class IpListDataGridViewModel : SelectableDataGridViewModel
 {
-    public ICommand AddColumnCommand { get; protected set; }
-    public ICommand RenameColumnCommand { get; protected set; }
-    public ICommand DeleteColumnCommand { get; protected set; }
+    public ICommand AddColumnCommand { get; }
+    public ICommand RenameColumnCommand { get; }
+    public ICommand DeleteColumnCommand { get; }
 
 
     public IpListDataGridViewModel()
@@ -30,7 +27,7 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
     private bool IsColumnNameEditable(object? obj)
     {
         var columnName = GetColumnNameFromMenuItem(obj);
-        return (columnName != SelectedPropertyName) && (columnName != Headquarters.IpParameterSet.IpPropertyName);
+        return (columnName != SelectedPropertyName) && (columnName != IpParameterSet.IpPropertyName);
     }
 
     private string GetColumnNameFromMenuItem(object? obj)
@@ -86,31 +83,16 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
 
     private async Task<(bool success, string)> ShowColumnNameDialog(string? title, string? name = null, bool isEnabled = true)
     {
-        var vm = new NameDialogViewModel()
+        var viewModel = new NameDialogViewModel()
         {
             Title = title,
             Name = name,
             IsEnabled = isEnabled
         };
-
-        var view = new NameDialog()
-        {
-            DataContext = vm
-        };
-            
-        var binding = BindingOperations.GetBinding(view.NameTextBox, TextBox.TextProperty);
-        if (binding != null)
-        {
-            var validationRule = new NotContainDataColumnCollectionValidationRule(Items.Columns, "Column already exists.");
-            binding.ValidationRules.Add(validationRule);
-        }
-
-        var result = await DialogHost.Show(view, "RootDialog");
-
-        return (
-            result != null && (bool)result,
-            vm.Name ?? string.Empty
-        );
+        
+        var validationRule = new NotContainDataColumnCollectionValidationRule(Items.Columns, "Column already exists.");
+        
+        return await NameDialogService.ShowDialog(viewModel, validationRule);
     }
  
 
@@ -131,9 +113,9 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
 
         lines.FirstOrDefault()?.Split(',').ToList().ForEach(header => Items.Columns.Add(header, typeof(string)));
 
-        if (Items.Columns[Headquarters.IpParameterSet.IpPropertyName] == null)
+        if (Items.Columns[IpParameterSet.IpPropertyName] == null)
         {
-            Items.Columns.Add(Headquarters.IpParameterSet.IpPropertyName, typeof(string));
+            Items.Columns.Add(IpParameterSet.IpPropertyName, typeof(string));
         }
 
         try

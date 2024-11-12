@@ -10,7 +10,7 @@ namespace Headquarters;
 /// </summary>
 public struct MainTabData
 {
-    public string TabHeader { get; set; } = "New Tab";
+    public string Name { get; set; } = "New Tab";
     public bool IsLocked { get; set; }
     public List<Dictionary<string, string>> IpList { get; set; }
     public Dictionary<string, Dictionary<string, string>> TabParameterDictionary { get; set; }
