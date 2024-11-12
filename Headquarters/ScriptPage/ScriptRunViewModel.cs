@@ -126,7 +126,7 @@ public class ScriptRunViewModel : ViewModelBase
 
         if (_script.HasError)
         {
-            OutputFieldViewModel.AddOutputUnit(new TextOutput(OutputIcon.Failed, "Script Parse Error", $"{string.Join("\n\n", _script.ParseErrors.Select(e => e.ToString()))}"));
+            OutputFieldViewModel.AddOutputUnit(new TextOutput(OutputIcon.Failure, "Script Parse Error", $"{string.Join("\n\n", _script.ParseErrors.Select(e => e.ToString()))}"));
             OutputFieldViewModel.UpdateOutput();
         }
     }

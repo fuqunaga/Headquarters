@@ -3,21 +3,21 @@
 public enum OutputIcon
 {
     None,
-    Completed,
-    Failed,
+    Success,
+    Failure,
 }
 
 public static class OutputIconEmoji
 {
-    public const string Completed = "✅";
-    public const string Failed = "⚠️";
+    public const string Success = "✅";
+    public const string Failure = "⚠️";
     
     public static string GetEmoji(this OutputIcon icon)
     {
         return icon switch
         {
-            OutputIcon.Completed => Completed,
-            OutputIcon.Failed => Failed,
+            OutputIcon.Success => Success,
+            OutputIcon.Failure => Failure,
             _ => "",
         };
     }

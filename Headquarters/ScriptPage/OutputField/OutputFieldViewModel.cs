@@ -71,8 +71,8 @@ public class OutputFieldViewModel : ViewModelBase
         lock (_outputUnits)
         {
             OutputText = string.Join("\n", _outputUnits.Where(IsOutputUnitVisible).Select(OutputUnitToString));
-            CompletedCount = _outputUnits.Count(unit => unit.Icon == OutputIcon.Completed);
-            FailedCount = _outputUnits.Count(unit => unit.Icon == OutputIcon.Failed);
+            CompletedCount = _outputUnits.Count(unit => unit.Icon == OutputIcon.Success);
+            FailedCount = _outputUnits.Count(unit => unit.Icon == OutputIcon.Failure);
         }
     }
     
@@ -80,8 +80,8 @@ public class OutputFieldViewModel : ViewModelBase
     {
         return unit.Icon switch
         {
-            OutputIcon.Completed => IsCompletedVisible,
-            OutputIcon.Failed => IsFailedVisible,
+            OutputIcon.Success => IsCompletedVisible,
+            OutputIcon.Failure => IsFailedVisible,
             _ => true
         };
     }

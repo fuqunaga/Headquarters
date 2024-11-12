@@ -4,8 +4,8 @@ public readonly struct ScriptResultOutput(ScriptResult result) : IOutputUnit
 {
     public OutputIcon Icon => result.Result?.IsSucceed switch
     {
-        true => OutputIcon.Completed,
-        false => OutputIcon.Failed,
+        true => OutputIcon.Success,
+        false => OutputIcon.Failure,
         _ => OutputIcon.None
     };
 
