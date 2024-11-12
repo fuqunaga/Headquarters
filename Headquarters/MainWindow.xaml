@@ -14,7 +14,6 @@
     <Window.Resources>
         <ResourceDictionary>
             <DataTemplate DataType="{x:Type local:MainTabViewModel}">
-                <!-- <ContentControl Content="{Binding Header}" Margin="4 4 4 4" FontSize="14" /> -->
                 <local:MainTabHeader />
             </DataTemplate>
             
@@ -156,6 +155,7 @@
                     
                     <dragablz:TabablzControl.HeaderSuffixContent>
                         <Grid MinWidth="64">
+                            <!-- Add new tab button -->
                             <Button HorizontalAlignment="Left"
                                     Command="{x:Static dragablz:TabablzControl.AddItemCommand}"
                                     Style="{StaticResource MaterialDesignIconForegroundButton}"
@@ -167,6 +167,7 @@
                                     Height="18" />
                             </Button>
                             
+                            <!-- Setting button -->
                             <Button HorizontalAlignment="Right"
                                     Command="{Binding OpenSettingPageCommand}"
                                     Style="{StaticResource MaterialDesignIconForegroundButton}"

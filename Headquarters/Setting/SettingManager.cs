@@ -22,7 +22,6 @@ public class SettingManager
             [
                 new MainTabData()
                 {
-                    Name = "New Tab",
                     IpList = []
                 }
             ]

@@ -10,24 +10,17 @@
              d:DesignHeight="300" d:DesignWidth="300">
     
     <StackPanel Orientation="Horizontal">
-        <Grid VerticalAlignment="Center">
-            <TextBlock Text="{Binding Header}" d:Text="DummyText"/>
-            
-            <!-- you should provide your own Thumb, which will be used to monitor dragging -->
-            <!-- <Thumb Style="{DynamicResource InvisibleThumbStyle}" -->
-            <!--        dragablz:DragablzItem.IsCustomThumb="True" /> -->
-        </Grid>        
-        <!-- <CheckBox IsChecked="{Binding IsSelected}" ToolTip="Embed your own controls" />             -->
-        <!-- <Button ToolTip="Manually add a close button" -->
-        <!--         Command="dragablz:TabablzControl.CloseItemCommand" -->
-        <!-- >X</Button> -->
-        
+                
         <materialDesign:PackIcon
             Visibility="{Binding IsLocked, Converter={StaticResource BooleanToVisibilityConverter}}"
             Kind="Lock"
-            Margin="8, 0"
+            Margin="0, 0, 4, 0"
             Width="16"
             Height="16" />
-
+        
+        <Grid VerticalAlignment="Center">
+            <TextBlock Text="{Binding Header}" d:Text="DummyText"/>
+        </Grid>        
+        
     </StackPanel>
 </UserControl>
