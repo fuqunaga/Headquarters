@@ -36,23 +36,19 @@
                 <materialDesign:PackIcon Kind="ScriptText" VerticalAlignment="Center" Margin="8,0,0,0" />
                 <Label Content="{Binding ScriptName}" VerticalAlignment="Center" />
 
-                <!-- Run Button -->
-                <materialDesign:Transitioner SelectedIndex="{Binding RunButton, Mode=OneWay, Converter={StaticResource EnumToIntConverter}}" Margin="16,0,8,0">
+                <!-- Setting Area -->
+                <materialDesign:Transitioner Margin="16,0,8,0">
+                    <materialDesign:Transitioner.Style>
+                        <Style TargetType="materialDesign:Transitioner">
+                            <Setter Property="SelectedIndex" Value="0" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                    <Setter Property="SelectedIndex" Value="1" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </materialDesign:Transitioner.Style>
 
-                    <!-- Select IP -->
-                    <materialDesign:TransitionerSlide>
-                        <materialDesign:TransitionerSlide.ForwardWipe>
-                            <local:CustomFadeWipe />
-                        </materialDesign:TransitionerSlide.ForwardWipe>
-
-                        <Button
-                            Margin="8"
-                            Style="{StaticResource MaterialDesignFloatingActionSecondaryButton}"
-                            HorizontalAlignment="Left"
-                            IsEnabled="False"
-                            Content="Select IP" />
-
-                    </materialDesign:TransitionerSlide>
 
                     <!-- Prepare Run -->
                     <materialDesign:TransitionerSlide>
@@ -64,14 +60,26 @@
                         </materialDesign:TransitionerSlide.ForwardWipe>
 
                         <DockPanel>
+                            <!-- Run Button -->
+                            <Button Command="{Binding RunCommand}"
+                                    IsEnabled="{Binding IsAnyIpSelected}"
+                                    Margin="8"
+                                     >
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionSecondaryButton}">
+                                        <Setter Property="Content" Value="{materialDesign:PackIcon Kind=MenuRight, Size=32}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsAnyIpSelected}" Value="False" >
+                                                <Setter Property="Content" Value="Select IP" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
 
-                            <Button
-                                Margin="8"
-                                Style="{StaticResource MaterialDesignFloatingActionSecondaryButton}"
-                                Command="{Binding RunCommand}"
-                                Content="{materialDesign:PackIcon Kind=MenuRight, Size=32}" />
-                            
+
                             <ToggleButton IsChecked="{Binding IsStopOnError, Mode=TwoWay}"
+                                          
                                 Margin="16 0 8 0"/>
                             <Label Content="エラー時にすべてのタスクを停止する"
                                    VerticalAlignment="Center" />
@@ -160,10 +168,7 @@
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
                                 >
-                            <TextBlock
-                                HorizontalAlignment="Left"
-                                
-                                 >
+                            <TextBlock HorizontalAlignment="Left">
                                 <TextBlock.Style>
                                     <Style TargetType="{x:Type TextBlock}">
                                         <Setter Property="Text" Value="{Binding HelpFirstLine}" />

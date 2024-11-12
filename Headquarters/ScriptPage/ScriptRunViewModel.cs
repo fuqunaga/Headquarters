@@ -17,13 +17,6 @@ public class ScriptRunViewModel : ViewModelBase
     
     #region Type Define
 
-    public enum RunButtonMode
-    {
-        SelectIp = 0,
-        PrepareRun = 1,
-        Running = 2,
-    };
-
     public static class ReservedParameterName
     {
         public const string MaxTaskCount = "MaxTaskCount";
@@ -36,11 +29,11 @@ public class ScriptRunViewModel : ViewModelBase
     private readonly Script _script;
     private readonly ParameterSet _scriptParameterSet;
         
-    private CancellationTokenSource? _cancelTokenSource;
-        
-    private RunButtonMode _runButtonMode = RunButtonMode.PrepareRun;
+    private bool _isRunning;
+    private bool _isAnyIpSelected;
     private bool _isStopOnError = true;
     private ObservableCollection<ScriptParameterViewModel> _parameterViewModels = [];
+    private CancellationTokenSource? _cancelTokenSource;
 
 
     #region Binding Properties
@@ -49,11 +42,18 @@ public class ScriptRunViewModel : ViewModelBase
         
     public string Description => _script.Description;
 
-    public RunButtonMode RunButton
+    public bool IsRunning
     {
-        get => _runButtonMode;
-        private set => SetProperty(ref _runButtonMode, value);
+        get => _isRunning;
+        private set => SetProperty(ref _isRunning, value);
     }
+    
+    public bool IsAnyIpSelected
+    {
+        get => _isAnyIpSelected;
+        private set => SetProperty(ref _isAnyIpSelected, value);
+    }
+    
         
     public ICommand RunCommand { get; }
     public ICommand StopCommand { get; }
@@ -137,27 +137,19 @@ public class ScriptRunViewModel : ViewModelBase
         {
             if (args.PropertyName == nameof(IpListDataGridViewModel.IsAllItemSelected))
             {
-                UpdateRunButton();
+                UpdateIsAnyIpSelected();
             }
         };
 
-        UpdateRunButton();
-    }
-
-
-    private void UpdateRunButton(bool force=false)
-    {
-        if (!force && RunButton == RunButtonMode.Running)
+        UpdateIsAnyIpSelected();
+        return;
+        
+        void UpdateIsAnyIpSelected()
         {
-            return;
+            IsAnyIpSelected = _ipListViewModel.DataGridViewModel.IsAllItemSelected ?? true;
         }
-                
-        var hasAnySelectedIp = _ipListViewModel.DataGridViewModel.IsAllItemSelected ?? true;
-        RunButton = (hasAnySelectedIp
-                ? RunButtonMode.PrepareRun
-                : RunButtonMode.SelectIp
-            );
     }
+
       
 
     private void RunCommandExecute(object? _)
@@ -222,8 +214,8 @@ public class ScriptRunViewModel : ViewModelBase
             
         OutputFieldViewModel.Clear();
         _script.Load();
-        RunButton = RunButtonMode.Running;
-            
+
+        IsRunning = true;
 
         using var cancelTokenSource = new CancellationTokenSource();
         _cancelTokenSource = cancelTokenSource;
@@ -231,7 +223,7 @@ public class ScriptRunViewModel : ViewModelBase
         await RunScriptFunctions(ipAndParameterList, _cancelTokenSource.Token);
             
         _cancelTokenSource = null;
-        UpdateRunButton(true);
+        IsRunning = false;
     }
 
     private async Task RunScriptFunctions(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken)
