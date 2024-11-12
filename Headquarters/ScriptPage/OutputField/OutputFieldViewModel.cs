@@ -88,12 +88,7 @@ public class OutputFieldViewModel : ViewModelBase
     
     private static string OutputUnitToString(IOutputUnit unit)
     {
-        var icon = unit.Icon switch
-        {
-            OutputIcon.Completed => "✅ ",
-            OutputIcon.Failed => "❌ ",
-            _ => ""
-        };
+        var icon = unit.Icon.GetEmoji();
 
         var text = unit.Text;
         return string.IsNullOrEmpty(text) 

@@ -269,7 +269,7 @@
 
                             <ListBoxItem  IsSelected="{Binding IsCompletedVisible, Mode=TwoWay}">
                                 <StackPanel Orientation="Horizontal">
-                                    <emoji:TextBlock Text="✅" FontSize="12" />
+                                    <emoji:TextBlock Text="{x:Static local:OutputIconEmoji.Completed}" FontSize="12" />
                                     <TextBlock Text="{Binding CompletedCount}"
                                            d:Text="123"
                                            Style="{StaticResource FilterTextBlock}"
@@ -280,7 +280,7 @@
 
                             <ListBoxItem IsSelected="{Binding IsFailedVisible, Mode=TwoWay}">
                                 <StackPanel Orientation="Horizontal" >
-                                    <emoji:TextBlock Text="❌" FontSize="12"/>
+                                    <emoji:TextBlock Text="{x:Static local:OutputIconEmoji.Failed}" FontSize="12"/>
                                     <TextBlock Text="{Binding FailedCount}"
                                            d:Text="456"
                                            Style="{StaticResource FilterTextBlock}" />
