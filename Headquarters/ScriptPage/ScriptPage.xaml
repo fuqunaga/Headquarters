@@ -11,7 +11,7 @@
              d:DesignHeight="500">
 
     <materialDesign:Transitioner SelectedIndex="{Binding Path=CurrentPage, Converter={StaticResource EnumToIntConverter}}">
-        <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect SlideInFromLeft}">
+        <materialDesign:TransitionerSlide>
             <materialDesign:TransitionerSlide.ForwardWipe>
                 <local:CustomFadeWipe />
             </materialDesign:TransitionerSlide.ForwardWipe>
