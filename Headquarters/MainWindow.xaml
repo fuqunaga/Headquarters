@@ -156,9 +156,11 @@
                     <dragablz:TabablzControl.HeaderSuffixContent>
                         <Grid MinWidth="64">
                             <!-- Add new tab button -->
+                            <!-- RippleAssist.IsDisabledをいれておくとタブを追加したときに表示が荒ぶるのが軽減する気がするので一旦いれとく -->
                             <Button HorizontalAlignment="Left"
                                     Command="{x:Static dragablz:TabablzControl.AddItemCommand}"
                                     Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                    materialDesign:RippleAssist.IsDisabled="True"
                                     Width="24"
                                     Height="24">
                                 <materialDesign:PackIcon
