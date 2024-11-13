@@ -26,12 +26,17 @@
                                   materialDesign:ElevationAssist.Elevation="Dp2">
             <DockPanel>
                 <!-- Return Button -->
-                <Button
-                    Command="{x:Static materialDesign:Transitioner.MovePreviousCommand}"
-                    Content="{materialDesign:PackIcon Kind=ArrowLeft, Size=24}"
-                    Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"
-                    Style="{StaticResource MaterialDesignToolButton}"
-                    HorizontalAlignment="Left" />
+                <Grid IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBoolConverter}}"
+                      Style="{StaticResource AddToolTipOfLockStyle}">
+                    
+                    <Button
+                        Command="{x:Static materialDesign:Transitioner.MovePreviousCommand}"
+                        Content="{materialDesign:PackIcon Kind=ArrowLeft, Size=24}"
+                        Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"
+                        Style="{StaticResource MaterialDesignToolButton}"
+                        HorizontalAlignment="Left" />
+                    
+                </Grid>
 
                 <materialDesign:PackIcon Kind="ScriptText" VerticalAlignment="Center" Margin="8,0,0,0" />
                 <Label Content="{Binding ScriptName}" VerticalAlignment="Center" />
@@ -78,14 +83,20 @@
                             </Button>
 
 
-                            <ToggleButton IsChecked="{Binding IsStopOnError, Mode=TwoWay}"
-                                          
-                                Margin="16 0 8 0"/>
-                            <Label Content="エラー時にすべてのタスクを停止する"
-                                   VerticalAlignment="Center" />
+                            <DockPanel IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBoolConverter}}"
+                                       Style="{StaticResource AddToolTipOfLockStyle}">
+                                <ToggleButton IsChecked="{Binding IsStopOnError, Mode=TwoWay}"
+                                              Margin="16 0 8 0"
+                                              Content="Hoge"
+                                              />
+                                <Label Content="エラー時にすべてのタスクを停止する"
+                                       VerticalAlignment="Center" />
+                            </DockPanel>
 
-                            <DockPanel HorizontalAlignment="Right">
-                                <Label VerticalAlignment="Center" Margin="4" 
+                            <DockPanel HorizontalAlignment="Right"
+                                       IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBoolConverter}}"
+                                       Style="{StaticResource AddToolTipOfLockStyle}">
+                                <Label VerticalAlignment="Center" Margin="4"
                                        Content="最大同時実行数"
                                        ToolTipService.ShowDuration="10000">
                                     <Label.ToolTip>
@@ -148,8 +159,9 @@
         <!-- Parameters -->
         <ItemsControl DockPanel.Dock="Top" Grid.IsSharedSizeScope="True"
                       ItemsSource="{Binding Parameters}"
-                       MaxHeight="200"
-                       Margin="0,16,0,0"
+                      IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBoolConverter}}"
+                      MaxHeight="200"
+                      Margin="0,16,0,0"
                       KeyboardNavigation.TabNavigation="Continue"
                       ScrollViewer.VerticalScrollBarVisibility="Disabled"
                       ScrollViewer.HorizontalScrollBarVisibility="Auto">

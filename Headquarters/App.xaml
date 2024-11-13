@@ -22,6 +22,14 @@
             <local:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
             <local:EnumToIntConverter x:Key="EnumToIntConverter" />
             <local:InverseBoolConverter x:Key="InverseBoolConverter" />
+            
+            <Style x:Key="AddToolTipOfLockStyle" TargetType="{x:Type FrameworkElement}">
+                <Setter Property="ToolTip" Value="操作するにはタブのロックを解除してください" />
+                <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
+                <Setter Property="ToolTipService.Placement" Value="Mouse" />
+                <Setter Property="ToolTipService.IsEnabled" Value="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InverseBoolConverter}}" />
+            </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

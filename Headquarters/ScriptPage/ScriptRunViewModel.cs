@@ -28,7 +28,8 @@ public class ScriptRunViewModel : ViewModelBase
     private readonly IpListViewModel _ipListViewModel;
     private readonly Script _script;
     private readonly ParameterSet _scriptParameterSet;
-        
+    
+    private bool _isLocked;
     private bool _isRunning;
     private bool _isAnyIpSelected;
     private bool _isStopOnError = true;
@@ -42,6 +43,12 @@ public class ScriptRunViewModel : ViewModelBase
         
     public string Description => _script.Description;
 
+    public bool IsLocked 
+    {
+        get => _isLocked;
+        set => SetProperty(ref _isLocked, value);
+    }
+    
     public bool IsRunning
     {
         get => _isRunning;
@@ -84,7 +91,6 @@ public class ScriptRunViewModel : ViewModelBase
     }
         
     public OutputFieldViewModel OutputFieldViewModel { get; } = new();
-        
 
     #endregion
 

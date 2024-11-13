@@ -25,9 +25,14 @@ public class MainTabViewModel : ViewModelBase
         private set => SetProperty(ref _header, value);
     }
     
-    public bool IsLocked {
+    public bool IsLocked 
+    {
         get => _isLocked;
-        set => SetProperty(ref _isLocked, value);
+        set { 
+            SetProperty(ref _isLocked, value);
+            IpListViewModel.IsLocked = value;
+            ScriptPageViewModel.CurrentScriptRunViewModel.IsLocked = value;
+        }
     }
 
     // nameはユーザーの入力して固定された名前

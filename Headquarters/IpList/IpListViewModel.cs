@@ -11,6 +11,13 @@ namespace Headquarters;
 public class IpListViewModel : ViewModelBase
 {
     private string _lastImportedFilePath = string.Empty;
+    private bool _isLocked;
+
+    public bool IsLocked
+    {
+        get => _isLocked;
+        set => SetProperty(ref _isLocked, value);
+    }
     
     public IpListDataGridViewModel DataGridViewModel { get; } = new();
     
