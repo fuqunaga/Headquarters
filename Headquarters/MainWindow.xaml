@@ -37,9 +37,14 @@
                 <Separator />
                 <MenuItem Header="Rename" Command="{Binding RenameTabCommand}" />
                 <Separator />
-                <MenuItem Command="{Binding ToggleLockCommand}" Style="{StaticResource LockMenuItemStyle}" />
+                <MenuItem Command="{Binding ToggleLockCommand}" Style="{StaticResource LockMenuItemStyle}"/>
                 <Separator />
-                <MenuItem Header="Close" Command="{Binding CloseTabCommand}"/>
+                <!-- うまくAddToolTipOfLockStyleを適用できないのでMenuItemのプロパティにセット -->
+                <MenuItem Header="Close" Command="{Binding CloseTabCommand}"
+                          ToolTip="{StaticResource LockedControlToolTip}"
+                          ToolTipService.ShowOnDisabled="True"
+                          ToolTipService.Placement="Mouse"
+                          ToolTipService.IsEnabled="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InverseBoolConverter}}" />
             </ContextMenu>
 
             <Style x:Key="TabItemStyle"  TargetType="{x:Type dragablz:DragablzItem}" BasedOn="{StaticResource CustomMaterialDesignDragableTabItemStyle}">
