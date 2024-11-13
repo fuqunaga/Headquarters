@@ -97,7 +97,8 @@ public class MainTabViewModel : ViewModelBase
     {
         return new MainTabData(IpListViewModel.DataGridViewModel.Items, _tabParameterSet)
         {
-            Name = Name
+            Name = Name,
+            IsLocked = IsLocked
         };
     }
     
