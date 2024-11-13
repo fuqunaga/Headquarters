@@ -12,6 +12,7 @@ public struct MainTabData
 {
     public string Name { get; set; } = "";
     public bool IsLocked { get; set; }
+    public string ScriptName { get; set; } = "";
     public List<Dictionary<string, string>> IpList { get; set; }
     public Dictionary<string, Dictionary<string, string>> TabParameterDictionary { get; set; }
 

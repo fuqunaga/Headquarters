@@ -62,10 +62,16 @@ public class ScriptPageViewModel : ViewModelBase
         );
     }
 
-    public void Initialize(IpListViewModel ipListViewModel, TabParameterSet tabParameterSet)
+    public void Initialize(IpListViewModel ipListViewModel, TabParameterSet tabParameterSet, string scriptName)
     {
         _ipListViewModel = ipListViewModel;
         _tabParameterSet = tabParameterSet;
+
+        var initialScript = Items.FirstOrDefault(scriptButtonViewModel => scriptButtonViewModel.Name == scriptName)?.Script;
+        if (initialScript is not null)
+        {
+            OnSelectScript(initialScript);
+        }
     }
 
 
