@@ -56,7 +56,7 @@ public class MainTabViewModel : ViewModelBase
     public MainTabViewModel(MainTabData data)
     {
         Name = data.Name;
-        IsLocked = data.IsLocked;
+        
         
         NewTabCommand = new DelegateCommand(_ => NewTab(this));
         DuplicateTabCommand = new DelegateCommand(_ => DuplicateTab(this));
@@ -67,7 +67,7 @@ public class MainTabViewModel : ViewModelBase
         IpListViewModel.DataGridViewModel.Items = data.CreateIpListDataTable();
 
         _tabParameterSet = data.CreateTabParameterSet();
-        ScriptPageViewModel.Initialize(IpListViewModel, _tabParameterSet);
+        ScriptPageViewModel.Initialize(IpListViewModel, _tabParameterSet, data.ScriptName);
         ScriptPageViewModel.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName == nameof(ScriptPageViewModel.CurrentPage))
@@ -77,6 +77,9 @@ public class MainTabViewModel : ViewModelBase
         };
         
         UpdateHeader();
+        
+        // ロックのセットはScriptPageの初期化後
+        IsLocked = data.IsLocked;
     }
 
     public MainTabViewModel() : this(new MainTabData())
@@ -97,7 +100,9 @@ public class MainTabViewModel : ViewModelBase
     {
         return new MainTabData(IpListViewModel.DataGridViewModel.Items, _tabParameterSet)
         {
-            Name = Name
+            Name = Name,
+            IsLocked = IsLocked,
+            ScriptName = ScriptPageViewModel.CurrentScriptRunViewModel.ScriptName
         };
     }
     
@@ -122,6 +127,7 @@ public class MainTabViewModel : ViewModelBase
         var viewModel =  new NameDialogViewModel()
         {
             Title = "Rename Tab",
+            OkButtonContent = "Rename",
             Name = Name
         };
         

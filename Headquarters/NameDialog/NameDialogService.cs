@@ -24,22 +24,21 @@ public static class NameDialogService
         Binding = binding ?? throw new InvalidOperationException("Binding not found.");
     }
 
+    public static async Task<(bool success, string)> ShowDialog(NameDialogViewModel viewModel, params ValidationRule[] validationRules)
+        => await ShowDialog(viewModel, false, validationRules);
+
     public static async Task<(bool success, string)> ShowDialog(NameDialogViewModel viewModel, bool allowEmpty = false,
         params ValidationRule[] validationRules)
         => await ShowDialog(viewModel, allowEmpty ? validationRules : validationRules.Append(NotEmptyValidationRule));
-    
-    public static async Task<(bool success, string)> ShowDialog(NameDialogViewModel viewModel, params ValidationRule[] validationRules)
-        => await ShowDialog(viewModel, validationRules.AsEnumerable());
-    
-    public static async Task<(bool success, string)> ShowDialog(NameDialogViewModel viewModel, IEnumerable<ValidationRule> validationRules)
+
+    private static async Task<(bool success, string)> ShowDialog(NameDialogViewModel viewModel, IEnumerable<ValidationRule> validationRules)
     {
-        Dialog.DataContext = viewModel;
-        
         foreach(var validationRule in validationRules)
         {
             Binding.ValidationRules.Add(validationRule);
         }
-
+        
+        Dialog.DataContext = viewModel;
         var result = await DialogHost.Show(Dialog, "RootDialog");
 
         Binding.ValidationRules.Clear();

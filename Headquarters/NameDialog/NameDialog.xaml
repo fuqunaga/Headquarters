@@ -15,16 +15,30 @@
 
     <StackPanel Margin="16">
         <Label Content="{Binding Title}" />
+        <!-- UpdateRouceTrigger==Default だとエンターでACCEPTしたとき文字列がViewModelに反映されない -->
         <TextBox x:Name="NameTextBox"
-                 Text = "{Binding Name}"
+                 Text = "{Binding Name, UpdateSourceTrigger=PropertyChanged}"
                  IsEnabled="{Binding IsEnabled}"
                  materialDesign:TextFieldAssist.SuffixText="{Binding Suffix}"
-                 Margin="0 8 0 0"
+                 Margin="0 14"
                  FontSize="18" />
+        
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+       
+            <Button IsCancel="True"
+                    Content="{Binding CancelButtonContent}"
+                    Style="{DynamicResource MaterialDesignOutlinedButton}"
+                    Width="100"
+                    Margin="0,8,8,0"
+                    Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
+                <Button.CommandParameter>
+                    <system:Boolean>False</system:Boolean>
+                </Button.CommandParameter>
+            </Button>
+            
             <Button IsDefault="True"
-                    Content="ACCEPT"
-                    Style="{DynamicResource MaterialDesignFlatButton}"
+                    Content="{Binding OkButtonContent}"
+                    Style="{DynamicResource MaterialDesignFlatDarkBgButton}"
                     Width="100"
                     Margin="0,8,8,0"
                     Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
@@ -37,16 +51,7 @@
                     </MultiBinding>
                 </Button.IsEnabled>
             </Button>
-            <Button IsCancel="True"
-                    Content="CANCEL"
-                    Style="{DynamicResource MaterialDesignFlatButton}"
-                    Width="100"
-                    Margin="0,8,8,0"
-                    Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
-                <Button.CommandParameter>
-                    <system:Boolean>False</system:Boolean>
-                </Button.CommandParameter>
-            </Button>
+            
         </StackPanel>
     </StackPanel>
 </UserControl>

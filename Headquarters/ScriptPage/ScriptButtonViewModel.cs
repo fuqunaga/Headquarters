@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Windows.Input;
 
 namespace Headquarters;
@@ -13,9 +12,8 @@ public class ScriptButtonViewModel : ViewModelBase
     public ICommand SelectCommand { get; }
 
     
-    private Script Script { get; }
-
-
+    public Script Script { get; }
+    
 
     public ScriptButtonViewModel(Script script, Action<Script>? onSelected)
     {
