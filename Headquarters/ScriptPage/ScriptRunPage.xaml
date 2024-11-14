@@ -22,8 +22,9 @@
 
 
     <DockPanel>
-        <materialDesign:ColorZone Mode="PrimaryDark" Padding="8,0,0,0" DockPanel.Dock="Top"
-                                  materialDesign:ElevationAssist.Elevation="Dp2">
+        <materialDesign:ColorZone DockPanel.Dock="Top"
+                                  Mode="PrimaryDark"
+                                  Padding="8,0,0,0" >
             <DockPanel>
                 <!-- Return Button -->
                 <Grid IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBoolConverter}}"

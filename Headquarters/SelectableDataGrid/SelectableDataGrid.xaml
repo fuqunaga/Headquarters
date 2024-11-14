@@ -37,20 +37,6 @@
             <DataTemplate x:Key="IsSelected">
                 <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </DataTemplate>
-
-            <!-- <ContextMenu x:Key="HeaderContextMenu"> -->
-            <!--     <MenuItem Header="Add" Command="{Binding AddColumnCommand}" /> -->
-            <!--     <MenuItem Header="Rename" Command="{Binding RenameColumnCommand}" -->
-            <!--               IsEnabled="{Binding DataContext.IsColumnEditable,RelativeSource={RelativeSource FindAncestor, AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" /> -->
-            <!--     <MenuItem Header="Delete" Command="{Binding DeleteColumnCommand}" -->
-            <!--               IsEnabled="{Binding DataContext.IsColumnEditable,RelativeSource={RelativeSource FindAncestor, AncestorType=DataGrid}, UpdateSourceTrigger=PropertyChanged}" /> -->
-            <!-- </ContextMenu> -->
-            <!-- -->
-            <!-- <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}"> -->
-            <!--     <Setter Property="ContextMenu" Value="{StaticResource HeaderContextMenu}" /> -->
-            <!--     ~1~ https://stackoverflow.com/questions/24928463/connect-handler-to-contextmenu-in-style-section @1@ -->
-            <!--     <EventSetter Event="ContextMenuOpening" Handler="OnHeaderContextMenuOpen" /> -->
-            <!-- </Style> -->
         </DataGrid.Resources>
     </DataGrid>
 
