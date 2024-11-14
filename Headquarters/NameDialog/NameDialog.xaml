@@ -15,8 +15,9 @@
 
     <StackPanel Margin="16">
         <Label Content="{Binding Title}" />
+        <!-- UpdateRouceTrigger==Default だとエンターでACCEPTしたとき文字列がViewModelに反映されない -->
         <TextBox x:Name="NameTextBox"
-                 Text = "{Binding Name}"
+                 Text = "{Binding Name, UpdateSourceTrigger=PropertyChanged}"
                  IsEnabled="{Binding IsEnabled}"
                  materialDesign:TextFieldAssist.SuffixText="{Binding Suffix}"
                  Margin="0 8 0 0"
