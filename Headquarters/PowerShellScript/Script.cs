@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Management.Automation.Language;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Headquarters
 {
@@ -46,6 +44,8 @@ namespace Headquarters
         private readonly Dictionary<string, ScriptFunction> _scriptFunctionDictionary = [];
         private CommentHelpInfo? _helpInfo;
         
+        public string  FilePath => filepath;
+
         public string Name { get; } = Path.GetFileNameWithoutExtension(filepath);
         public bool HasError => ParseErrors.Length > 0;
         public string Synopsis => _helpInfo?.Synopsis?.TrimEnd('\r', '\n') ?? "";
@@ -60,8 +60,7 @@ namespace Headquarters
         public ScriptFunction PreProcess => _scriptFunctionDictionary[PreProcessFunctionName];
         public ScriptFunction IpAddressProcess => _scriptFunctionDictionary[IpAddressProcessFunctionName];
         public ScriptFunction PostProcess => _scriptFunctionDictionary[PostProcessFunctionName];
-
-
+        
         public string GetParameterHelp(string parameterName)
         {
             if ( _helpInfo?.Parameters.TryGetValue(parameterName.ToUpper(), out var help) ?? false)
