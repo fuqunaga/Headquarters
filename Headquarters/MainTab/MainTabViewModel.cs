@@ -127,6 +127,7 @@ public class MainTabViewModel : ViewModelBase
         var viewModel =  new NameDialogViewModel()
         {
             Title = "Rename Tab",
+            OkButtonContent = "Rename",
             Name = Name
         };
         
