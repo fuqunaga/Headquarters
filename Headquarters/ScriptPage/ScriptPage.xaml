@@ -24,7 +24,9 @@
                 </Grid.RowDefinitions>
 
                 <materialDesign:ColorZone Grid.Row="0"
-                    Mode="PrimaryDark" Padding="16" materialDesign:ElevationAssist.Elevation="Dp2">
+                                          Mode="PrimaryDark"
+                                          Padding="8"
+                                          materialDesign:ElevationAssist.Elevation="Dp2">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="ScriptText" />
                         <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">Scripts</TextBlock>
