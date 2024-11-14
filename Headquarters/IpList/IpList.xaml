@@ -13,9 +13,12 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
-        <materialDesign:ColorZone Grid.Row="0" 
-            Mode="PrimaryDark" Padding="16,0" VerticalAlignment="Stretch">
+
+        <materialDesign:ColorZone Grid.Row="0"
+                                  Mode="PrimaryDark"
+                                  Padding="4"
+                                  materialDesign:ElevationAssist.Elevation="Dp2">
+
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />
@@ -58,10 +61,12 @@
             </Grid>
         </materialDesign:ColorZone>
 
-        <local:IpListDataGrid Grid.Row="1" 
-                              DataContext="{Binding DataGridViewModel}"
-                              IsEnabled="{Binding DataContext.IsLocked, Converter={StaticResource InverseBoolConverter}, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:IpList}}}"
-                              Style="{StaticResource AddToolTipOfLockStyle}"
-                              />
+        <local:IpListDataGrid Grid.Row="1"
+                               DataContext="{Binding DataGridViewModel}" 
+                               IsEnabled="{Binding DataContext.IsLocked, Converter={StaticResource InverseBoolConverter}, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:IpList}}}" 
+                               Style="{StaticResource AddToolTipOfLockStyle}" 
+                               Margin="0 4 0 0"
+                               />
+
     </Grid>
 </UserControl>

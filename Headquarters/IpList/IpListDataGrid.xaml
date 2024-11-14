@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
              xmlns:local="clr-namespace:Headquarters"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:IpListDataGridViewModel, IsDesignTimeCreatable=True}"
@@ -22,6 +23,12 @@
 
         <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
             <Setter Property="ContextMenu" Value="{StaticResource HeaderContextMenu}" />
+            <Setter Property="Background" Value="#22000000" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+
+        <Style TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
+            <Setter Property="GridLinesVisibility" Value="All" />
         </Style>
     </UserControl.Resources>
     
