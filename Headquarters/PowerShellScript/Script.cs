@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Management.Automation.Language;
+using System.Threading;
 
 namespace Headquarters
 {
@@ -40,6 +41,7 @@ namespace Headquarters
         
         #endregion
 
+        public event Action? onLoad;
         
         private readonly Dictionary<string, ScriptFunction> _scriptFunctionDictionary = [];
         private CommentHelpInfo? _helpInfo;
@@ -47,7 +49,7 @@ namespace Headquarters
         public string  FilePath => filepath;
 
         public string Name { get; } = Path.GetFileNameWithoutExtension(filepath);
-        public bool HasError => ParseErrors.Length > 0;
+        public bool HasParseError => ParseErrors.Length > 0;
         public string Synopsis => _helpInfo?.Synopsis?.TrimEnd('\r', '\n') ?? "";
         public string Description => _helpInfo?.Description?.TrimEnd('\r', '\n') ?? "";
         
@@ -70,9 +72,13 @@ namespace Headquarters
 
             return string.Empty;
         }
-        
-        
-        public void Load() => ParseScript();
+
+
+        public void Load()
+        {
+            ParseScript();
+            onLoad?.Invoke();
+        }
 
         private void ParseScript()
         {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 
 namespace Headquarters;
@@ -87,7 +88,7 @@ public class ScriptDirectoryWatcher : IDisposable
             // メインスレッドで呼ぶようにする
 
 
-            // _watcher.Changed += OnChanged;
+            _watcher.Changed += (_, e) => CallOnMainThread(() => OnScriptChanged(e.FullPath));
             _watcher.Created += (_, e) => CallOnMainThread(() => OnScriptCreated(e.FullPath));
             _watcher.Deleted += (_, e) => CallOnMainThread(() => OnScriptDeleted(e.FullPath));
             // _watcher.Renamed += (_,_) => ReloadScripts();
@@ -96,7 +97,7 @@ public class ScriptDirectoryWatcher : IDisposable
         LoadScripts();
         _watcher.EnableRaisingEvents = true;
     }
-
+    
     private void LoadScripts()
     {
         var filePaths = Directory.GetFiles(_folderPath, ScriptSearchPattern)
@@ -114,6 +115,13 @@ public class ScriptDirectoryWatcher : IDisposable
         {
             Scripts.Add(script);
         }
+    }
+    
+    private void OnScriptChanged(string filePath)
+    {
+        var script = Scripts.FirstOrDefault(s => s.FilePath == filePath);
+        Thread.Sleep(10); // ファイルがロックされている場合があるので少し待つ
+        script?.Load();
     }
 
     private void OnScriptCreated(string filePath)
@@ -140,11 +148,6 @@ public class ScriptDirectoryWatcher : IDisposable
         }
     }
     
-
-    private void OnChanged(object sender, FileSystemEventArgs e)
-    {
-        Console.WriteLine($"Changed: {e.FullPath}");
-    }
     
 
     private static void CallOnMainThread(Action action)

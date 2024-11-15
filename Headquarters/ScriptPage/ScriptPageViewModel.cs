@@ -62,25 +62,34 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
             case NotifyCollectionChangedAction.Add:
                 if (e.NewItems?[0] is Script s)
                     Items.Insert(e.NewStartingIndex, ScriptToViewModel(s));
-                return;
+                break;
 
             case NotifyCollectionChangedAction.Remove:
                 if (e.OldStartingIndex >= 0)
+                {
+                    Items[e.OldStartingIndex].Dispose();
                     Items.RemoveAt(e.OldStartingIndex);
-                return;
+                }
+                break;
 
             case NotifyCollectionChangedAction.Replace:
                 if (e.NewItems?[0] is Script replaceItem)
                     Items[e.NewStartingIndex] = ScriptToViewModel(replaceItem);
-                return;
+                break;
             
             case NotifyCollectionChangedAction.Move:
                 throw new NotImplementedException();
-            
+
             case NotifyCollectionChangedAction.Reset:
-                Items.Clear();
+                {
+                    foreach (var item in Items)
+                    {
+                        item.Dispose();
+                    }
+                    Items.Clear();
+                }
                 break;
-            
+
             default:
                 throw new ArgumentOutOfRangeException();
         }
