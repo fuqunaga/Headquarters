@@ -160,10 +160,10 @@ public class ScriptRunViewModel : ViewModelBase
 
     private void RunCommandExecute(object? _)
     {
-        Run(_ipListViewModel.DataGridViewModel.SelectedParams.ToList());
+        Task.Run(() => Run(_ipListViewModel.DataGridViewModel.SelectedParams.ToList()));
     }
 
-    private async void Run(IReadOnlyList<IpParameterSet> ipParamsList)
+    private async Task Run(IReadOnlyList<IpParameterSet> ipParamsList)
     {
         var ipAndParameterList = ipParamsList.SelectMany(ipParams =>
             {

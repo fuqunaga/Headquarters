@@ -60,7 +60,9 @@ public class MainTabViewModel : ViewModelBase, IDisposable
         
         NewTabCommand = new DelegateCommand(_ => NewTab());
         DuplicateTabCommand = new DelegateCommand(_ => DuplicateTab());
-        RenameTabCommand = new DelegateCommand(_ => RenameTab());
+        // CS4014: Because this call is not awaited, execution of the current method continues before the call is completed.
+        // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/cs4014?redirectedfrom=MSDN
+        RenameTabCommand = new DelegateCommand((_) => { var suppressWarning = RenameTab(); });
         ToggleLockCommand = new DelegateCommand(_ => IsLocked = !IsLocked);
         CloseTabCommand = new DelegateCommand(_ => CloseTab(), _ => !IsLocked);
         
@@ -127,7 +129,7 @@ public class MainTabViewModel : ViewModelBase, IDisposable
         TabablzControl.SelectItem(newItem);
     }
     
-    private async void RenameTab()
+    private async Task RenameTab()
     {
         var viewModel =  new NameDialogViewModel()
         {

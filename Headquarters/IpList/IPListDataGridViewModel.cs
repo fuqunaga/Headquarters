@@ -19,9 +19,11 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
 
     public IpListDataGridViewModel()
     {
-        AddColumnCommand = new DelegateCommand(_ => AddColumn());
-        RenameColumnCommand = new DelegateCommand(RenameColumn, IsColumnNameEditable);
-        DeleteColumnCommand = new DelegateCommand(DeleteColumn, IsColumnNameEditable);
+        // CS4014: Because this call is not awaited, execution of the current method continues before the call is completed.
+        // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/cs4014?redirectedfrom=MSDN
+        AddColumnCommand = new DelegateCommand(_ => {var suppressWarning = AddColumn();});
+        RenameColumnCommand = new DelegateCommand(o => {var suppressWarning = RenameColumn(o); }, IsColumnNameEditable);
+        DeleteColumnCommand = new DelegateCommand(o => {var suppressWarning = DeleteColumn(o); }, IsColumnNameEditable);
     }
 
     private bool IsColumnNameEditable(object? obj)
@@ -39,9 +41,9 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
         
         return (string)header.Content;
     }
-    
-    
-    public async void AddColumn()
+
+
+    private async Task AddColumn()
     {
         var (success, name) = await ShowColumnNameDialog("Add Column", "Add");
         if (!success) return;
@@ -51,7 +53,7 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
         RefreshDataGrid();
     }
 
-    public async void RenameColumn(object? obj)
+    private async Task RenameColumn(object? obj)
     {
         var name = GetColumnNameFromMenuItem(obj);
         
@@ -67,7 +69,7 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
         }
     }
 
-    private async void DeleteColumn(object? obj)
+    private async Task DeleteColumn(object? obj)
     {
         var name = GetColumnNameFromMenuItem(obj);
 
