@@ -48,11 +48,11 @@ namespace Headquarters
         public string  FilePath => filepath;
 
         public string Name { get; } = Path.GetFileNameWithoutExtension(filepath);
-        public bool HasParseError => ParseErrors.Length > 0;
+        public bool HasParseError => ParseErrors.Count > 0;
         public string Synopsis => _helpInfo?.Synopsis?.TrimEnd('\r', '\n') ?? "";
         public string Description => _helpInfo?.Description?.TrimEnd('\r', '\n') ?? "";
         
-        public ParseError[] ParseErrors { get; private set; } = [];        
+        public IReadOnlyCollection<ParseError> ParseErrors { get; private set; } = [];        
         public IEnumerable<string> EditableParameterNames => _scriptFunctionDictionary.Values.SelectMany(f => f.ParameterNames).Distinct().Except(ReservedParameterNames);
 
         public bool HasPreProcess => _scriptFunctionDictionary.ContainsKey(PreProcessFunctionName);
@@ -82,12 +82,6 @@ namespace Headquarters
         private void ParseScript()
         {
             var ast = Parser.ParseFile(filepath, out _, out var parseErrors);
-
-            if (parseErrors.Length > 0)
-            {
-                ParseErrors = parseErrors;
-                return;
-            }
             
             var functionDefinitions = ast
                 .FindAll(item => item is FunctionDefinitionAst, searchNestedScriptBlocks: false)
@@ -112,6 +106,8 @@ namespace Headquarters
             }
             
             _helpInfo = ast.GetHelpContent();
+            
+            ParseErrors = parseErrors ?? Array.Empty<ParseError>();
         }
     }
 }

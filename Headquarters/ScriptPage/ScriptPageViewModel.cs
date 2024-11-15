@@ -53,6 +53,16 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
     public void Dispose()
     {
         _watcher.Scripts.CollectionChanged -= OnScriptsChanged;
+        
+        foreach (var item in Items)
+        {
+            item.Dispose();
+        }
+        
+        foreach(var scriptRunViewModel in  _scriptRunViewModelDictionary.Values)
+        {
+            scriptRunViewModel.Dispose();
+        }
     }
     
     private void OnScriptsChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -133,11 +143,6 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
             );
 
             _scriptRunViewModelDictionary[script] = scriptRunViewModel;
-        }
-        else
-        {
-            // スクリプトを編集してる場合を想定して選択するたびにViewModelをリセットする
-            scriptRunViewModel.ResetScript(_tabParameterSet.GetScriptParameterSet(script.Name));
         }
         
         CurrentScriptRunViewModel = scriptRunViewModel;

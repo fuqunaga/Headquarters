@@ -11,10 +11,8 @@ using IpAndParameterList = System.Collections.Generic.List<(string ipString, Sys
 
 namespace Headquarters;
 
-public class ScriptRunViewModel : ViewModelBase
+public class ScriptRunViewModel : ViewModelBase, IDisposable
 {
-    
-    
     #region Type Define
 
     public static class ReservedParameterName
@@ -29,32 +27,41 @@ public class ScriptRunViewModel : ViewModelBase
     private readonly Script _script;
     private readonly ParameterSet _scriptParameterSet;
     
+    private string _scriptName = "";
+    private string _description = "";
     private bool _isLocked;
     private bool _isRunning;
     private bool _isAnyIpSelected;
     private bool _isStopOnError = true;
-    private ObservableCollection<ScriptParameterViewModel> _parameterViewModels = [];
     private CancellationTokenSource? _cancelTokenSource;
 
 
     #region Binding Properties
 
-    public string ScriptName => _script.Name;
-        
-    public string Description => _script.Description;
+    public string ScriptName
+    {
+        get => _scriptName;
+        private set => SetProperty(ref _scriptName, value);
+    }
 
-    public bool IsLocked 
+    public string Description
+    {
+        get => _description;
+        private set => SetProperty(ref _description, value);
+    }
+
+    public bool IsLocked
     {
         get => _isLocked;
         set => SetProperty(ref _isLocked, value);
     }
-    
+
     public bool IsRunning
     {
         get => _isRunning;
         private set => SetProperty(ref _isRunning, value);
     }
-    
+
     public bool IsAnyIpSelected
     {
         get => _isAnyIpSelected;
@@ -71,11 +78,7 @@ public class ScriptRunViewModel : ViewModelBase
         set => SetProperty(ref _isStopOnError, value);
     }
 
-    public ObservableCollection<ScriptParameterViewModel> Parameters
-    {
-        get => _parameterViewModels;
-        private set => SetProperty(ref _parameterViewModels, value);
-    }
+    public ObservableCollection<ScriptParameterViewModel> Parameters { get; } = [];
         
     public int MaxTaskCount
     {
@@ -105,16 +108,23 @@ public class ScriptRunViewModel : ViewModelBase
         StopCommand = new DelegateCommand(_ => Stop());
             
         _script = script;
+        _script.onLoad += OnUpdateScript;
+        
         _scriptParameterSet = scriptParameterSet;
         _ipListViewModel = ipListViewModel;
             
-        ResetScript(scriptParameterSet);
-        InitializeIpListViewModel();
+        OnUpdateScript();
+        SubscribeIpListViewModel();
+    }
+    
+    public void Dispose()
+    {
+        _script.onLoad -= OnUpdateScript;
     }
 
-    public void ResetScript(ParameterSet scriptParameterSet)
+
+    private void OnUpdateScript()
     {
-        _script.Load();
         Parameters.Clear();
         foreach (var parameterName in _script.EditableParameterNames)
         {
@@ -122,22 +132,21 @@ public class ScriptRunViewModel : ViewModelBase
                 parameterName,
                 _script.GetParameterHelp(parameterName),
                 _ipListViewModel,
-                scriptParameterSet)
+                _scriptParameterSet)
             );
         }
 
-        OnPropertyChanged(nameof(ScriptName));
-            
-        OutputFieldViewModel.Clear();
+        ScriptName = _script.Name;
+        Description = _script.Description;
 
-        if (_script.HasParseError)
-        {
-            OutputFieldViewModel.AddOutputUnit(new TextOutput(OutputIcon.Failure, "Script Parse Error", $"{string.Join("\n\n", _script.ParseErrors.Select(e => e.ToString()))}"));
-            OutputFieldViewModel.UpdateOutput();
-        }
+        OutputFieldViewModel.Clear();
+        if (!_script.HasParseError) return;
+        
+        OutputFieldViewModel.AddOutputUnit(new TextOutput(OutputIcon.Failure, "Script Parse Error", $"{string.Join("\n\n", _script.ParseErrors.Select(e => e.ToString()))}"));
+        OutputFieldViewModel.UpdateOutput();
     }
         
-    private void InitializeIpListViewModel()
+    private void SubscribeIpListViewModel()
     {
         _ipListViewModel.DataGridViewModel.PropertyChanged += (_, args) =>
         {
@@ -163,7 +172,7 @@ public class ScriptRunViewModel : ViewModelBase
         Task.Run(() => Run(_ipListViewModel.DataGridViewModel.SelectedParams.ToList()));
     }
 
-    private async Task Run(IReadOnlyList<IpParameterSet> ipParamsList)
+    private async Task Run(IEnumerable<IpParameterSet> ipParamsList)
     {
         var ipAndParameterList = ipParamsList.SelectMany(ipParams =>
             {
@@ -219,7 +228,6 @@ public class ScriptRunViewModel : ViewModelBase
             
             
         OutputFieldViewModel.Clear();
-        _script.Load();
 
         IsRunning = true;
 
