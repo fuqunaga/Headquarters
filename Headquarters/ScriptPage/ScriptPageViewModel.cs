@@ -89,9 +89,12 @@ public class ScriptPageViewModel : ViewModelBase
                 return;
             
             case NotifyCollectionChangedAction.Move:
-                break;
+                throw new NotImplementedException();
+            
             case NotifyCollectionChangedAction.Reset:
+                Items.Clear();
                 break;
+            
             default:
                 throw new ArgumentOutOfRangeException();
         }

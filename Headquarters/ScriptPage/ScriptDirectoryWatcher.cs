@@ -54,9 +54,9 @@ public class ScriptDirectoryWatcher : IDisposable
         _directoryWatcher = new FileSystemWatcher(parentDirectory.FullName, directoryName);
         _directoryWatcher.NotifyFilter = NotifyFilters.DirectoryName | NotifyFilters.LastWrite;
         
-        _directoryWatcher.Created += (_, _) => OnDirectoryExistChanged(true);
-        _directoryWatcher.Deleted += (_, _) => OnDirectoryExistChanged(false);
-        _directoryWatcher.Renamed += (_, e) => OnDirectoryExistChanged(e.Name == directoryName);
+        _directoryWatcher.Created += (_, _) => CallOnMainThread(() => OnDirectoryExistChanged(true));
+        _directoryWatcher.Deleted += (_, _) => CallOnMainThread(() => OnDirectoryExistChanged(false));
+        _directoryWatcher.Renamed += (_, e) => CallOnMainThread(() => OnDirectoryExistChanged(e.Name == directoryName));
         
         _directoryWatcher.EnableRaisingEvents = true;
         
@@ -71,6 +71,7 @@ public class ScriptDirectoryWatcher : IDisposable
             if (_watcher != null)
             {
                 _watcher.EnableRaisingEvents = false;
+                Scripts.Clear();
             }
             
             return;
@@ -84,8 +85,8 @@ public class ScriptDirectoryWatcher : IDisposable
             // Application.Current.Dispatcher.Invokeでメインスレッドで呼ぶ
             
             // _watcher.Changed += OnChanged;
-            _watcher.Created += (_, e) => Application.Current.Dispatcher.Invoke(() =>OnScriptCreated(e.FullPath));
-            _watcher.Deleted += (_, e) => Application.Current.Dispatcher.Invoke(() =>OnScriptDeleted(e.FullPath));
+            _watcher.Created += (_, e) => CallOnMainThread(() =>OnScriptCreated(e.FullPath));
+            _watcher.Deleted += (_, e) => CallOnMainThread(() =>OnScriptDeleted(e.FullPath));
             // _watcher.Renamed += (_,_) => ReloadScripts();
         }
         
@@ -97,7 +98,7 @@ public class ScriptDirectoryWatcher : IDisposable
     {
         var filePaths = Directory.GetFiles(_folderPath, ScriptSearchPattern)
             .Where(s => s.EndsWith(ScriptExtension)) // GetFiles includes *.ps1*. (*.ps1~, *.ps1_, etc.)
-            .OrderBy(Path.GetFileName);
+            .OrderBy(Path.GetFileNameWithoutExtension);
 
         var scripts = filePaths.Select(path =>
         {
@@ -143,7 +144,10 @@ public class ScriptDirectoryWatcher : IDisposable
     }
     
 
-    
+    private static void CallOnMainThread(Action action)
+    {
+        Application.Current.Dispatcher.Invoke(action);
+    }
 
     public void Dispose()
     {
