@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Management.Automation.Language;
-using System.Threading;
 
 namespace Headquarters
 {
@@ -15,7 +14,7 @@ namespace Headquarters
         private const string IpAddressProcessFunctionName = "IpAddressProcess";
         private const string PostProcessFunctionName = "PostProcess";
 
-        private static readonly HashSet<string> ReservedFunctionNames = new(
+        private static readonly IReadOnlyCollection<string> ReservedFunctionNames = new HashSet<string>(
             [
                 PreProcessFunctionName,
                 IpAddressProcessFunctionName,
