@@ -54,6 +54,8 @@ public class ScriptDirectoryWatcher : IDisposable
         _directoryWatcher = new FileSystemWatcher(parentDirectory.FullName, directoryName);
         _directoryWatcher.NotifyFilter = NotifyFilters.DirectoryName | NotifyFilters.LastWrite;
         
+        // イベントは別スレッドで呼ばれるのでそのままUIスレッドの処理までつなげると例外になる
+        // メインスレッドで呼ぶようにする
         _directoryWatcher.Created += (_, _) => CallOnMainThread(() => OnDirectoryExistChanged(true));
         _directoryWatcher.Deleted += (_, _) => CallOnMainThread(() => OnDirectoryExistChanged(false));
         _directoryWatcher.Renamed += (_, e) => CallOnMainThread(() => OnDirectoryExistChanged(e.Name == directoryName));
@@ -81,12 +83,13 @@ public class ScriptDirectoryWatcher : IDisposable
         {
             _watcher = new FileSystemWatcher(_folderPath, ScriptSearchPattern);
         
-            // イベントは別スレッドで呼ばれるので注意
-            // Application.Current.Dispatcher.Invokeでメインスレッドで呼ぶ
-            
+            // イベントは別スレッドで呼ばれるのでそのままUIスレッドの処理までつなげると例外になる
+            // メインスレッドで呼ぶようにする
+
+
             // _watcher.Changed += OnChanged;
-            _watcher.Created += (_, e) => CallOnMainThread(() =>OnScriptCreated(e.FullPath));
-            _watcher.Deleted += (_, e) => CallOnMainThread(() =>OnScriptDeleted(e.FullPath));
+            _watcher.Created += (_, e) => CallOnMainThread(() => OnScriptCreated(e.FullPath));
+            _watcher.Deleted += (_, e) => CallOnMainThread(() => OnScriptDeleted(e.FullPath));
             // _watcher.Renamed += (_,_) => ReloadScripts();
         }
         

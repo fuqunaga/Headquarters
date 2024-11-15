@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Headquarters;
 
-public class ScriptPageViewModel : ViewModelBase
+public class ScriptPageViewModel : ViewModelBase, IDisposable
 {
     public enum Page
     {
@@ -14,6 +14,7 @@ public class ScriptPageViewModel : ViewModelBase
         RunScript
     }
     
+    private ScriptDirectoryWatcher _watcher;
     private Page _currentPage;
     private IpListViewModel? _ipListViewModel;
     private TabParameterSet? _tabParameterSet;
@@ -41,34 +42,19 @@ public class ScriptPageViewModel : ViewModelBase
 
     public ScriptPageViewModel(string folderPath)
     {
-        var watcher = ScriptDirectoryWatcher.GetOrCreate(folderPath);
-        watcher.Scripts.CollectionChanged += OnScriptsChanged;
-
+        _watcher = ScriptDirectoryWatcher.GetOrCreate(folderPath);
+        _watcher.Scripts.CollectionChanged += OnScriptsChanged;
         
         Items = new ObservableCollection<ScriptButtonViewModel>(
-            watcher.Scripts.Select(s => new ScriptButtonViewModel(s, OnSelectScript))
+            _watcher.Scripts.Select(s => new ScriptButtonViewModel(s, OnSelectScript))
         );
-        
-        // if (!Directory.Exists(folderPath))
-        // {
-        //     return;
-        // }
-        //
-        //
-        // var filePaths = Directory.GetFiles(folderPath, "*.ps1")
-        //     .Where(s => s.EndsWith(".ps1")) // GetFiles includes *.ps1*. (*.ps1~, *.ps1_, etc.)
-        //     .OrderBy(Path.GetFileName);
-        //
-        // var scripts = filePaths.Select(path =>
-        // {
-        //     var script = new Script(path);
-        //     script.Load();
-        //     return script;
-        // });
-
-
     }
-
+    
+    public void Dispose()
+    {
+        _watcher.Scripts.CollectionChanged -= OnScriptsChanged;
+    }
+    
     private void OnScriptsChanged(object sender, NotifyCollectionChangedEventArgs e)
     {
         switch (e.Action)
