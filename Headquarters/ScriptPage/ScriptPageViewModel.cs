@@ -14,7 +14,7 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         RunScript
     }
     
-    private ScriptDirectoryWatcher _watcher;
+    private readonly ScriptDirectoryWatcher _watcher;
     private Page _currentPage;
     private IpListViewModel? _ipListViewModel;
     private TabParameterSet? _tabParameterSet;

@@ -48,11 +48,11 @@ namespace Headquarters
         public string  FilePath => filepath;
 
         public string Name { get; } = Path.GetFileNameWithoutExtension(filepath);
-        public bool HasParseError => ParseErrors.Count > 0;
+        public bool HasParseError => ParseErrorMessages.Count > 0;
         public string Synopsis => _helpInfo?.Synopsis?.TrimEnd('\r', '\n') ?? "";
         public string Description => _helpInfo?.Description?.TrimEnd('\r', '\n') ?? "";
         
-        public IReadOnlyCollection<ParseError> ParseErrors { get; private set; } = [];        
+        public List<string> ParseErrorMessages { get; private set; } = [];        
         public IEnumerable<string> EditableParameterNames => _scriptFunctionDictionary.Values.SelectMany(f => f.ParameterNames).Distinct().Except(ReservedParameterNames);
 
         public bool HasPreProcess => _scriptFunctionDictionary.ContainsKey(PreProcessFunctionName);
@@ -81,13 +81,22 @@ namespace Headquarters
 
         private void ParseScript()
         {
+            _scriptFunctionDictionary.Clear();
+            _helpInfo = null;
+            ParseErrorMessages.Clear();
+            
+            if (!File.Exists(filepath))
+            {
+                // ファイルが見つからないときのParser.ParseFile()のParseErrorの文言が変なので自前で作成
+                ParseErrorMessages.Add($"ファイル[{filepath}]が見つかりませんでした");
+                return;
+            }
+
             var ast = Parser.ParseFile(filepath, out _, out var parseErrors);
             
             var functionDefinitions = ast
                 .FindAll(item => item is FunctionDefinitionAst, searchNestedScriptBlocks: false)
                 .OfType<FunctionDefinitionAst>();
-            
-            _scriptFunctionDictionary.Clear();
             
             // 予約済み関数を取得
             foreach(var functionDefinition in functionDefinitions)
@@ -106,8 +115,11 @@ namespace Headquarters
             }
             
             _helpInfo = ast.GetHelpContent();
-            
-            ParseErrors = parseErrors ?? Array.Empty<ParseError>();
+
+            if (parseErrors != null)
+            {
+                ParseErrorMessages.AddRange(parseErrors.Select(e => e.ToString()));
+            }
         }
     }
 }
