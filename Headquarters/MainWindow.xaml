@@ -8,8 +8,10 @@
         xmlns:local="clr-namespace:Headquarters"
         Style="{StaticResource MaterialDesignWindow}"
         mc:Ignorable="d"
-        d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
-        Title="Headquarters">
+        Title="Headquarters"
+        Width="1600"
+        Height="900"
+        d:DataContext="{d:DesignInstance local:MainWindowViewModel}">
     
     <Window.Resources>
         <ResourceDictionary>

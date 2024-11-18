@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
+using System.Collections.Specialized;
 using System.Linq;
 
 namespace Headquarters;
 
-public class ScriptPageViewModel : ViewModelBase
+public class ScriptPageViewModel : ViewModelBase, IDisposable
 {
     public enum Page
     {
@@ -14,6 +14,7 @@ public class ScriptPageViewModel : ViewModelBase
         RunScript
     }
     
+    private readonly ScriptDirectoryWatcher _watcher;
     private Page _currentPage;
     private IpListViewModel? _ipListViewModel;
     private TabParameterSet? _tabParameterSet;
@@ -41,25 +42,71 @@ public class ScriptPageViewModel : ViewModelBase
 
     public ScriptPageViewModel(string folderPath)
     {
-        if (!Directory.Exists(folderPath))
+        _watcher = ScriptDirectoryWatcher.GetOrCreate(folderPath);
+        _watcher.Scripts.CollectionChanged += OnScriptsChanged;
+        
+        Items = new ObservableCollection<ScriptButtonViewModel>(
+            _watcher.Scripts.Select(s => new ScriptButtonViewModel(s, OnSelectScript))
+        );
+    }
+    
+    public void Dispose()
+    {
+        _watcher.Scripts.CollectionChanged -= OnScriptsChanged;
+        
+        foreach (var item in Items)
         {
-            return;
+            item.Dispose();
         }
         
-        var filePaths = Directory.GetFiles(folderPath, "*.ps1")
-            .Where(s => s.EndsWith(".ps1")) // GetFiles includes *.ps1*. (*.ps1~, *.ps1_, etc.)
-            .OrderBy(Path.GetFileName);
-
-        var scripts = filePaths.Select(path =>
+        foreach(var scriptRunViewModel in  _scriptRunViewModelDictionary.Values)
         {
-            var script = new Script(path);
-            script.Load();
-            return script;
-        });
+            scriptRunViewModel.Dispose();
+        }
+    }
+    
+    private void OnScriptsChanged(object sender, NotifyCollectionChangedEventArgs e)
+    {
+        switch (e.Action)
+        {
+            case NotifyCollectionChangedAction.Add:
+                if (e.NewItems?[0] is Script s)
+                    Items.Insert(e.NewStartingIndex, ScriptToViewModel(s));
+                break;
 
-        Items = new ObservableCollection<ScriptButtonViewModel>(
-            scripts.Select(s => new ScriptButtonViewModel(s, OnSelectScript))
-        );
+            case NotifyCollectionChangedAction.Remove:
+                if (e.OldStartingIndex >= 0)
+                {
+                    Items[e.OldStartingIndex].Dispose();
+                    Items.RemoveAt(e.OldStartingIndex);
+                }
+                break;
+
+            case NotifyCollectionChangedAction.Replace:
+                if (e.NewItems?[0] is Script replaceItem)
+                    Items[e.NewStartingIndex] = ScriptToViewModel(replaceItem);
+                break;
+            
+            case NotifyCollectionChangedAction.Move:
+                throw new NotImplementedException();
+
+            case NotifyCollectionChangedAction.Reset:
+                {
+                    foreach (var item in Items)
+                    {
+                        item.Dispose();
+                    }
+                    Items.Clear();
+                }
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        return;
+
+        ScriptButtonViewModel ScriptToViewModel(Script s) => new(s, OnSelectScript);
     }
 
     public void Initialize(IpListViewModel ipListViewModel, TabParameterSet tabParameterSet, string scriptName)
@@ -67,11 +114,14 @@ public class ScriptPageViewModel : ViewModelBase
         _ipListViewModel = ipListViewModel;
         _tabParameterSet = tabParameterSet;
 
-        var initialScript = Items.FirstOrDefault(scriptButtonViewModel => scriptButtonViewModel.Name == scriptName)?.Script;
-        if (initialScript is not null)
+        if (string.IsNullOrEmpty(scriptName))
         {
-            OnSelectScript(initialScript);
+            return;
         }
+
+        var initialScript = Items.FirstOrDefault(scriptButtonViewModel => scriptButtonViewModel.Name == scriptName)?.Script;
+        initialScript ??= _watcher.GetOrCreateNonExistentScript(scriptName);
+        OnSelectScript(initialScript);
     }
 
 
@@ -96,11 +146,6 @@ public class ScriptPageViewModel : ViewModelBase
             );
 
             _scriptRunViewModelDictionary[script] = scriptRunViewModel;
-        }
-        else
-        {
-            // スクリプトを編集してる場合を想定して選択するたびにViewModelをリセットする
-            scriptRunViewModel.ResetScript(_tabParameterSet.GetScriptParameterSet(script.Name));
         }
         
         CurrentScriptRunViewModel = scriptRunViewModel;

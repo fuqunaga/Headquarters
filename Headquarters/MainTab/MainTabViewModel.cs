@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Dragablz;
 
 namespace Headquarters;
 
-public class MainTabViewModel : ViewModelBase
+public class MainTabViewModel : ViewModelBase, IDisposable
 {
     public static Func<MainTabViewModel> Factory => () => new MainTabViewModel();
 
@@ -57,12 +58,13 @@ public class MainTabViewModel : ViewModelBase
     {
         Name = data.Name;
         
-        
-        NewTabCommand = new DelegateCommand(_ => NewTab(this));
-        DuplicateTabCommand = new DelegateCommand(_ => DuplicateTab(this));
-        RenameTabCommand = new DelegateCommand(_ => RenameTab());
+        NewTabCommand = new DelegateCommand(_ => NewTab());
+        DuplicateTabCommand = new DelegateCommand(_ => DuplicateTab());
+        // CS4014: Because this call is not awaited, execution of the current method continues before the call is completed.
+        // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/cs4014?redirectedfrom=MSDN
+        RenameTabCommand = new DelegateCommand((_) => { var suppressWarning = RenameTab(); });
         ToggleLockCommand = new DelegateCommand(_ => IsLocked = !IsLocked);
-        CloseTabCommand = new DelegateCommand(_ => TabablzControl.CloseItem(this), _ => !IsLocked);
+        CloseTabCommand = new DelegateCommand(_ => CloseTab(), _ => !IsLocked);
         
         IpListViewModel.DataGridViewModel.Items = data.CreateIpListDataTable();
 
@@ -86,6 +88,11 @@ public class MainTabViewModel : ViewModelBase
     {
     }
 
+    public void Dispose()
+    {
+        ScriptPageViewModel.Dispose();
+    }
+    
     private void UpdateHeader()
     {
         // NameがあるならHeaderは更新しない
@@ -107,22 +114,22 @@ public class MainTabViewModel : ViewModelBase
     }
     
         
-    private static void NewTab(MainTabViewModel sender)
+    private void NewTab()
     {
         var newItem = new MainTabViewModel();
-        TabablzControl.AddItem(newItem, sender, AddLocationHint.After);
+        TabablzControl.AddItem(newItem, this, AddLocationHint.After);
         TabablzControl.SelectItem(newItem);
     }
 
-    private static void DuplicateTab(MainTabViewModel sender)
+    private void DuplicateTab()
     {
-        var data = sender.CreateMainTabData();
+        var data = CreateMainTabData();
         var newItem = new MainTabViewModel(data);
-        TabablzControl.AddItem(newItem, sender, AddLocationHint.After);
+        TabablzControl.AddItem(newItem, this, AddLocationHint.After);
         TabablzControl.SelectItem(newItem);
     }
     
-    private async void RenameTab()
+    private async Task RenameTab()
     {
         var viewModel =  new NameDialogViewModel()
         {
@@ -138,5 +145,11 @@ public class MainTabViewModel : ViewModelBase
         }
         
         UpdateHeader();
+    }
+    
+    private void CloseTab()
+    {
+        TabablzControl.CloseItem(this);
+        Dispose();
     }
 }

@@ -103,6 +103,6 @@ public class OutputFieldViewModel : ViewModelBase
             _outputUnits.Clear();
         }
 
-        OutputText = "";
+        UpdateOutput();
     }
 }

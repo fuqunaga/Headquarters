@@ -3,20 +3,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Management.Automation.Language;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Headquarters
 {
-    public class Script(string filepath)
+    public class Script
     {
-        #region static
+        #region Static
         
         private const string PreProcessFunctionName = "PreProcess";
         private const string IpAddressProcessFunctionName = "IpAddressProcess";
         private const string PostProcessFunctionName = "PostProcess";
 
-        private static readonly HashSet<string> ReservedFunctionNames = new(
+        private static readonly IReadOnlyCollection<string> ReservedFunctionNames = new HashSet<string>(
             [
                 PreProcessFunctionName,
                 IpAddressProcessFunctionName,
@@ -42,16 +40,19 @@ namespace Headquarters
         
         #endregion
 
-        
+        public event Action? onUpdate;
+
         private readonly Dictionary<string, ScriptFunction> _scriptFunctionDictionary = [];
         private CommentHelpInfo? _helpInfo;
         
-        public string Name { get; } = Path.GetFileNameWithoutExtension(filepath);
-        public bool HasError => ParseErrors.Length > 0;
+        public string  FilePath { get; }
+
+        public string Name { get; }
+        public bool HasParseError => ParseErrorMessages.Count > 0;
         public string Synopsis => _helpInfo?.Synopsis?.TrimEnd('\r', '\n') ?? "";
         public string Description => _helpInfo?.Description?.TrimEnd('\r', '\n') ?? "";
         
-        public ParseError[] ParseErrors { get; private set; } = [];        
+        public List<string> ParseErrorMessages { get; private set; } = [];        
         public IEnumerable<string> EditableParameterNames => _scriptFunctionDictionary.Values.SelectMany(f => f.ParameterNames).Distinct().Except(ReservedParameterNames);
 
         public bool HasPreProcess => _scriptFunctionDictionary.ContainsKey(PreProcessFunctionName);
@@ -62,6 +63,13 @@ namespace Headquarters
         public ScriptFunction PostProcess => _scriptFunctionDictionary[PostProcessFunctionName];
 
 
+        public Script(string filePath)
+        {
+            FilePath = filePath;
+            Name = Path.GetFileNameWithoutExtension(FilePath);
+            Update();
+        }
+        
         public string GetParameterHelp(string parameterName)
         {
             if ( _helpInfo?.Parameters.TryGetValue(parameterName.ToUpper(), out var help) ?? false)
@@ -71,25 +79,32 @@ namespace Headquarters
 
             return string.Empty;
         }
-        
-        
-        public void Load() => ParseScript();
+
+
+        public void Update()
+        {
+            ParseScript();
+            onUpdate?.Invoke();
+        }
 
         private void ParseScript()
         {
-            var ast = Parser.ParseFile(filepath, out _, out var parseErrors);
-
-            if (parseErrors.Length > 0)
+            _scriptFunctionDictionary.Clear();
+            _helpInfo = null;
+            ParseErrorMessages.Clear();
+            
+            if (!File.Exists(FilePath))
             {
-                ParseErrors = parseErrors;
+                // ファイルが見つからないときのParser.ParseFile()のParseErrorの文言が変なので自前で作成
+                ParseErrorMessages.Add($"ファイル[{FilePath}]が見つかりませんでした");
                 return;
             }
+
+            var ast = Parser.ParseFile(FilePath, out _, out var parseErrors);
             
             var functionDefinitions = ast
                 .FindAll(item => item is FunctionDefinitionAst, searchNestedScriptBlocks: false)
                 .OfType<FunctionDefinitionAst>();
-            
-            _scriptFunctionDictionary.Clear();
             
             // 予約済み関数を取得
             foreach(var functionDefinition in functionDefinitions)
@@ -108,6 +123,11 @@ namespace Headquarters
             }
             
             _helpInfo = ast.GetHelpContent();
+
+            if (parseErrors != null)
+            {
+                ParseErrorMessages.AddRange(parseErrors.Select(e => e.ToString()));
+            }
         }
     }
 }
