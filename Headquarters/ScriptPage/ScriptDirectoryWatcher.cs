@@ -86,12 +86,10 @@ public class ScriptDirectoryWatcher : IDisposable
         
             // イベントは別スレッドで呼ばれるのでそのままUIスレッドの処理までつなげると例外になる
             // メインスレッドで呼ぶようにする
-
-
             _watcher.Changed += (_, e) => CallOnMainThread(() => OnScriptChanged(e.FullPath));
             _watcher.Created += (_, e) => CallOnMainThread(() => OnScriptCreated(e.FullPath));
             _watcher.Deleted += (_, e) => CallOnMainThread(() => OnScriptDeleted(e.FullPath));
-            _watcher.Renamed += (_, e) => CallOnMainThread(() => OnScriptRenamed(e));;
+            _watcher.Renamed += (_, e) => CallOnMainThread(() => OnScriptRenamed(e.OldFullPath, e.FullPath));
         }
         
         LoadScripts();
@@ -149,9 +147,10 @@ public class ScriptDirectoryWatcher : IDisposable
         }
     }
     
-    private void OnScriptRenamed(RenamedEventArgs renamedEventArgs)
+    private void OnScriptRenamed(string oldFilePath, string newFilePath)
     {
-        throw new NotImplementedException();
+        OnScriptDeleted(oldFilePath);
+        OnScriptCreated(newFilePath);
     }
 
     private static void CallOnMainThread(Action action)
