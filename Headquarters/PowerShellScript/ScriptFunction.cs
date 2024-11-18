@@ -74,7 +74,7 @@ public class ScriptFunction
         var needCredential = IsCredentialRequired || IsSessionRequired;
         if (needCredential)
         {
-            param.parameters[Script.ReservedParameterName.Credential] = SessionManager.CreateCredential(param.parameters);
+            param.Parameters[Script.ReservedParameterName.Credential] = SessionManager.CreateCredential(param.Parameters);
         }
         
         if (IsSessionRequired)
@@ -86,7 +86,7 @@ public class ScriptFunction
                 return sessionResult;
             }
                 
-            param.parameters[Script.ReservedParameterName.Session] = session;
+            param.Parameters[Script.ReservedParameterName.Session] = session;
         }
         
         return await Run(param);

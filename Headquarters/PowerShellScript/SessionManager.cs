@@ -20,11 +20,11 @@ namespace Headquarters
                 parameters: new Dictionary<string, object>()
                 {
                     { "computerName", ipAddress },
-                    { "credential", param.parameters[Script.ReservedParameterName.Credential] },
+                    { "credential", param.Parameters[Script.ReservedParameterName.Credential] },
                 },
-                cancellationToken: param.cancellationToken,
-                runspacePool: param.runspacePool,
-                invocationStateChanged: param.invocationStateChanged
+                cancellationToken: param.CancellationToken,
+                runspacePool: param.RunspacePool,
+                invocationStateChanged: param.InvocationStateChanged
             );
 
             return await PowerShellRunner.InvokeAsync(CreateSessionString, p);

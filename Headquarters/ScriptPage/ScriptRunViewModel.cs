@@ -170,7 +170,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
 
     private void RunCommandExecute(object? _)
     {
-        Task.Run(() => Run(_ipListViewModel.DataGridViewModel.SelectedParams.ToList()));
+        var task = Run(_ipListViewModel.DataGridViewModel.SelectedParams.ToList());
     }
 
     private async Task Run(IEnumerable<IpParameterSet> ipParamsList)
@@ -288,7 +288,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         CheckAndStopIfResultHasError(scriptResult.Result);
     }
 
-    private async Task RunIpAddressProcesses(IpAndParameterList ipAndParameterList, CancellationToken cancelToken, RunspacePool runspacePool)
+    private async Task RunIpAddressProcesses(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken, RunspacePool runspacePool)
     {
         var ipProcessParameterList = ipAndParameterList.Select(ipAndParameter =>
             {
@@ -304,22 +304,54 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
                 };
             }
         ).ToList();
-            
-        var semaphore = new SemaphoreSlim(MaxTaskCount);
 
-        await Task.WhenAll(
-            ipProcessParameterList.Select(async paramSet =>
+        // RunspacePool任せの並列実行だとすべて実行してRunspacePool待ちになる＆後半の処理が先に実行されたりするため、
+        // 自前のSemaphoreSlimで各Taskが実行可能になってから実行する
+        var semaphore = new SemaphoreSlim(MaxTaskCount);
+        var tasks = new List<Task>();
+        
+        try
+        {
+            foreach (var paramSet in ipProcessParameterList)
             {
-                await semaphore.WaitAsync(cancelToken);
-                await RunProcess(
-                    paramSet.ipAndParameter.ipString,
-                    paramSet.ipAndParameter.parameters, 
-                    paramSet.scriptResult, cancelToken,
-                    runspacePool
-                    );
-                semaphore.Release();
-            })
-        );
+                await semaphore.WaitAsync(cancellationToken);
+
+                var task = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await RunProcess(
+                                paramSet.ipAndParameter.ipString,
+                                paramSet.ipAndParameter.parameters,
+                                paramSet.scriptResult,
+                                cancellationToken,
+                                runspacePool
+                            );
+                        }
+                        finally
+                        {
+                            semaphore.Release();
+                        }
+                    },
+                    cancellationToken
+                );
+                
+                tasks.Add(task);
+            }
+            
+            await Task.WhenAll(tasks);
+        }
+        catch (OperationCanceledException e)
+        {
+            foreach(var paramSet in ipProcessParameterList)
+            {
+                paramSet.scriptResult.Result ??= new PowerShellRunner.Result { canceled = true };
+            }
+        }
+        finally
+        {
+            semaphore.Dispose();
+        }
     }
         
     private async Task RunProcess(string ip, Dictionary<string, object> parameters,
@@ -340,7 +372,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     {
         if (IsStopOnError && (result is { HasError: true }))
         {
-            _cancelTokenSource?.Cancel();
+            Stop();
         }
     }
 

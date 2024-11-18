@@ -18,10 +18,10 @@ namespace Headquarters
             RunspacePool runspacePool,
             EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged)
         {
-            public readonly Dictionary<string, object> parameters = parameters;
-            public CancellationToken cancellationToken = cancellationToken;
-            public RunspacePool runspacePool = runspacePool;
-            public readonly EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged = invocationStateChanged;
+            public Dictionary<string, object> Parameters => parameters;
+            public CancellationToken CancellationToken => cancellationToken;
+            public RunspacePool RunspacePool => runspacePool;
+            public EventHandler<PSInvocationStateChangedEventArgs> InvocationStateChanged => invocationStateChanged;
         }
 
         public class Result
@@ -41,8 +41,8 @@ namespace Headquarters
         {
             using var powerShell = PowerShell.Create();
             
-            powerShell.InvocationStateChanged += param.invocationStateChanged;
-            powerShell.RunspacePool = param.runspacePool;
+            powerShell.InvocationStateChanged += param.InvocationStateChanged;
+            powerShell.RunspacePool = param.RunspacePool;
             
             powerShell.AddScript(scriptString, false);
             if (commandName != null)
@@ -51,13 +51,13 @@ namespace Headquarters
                 powerShell.AddCommand(commandName);
             }
             
-            powerShell.AddParameters((IDictionary)param.parameters);
+            powerShell.AddParameters(param.Parameters);
 
 
             var result = new Result();
 
-            using var _ = param.cancellationToken.Register(state =>
-                {
+            using var _ = param.CancellationToken.Register(
+                state => {
                     if (state is PowerShell ps)
                     {
                         ps.Stop();
@@ -67,7 +67,6 @@ namespace Headquarters
                 },
                 powerShell
             );
-
 
             try
             {
