@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Management.Automation.Runspaces;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -242,19 +243,22 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
 
     private async Task RunScriptFunctions(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken)
     {
+        using var runspacePool = RunspaceFactory.CreateRunspacePool(1, MaxTaskCount);
+        runspacePool.Open();
+        
         // --------------------------------------------------------------------------------
         // PreProcess
         // --------------------------------------------------------------------------------
         if (_script.HasPreProcess)
         {
-            await RunScriptFunction(_script.PreProcess, cancellationToken);
+            await RunScriptFunction(_script.PreProcess, cancellationToken, runspacePool);
             if (cancellationToken.IsCancellationRequested) return;
         }
 
         // --------------------------------------------------------------------------------
         // IpAddressProcess parallel
         // --------------------------------------------------------------------------------
-        await RunIpAddressProcesses(ipAndParameterList, cancellationToken);
+        await RunIpAddressProcesses(ipAndParameterList, cancellationToken, runspacePool);
         if (cancellationToken.IsCancellationRequested) return;
 
         // --------------------------------------------------------------------------------
@@ -262,11 +266,11 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         // --------------------------------------------------------------------------------
         if (_script.HasPostProcess)
         {
-            await RunScriptFunction(_script.PostProcess, cancellationToken);
+            await RunScriptFunction(_script.PostProcess, cancellationToken, runspacePool);
         }
     }
 
-    private async Task RunScriptFunction(ScriptFunction scriptFunction, CancellationToken cancellationToken)
+    private async Task RunScriptFunction(ScriptFunction scriptFunction, CancellationToken cancellationToken, RunspacePool runspacePool)
     {
         var scriptResult = new ScriptResult(scriptFunction.Name);
         scriptResult.onPropertyChanged += OutputFieldViewModel.UpdateOutput;
@@ -276,6 +280,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         var invokeParameter = new PowerShellRunner.InvokeParameter(
             parameters: Parameters.ToDictionary(p => p.Name, object (p) => p.Value),
             cancellationToken: cancellationToken,
+            runspacePool: runspacePool,
             invocationStateChanged: (_, args) => scriptResult.Info = args.InvocationStateInfo
         );
                 
@@ -283,7 +288,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         CheckAndStopIfResultHasError(scriptResult.Result);
     }
 
-    private async Task RunIpAddressProcesses(IpAndParameterList ipAndParameterList, CancellationToken cancelToken)
+    private async Task RunIpAddressProcesses(IpAndParameterList ipAndParameterList, CancellationToken cancelToken, RunspacePool runspacePool)
     {
         var ipProcessParameterList = ipAndParameterList.Select(ipAndParameter =>
             {
@@ -309,18 +314,21 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
                 await RunProcess(
                     paramSet.ipAndParameter.ipString,
                     paramSet.ipAndParameter.parameters, 
-                    paramSet.scriptResult, cancelToken);
+                    paramSet.scriptResult, cancelToken,
+                    runspacePool
+                    );
                 semaphore.Release();
             })
         );
     }
         
     private async Task RunProcess(string ip, Dictionary<string, object> parameters,
-        ScriptResult scriptResult, CancellationToken cancelToken)
+        ScriptResult scriptResult, CancellationToken cancelToken, RunspacePool runspacePool)
     {
         var param = new PowerShellRunner.InvokeParameter(
             parameters: parameters,
             cancellationToken: cancelToken,
+            runspacePool: runspacePool,
             invocationStateChanged: (_, e) => scriptResult.Info = e.InvocationStateInfo
         );
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Management.Automation;
+using System.Management.Automation.Runspaces;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,11 +15,13 @@ namespace Headquarters
         public class InvokeParameter(
             Dictionary<string, object> parameters,
             CancellationToken cancellationToken,
+            RunspacePool runspacePool,
             EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged)
         {
-            public Dictionary<string, object> parameters = parameters;
+            public readonly Dictionary<string, object> parameters = parameters;
             public CancellationToken cancellationToken = cancellationToken;
-            public EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged = invocationStateChanged;
+            public RunspacePool runspacePool = runspacePool;
+            public readonly EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged = invocationStateChanged;
         }
 
         public class Result
@@ -39,7 +42,7 @@ namespace Headquarters
             using var powerShell = PowerShell.Create();
             
             powerShell.InvocationStateChanged += param.invocationStateChanged;
-
+            powerShell.RunspacePool = param.runspacePool;
             
             powerShell.AddScript(scriptString, false);
             if (commandName != null)

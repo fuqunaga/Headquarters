@@ -23,9 +23,9 @@ namespace Headquarters
                     { "credential", param.parameters[Script.ReservedParameterName.Credential] },
                 },
                 cancellationToken: param.cancellationToken,
+                runspacePool: param.runspacePool,
                 invocationStateChanged: param.invocationStateChanged
             );
-            
 
             return await PowerShellRunner.InvokeAsync(CreateSessionString, p);
         }
