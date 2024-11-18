@@ -151,7 +151,7 @@
             </Expander.Header>
 
             <TextBlock Text="{Binding Description}"
-                       Margin="32 0 16 0"
+                       Margin="32 0 16 16"
                        TextWrapping="Wrap"
                        Opacity="0.7" />
         </Expander>
