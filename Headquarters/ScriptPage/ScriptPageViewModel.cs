@@ -114,11 +114,14 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         _ipListViewModel = ipListViewModel;
         _tabParameterSet = tabParameterSet;
 
-        var initialScript = Items.FirstOrDefault(scriptButtonViewModel => scriptButtonViewModel.Name == scriptName)?.Script;
-        if (initialScript is not null)
+        if (string.IsNullOrEmpty(scriptName))
         {
-            OnSelectScript(initialScript);
+            return;
         }
+
+        var initialScript = Items.FirstOrDefault(scriptButtonViewModel => scriptButtonViewModel.Name == scriptName)?.Script;
+        initialScript ??= _watcher.GetOrCreateNonExistentScript(scriptName);
+        OnSelectScript(initialScript);
     }
 
 

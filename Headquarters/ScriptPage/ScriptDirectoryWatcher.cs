@@ -40,6 +40,7 @@ public class ScriptDirectoryWatcher : IDisposable
     private FileSystemWatcher? _watcher;
     
     public ObservableCollection<Script> Scripts { get; } = [];
+    public Dictionary<string, Script> NonExistentScriptTable { get; } = [];
     
     private ScriptDirectoryWatcher(string folderPath)
     {
@@ -67,6 +68,19 @@ public class ScriptDirectoryWatcher : IDisposable
         OnDirectoryExistChanged(Directory.Exists(folderPath));
     }
 
+    public Script GetOrCreateNonExistentScript(string name)
+    {
+        var fullPath = Path.Combine(_folderPath, name + ScriptExtension);
+        if (NonExistentScriptTable.TryGetValue(fullPath, out var script))
+        {
+            return script;
+        }
+
+        script = new Script(fullPath);
+        NonExistentScriptTable.Add(fullPath, script);
+        return script;
+    }
+    
     private void OnDirectoryExistChanged(bool exist)
     {
         if (!exist)
@@ -101,15 +115,8 @@ public class ScriptDirectoryWatcher : IDisposable
         var filePaths = Directory.GetFiles(_folderPath, ScriptSearchPattern)
             .Where(s => s.EndsWith(ScriptExtension)) // GetFiles includes *.ps1*. (*.ps1~, *.ps1_, etc.)
             .OrderBy(Path.GetFileNameWithoutExtension);
-
-        var scripts = filePaths.Select(path =>
-        {
-            var script = new Script(path);
-            script.Update();
-            return script;
-        });
         
-        foreach(var script in scripts)
+        foreach(var script in filePaths.Select(path => new Script(path)))
         {
             Scripts.Add(script);
         }
@@ -124,8 +131,16 @@ public class ScriptDirectoryWatcher : IDisposable
 
     private void OnScriptCreated(string filePath)
     {
-        var script = new Script(filePath);
-        script.Update();
+        if( NonExistentScriptTable.TryGetValue(filePath, out var script))
+        {
+            NonExistentScriptTable.Remove(filePath);
+            script.Update();
+        }
+        else
+        {
+            script = new Script(filePath);
+        }
+        
         var index = Scripts.IndexOf(Scripts.FirstOrDefault(s => Comparer<string>.Default.Compare(script.Name, s.Name) < 0));
         if (index == -1)
         {

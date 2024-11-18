@@ -6,9 +6,9 @@ using System.Management.Automation.Language;
 
 namespace Headquarters
 {
-    public class Script(string filepath)
+    public class Script
     {
-        #region static
+        #region Static
         
         private const string PreProcessFunctionName = "PreProcess";
         private const string IpAddressProcessFunctionName = "IpAddressProcess";
@@ -41,13 +41,13 @@ namespace Headquarters
         #endregion
 
         public event Action? onUpdate;
-        
+
         private readonly Dictionary<string, ScriptFunction> _scriptFunctionDictionary = [];
         private CommentHelpInfo? _helpInfo;
         
-        public string  FilePath => filepath;
+        public string  FilePath { get; }
 
-        public string Name { get; } = Path.GetFileNameWithoutExtension(filepath);
+        public string Name { get; }
         public bool HasParseError => ParseErrorMessages.Count > 0;
         public string Synopsis => _helpInfo?.Synopsis?.TrimEnd('\r', '\n') ?? "";
         public string Description => _helpInfo?.Description?.TrimEnd('\r', '\n') ?? "";
@@ -61,6 +61,14 @@ namespace Headquarters
         public ScriptFunction PreProcess => _scriptFunctionDictionary[PreProcessFunctionName];
         public ScriptFunction IpAddressProcess => _scriptFunctionDictionary[IpAddressProcessFunctionName];
         public ScriptFunction PostProcess => _scriptFunctionDictionary[PostProcessFunctionName];
+
+
+        public Script(string filePath)
+        {
+            FilePath = filePath;
+            Name = Path.GetFileNameWithoutExtension(FilePath);
+            Update();
+        }
         
         public string GetParameterHelp(string parameterName)
         {
@@ -85,14 +93,14 @@ namespace Headquarters
             _helpInfo = null;
             ParseErrorMessages.Clear();
             
-            if (!File.Exists(filepath))
+            if (!File.Exists(FilePath))
             {
                 // ファイルが見つからないときのParser.ParseFile()のParseErrorの文言が変なので自前で作成
-                ParseErrorMessages.Add($"ファイル[{filepath}]が見つかりませんでした");
+                ParseErrorMessages.Add($"ファイル[{FilePath}]が見つかりませんでした");
                 return;
             }
 
-            var ast = Parser.ParseFile(filepath, out _, out var parseErrors);
+            var ast = Parser.ParseFile(FilePath, out _, out var parseErrors);
             
             var functionDefinitions = ast
                 .FindAll(item => item is FunctionDefinitionAst, searchNestedScriptBlocks: false)
