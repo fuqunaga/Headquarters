@@ -40,7 +40,7 @@ namespace Headquarters
         
         #endregion
 
-        public event Action? onLoad;
+        public event Action? onUpdate;
         
         private readonly Dictionary<string, ScriptFunction> _scriptFunctionDictionary = [];
         private CommentHelpInfo? _helpInfo;
@@ -73,10 +73,10 @@ namespace Headquarters
         }
 
 
-        public void Load()
+        public void Update()
         {
             ParseScript();
-            onLoad?.Invoke();
+            onUpdate?.Invoke();
         }
 
         private void ParseScript()

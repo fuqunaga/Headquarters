@@ -31,7 +31,7 @@ public class ScriptButtonViewModel : ViewModelBase, IDisposable
     public ScriptButtonViewModel(Script script, Action<Script>? onSelected)
     {
         Script = script;
-        Script.onLoad += OnUpdateScript;
+        Script.onUpdate += OnUpdateScript;
         SelectCommand = new DelegateCommand(_ => onSelected?.Invoke(Script));
         
         OnUpdateScript();
@@ -39,7 +39,7 @@ public class ScriptButtonViewModel : ViewModelBase, IDisposable
     
     public void Dispose()
     {
-        Script.onLoad -= OnUpdateScript;
+        Script.onUpdate -= OnUpdateScript;
     }
 
     private void OnUpdateScript()

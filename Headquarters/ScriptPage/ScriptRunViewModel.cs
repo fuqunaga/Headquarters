@@ -108,7 +108,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         StopCommand = new DelegateCommand(_ => Stop());
             
         _script = script;
-        _script.onLoad += OnUpdateScript;
+        _script.onUpdate += OnUpdateScript;
         
         _scriptParameterSet = scriptParameterSet;
         _ipListViewModel = ipListViewModel;
@@ -119,7 +119,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     
     public void Dispose()
     {
-        _script.onLoad -= OnUpdateScript;
+        _script.onUpdate -= OnUpdateScript;
     }
 
 

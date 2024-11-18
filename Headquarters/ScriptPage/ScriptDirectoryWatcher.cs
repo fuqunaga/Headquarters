@@ -91,13 +91,13 @@ public class ScriptDirectoryWatcher : IDisposable
             _watcher.Changed += (_, e) => CallOnMainThread(() => OnScriptChanged(e.FullPath));
             _watcher.Created += (_, e) => CallOnMainThread(() => OnScriptCreated(e.FullPath));
             _watcher.Deleted += (_, e) => CallOnMainThread(() => OnScriptDeleted(e.FullPath));
-            // _watcher.Renamed += (_,_) => ReloadScripts();
+            _watcher.Renamed += (_, e) => CallOnMainThread(() => OnScriptRenamed(e));;
         }
         
         LoadScripts();
         _watcher.EnableRaisingEvents = true;
     }
-    
+
     private void LoadScripts()
     {
         var filePaths = Directory.GetFiles(_folderPath, ScriptSearchPattern)
@@ -107,7 +107,7 @@ public class ScriptDirectoryWatcher : IDisposable
         var scripts = filePaths.Select(path =>
         {
             var script = new Script(path);
-            script.Load();
+            script.Update();
             return script;
         });
         
@@ -121,13 +121,13 @@ public class ScriptDirectoryWatcher : IDisposable
     {
         var script = Scripts.FirstOrDefault(s => s.FilePath == filePath);
         Thread.Sleep(10); // ファイルがロックされている場合があるので少し待つ
-        script?.Load();
+        script?.Update();
     }
 
     private void OnScriptCreated(string filePath)
     {
         var script = new Script(filePath);
-        script.Load();
+        script.Update();
         var index = Scripts.IndexOf(Scripts.FirstOrDefault(s => Comparer<string>.Default.Compare(script.Name, s.Name) < 0));
         if (index == -1)
         {
@@ -145,10 +145,14 @@ public class ScriptDirectoryWatcher : IDisposable
         if (script != null)
         {
             Scripts.Remove(script);
+            script.Update();
         }
     }
     
-    
+    private void OnScriptRenamed(RenamedEventArgs renamedEventArgs)
+    {
+        throw new NotImplementedException();
+    }
 
     private static void CallOnMainThread(Action action)
     {
