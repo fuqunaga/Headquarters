@@ -12,6 +12,7 @@ public class ScriptResult(string name)
     
     private PSInvocationStateInfo? _info;
     private PowerShellRunner.Result? _result;
+    private string _customState = "";
 
     
     public PSInvocationStateInfo? Info
@@ -33,9 +34,30 @@ public class ScriptResult(string name)
             onPropertyChanged?.Invoke();
         }
     }
-    
-    public string Label => $"{name}: {Info?.State}";
 
+    public string CustomState
+    {
+        get => _customState;
+        set
+        {
+            _customState = value;
+            onPropertyChanged?.Invoke();
+        }
+    }
+    
+    public string Label => $"{name}: {Info?.State.ToString() ?? _customState}";
+
+    public void SetCancelledIfNoResult()
+    {
+        if (Result != null)
+        {
+            return;
+        }
+        
+        Result = new PowerShellRunner.Result { canceled = true };
+        CustomState = "Cancelled - Not Started";
+    }
+    
     public string GetResultString()
     {
         if (Result == null) return "";

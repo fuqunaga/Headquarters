@@ -34,6 +34,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     private bool _isRunning;
     private bool _isAnyIpSelected;
     private bool _isStopOnError = true;
+    private List<Task> _runningTasks = [];
     private CancellationTokenSource? _cancelTokenSource;
 
 
@@ -175,6 +176,11 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
 
     private async Task Run(IEnumerable<IpParameterSet> ipParamsList)
     {
+        if ( IsRunning)
+        {
+            return;
+        }
+        
         var ipAndParameterList = ipParamsList.SelectMany(ipParams =>
             {
                 var ipParamsTable = Parameters
@@ -308,7 +314,12 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         // RunspacePool任せの並列実行だとすべて実行してRunspacePool待ちになる＆後半の処理が先に実行されたりするため、
         // 自前のSemaphoreSlimで各Taskが実行可能になってから実行する
         var semaphore = new SemaphoreSlim(MaxTaskCount);
-        var tasks = new List<Task>();
+        
+        // _runningTasksが空でない場合は別のタスクが実行中っぽそうでまずい
+        if (_runningTasks.Count > 0)
+        {
+            throw new InvalidOperationException("RunningTasks is not empty");
+        }
         
         try
         {
@@ -336,21 +347,22 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
                     cancellationToken
                 );
                 
-                tasks.Add(task);
+                _runningTasks.Add(task);
             }
             
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(_runningTasks);
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException _)
         {
             foreach(var paramSet in ipProcessParameterList)
             {
-                paramSet.scriptResult.Result ??= new PowerShellRunner.Result { canceled = true };
+                paramSet.scriptResult.SetCancelledIfNoResult();
             }
         }
         finally
         {
             semaphore.Dispose();
+            _runningTasks.Clear();
         }
     }
         

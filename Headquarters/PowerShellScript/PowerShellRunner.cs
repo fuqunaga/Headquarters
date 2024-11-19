@@ -56,25 +56,28 @@ namespace Headquarters
 
             var result = new Result();
 
-            using var _ = param.CancellationToken.Register(
-                state => {
-                    if (state is PowerShell ps)
-                    {
-                        ps.Stop();
-                    }
-
-                    result.canceled = true;
-                },
-                powerShell
-            );
-
             try
             {
-                result.objs = await Task.Run(() => powerShell.Invoke());
+                result.objs = await Task.Run(() =>
+                {  
+                    using var _ = param.CancellationToken.Register(
+                        state => {
+                            if (state is PowerShell ps)
+                            {
+                                ps.Stop();
+                            }
+
+                            result.canceled = true;
+                        },
+                        powerShell
+                    );
+                    
+                    return powerShell.Invoke();
+                });
             }
             catch (Exception e)
             {
-                result.errors = [new ErrorRecord(e, "InvokeAsync", ErrorCategory.NotSpecified, null)];
+                result.errors = [new ErrorRecord(e, "Invoke", ErrorCategory.NotSpecified, null)];
             }
 
             result.errors ??= [];
