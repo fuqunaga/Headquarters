@@ -343,7 +343,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             
             await Task.WhenAll(_runningTasks);
         }
-        catch (OperationCanceledException _)
+        catch (OperationCanceledException)
         {
             foreach(var paramSet in ipProcessParameterList)
             {
