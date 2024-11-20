@@ -123,7 +123,10 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <ProgressBar Grid.Column="0" IsIndeterminate="True" />
+                            <ProgressBar Grid.Column="0" 
+                                         IsIndeterminate="True"
+                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
+                                         />
                             
                             <Button
                                 Grid.Column="1"
