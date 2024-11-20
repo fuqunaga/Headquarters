@@ -34,7 +34,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     private bool _isRunning;
     private bool _isAnyIpSelected;
     private bool _isStopOnError = true;
-    private List<Task> _runningTasks = [];
+    private readonly List<Task> _runningTasks = [];
     private CancellationTokenSource? _cancelTokenSource;
 
 
@@ -310,9 +310,9 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
                 };
             }
         ).ToList();
-
-        // RunspacePool任せの並列実行だとすべて実行してRunspacePool待ちになる＆後半の処理が先に実行されたりするため、
-        // 自前のSemaphoreSlimで各Taskが実行可能になってから実行する
+        
+        // 自前のSemaphoreSlimで各Taskが実行可能になってから実行することでMaxTaskCount通りの同時実行数にする
+        // RunspacePool任せの並列実行だとすべてRunning状態になってからRunspacePool待ちになる
         var semaphore = new SemaphoreSlim(MaxTaskCount);
         
         // _runningTasksが空でない場合は別のタスクが実行中っぽそうでまずい
@@ -325,29 +325,20 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         {
             foreach (var paramSet in ipProcessParameterList)
             {
-                await semaphore.WaitAsync(cancellationToken);
-
-                var task = Task.Run(async () =>
-                    {
-                        try
-                        {
-                            await RunProcess(
-                                paramSet.ipAndParameter.ipString,
-                                paramSet.ipAndParameter.parameters,
-                                paramSet.scriptResult,
-                                cancellationToken,
-                                runspacePool
-                            );
-                        }
-                        finally
-                        {
-                            semaphore.Release();
-                        }
-                    },
-                    cancellationToken
-                );
+                 await semaphore.WaitAsync(cancellationToken);
+                 var task = RunProcess(
+                        paramSet.ipAndParameter.ipString,
+                        paramSet.ipAndParameter.parameters,
+                        paramSet.scriptResult,
+                        cancellationToken,
+                        runspacePool
+                    ).ContinueWith(_ => semaphore.Release(), cancellationToken);
                 
                 _runningTasks.Add(task);
+                
+                // 同時実行だと幅優先的な挙動になりなかなか最初のタスクが終わらない
+                // 少し待ってから次のタスクを実行することで深さ優先っぽい挙動になる
+                await Task.Delay(1, cancellationToken);
             }
             
             await Task.WhenAll(_runningTasks);

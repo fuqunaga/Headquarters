@@ -73,11 +73,15 @@ namespace Headquarters
                     );
                     
                     return powerShell.Invoke();
-                });
+                }, param.CancellationToken);
             }
             catch (Exception e)
             {
-                result.errors = [new ErrorRecord(e, "Invoke", ErrorCategory.NotSpecified, null)];
+                // キャンセルの例外は無視
+                if (e is not OperationCanceledException)
+                {
+                    result.errors = [new ErrorRecord(e, "Invoke", ErrorCategory.NotSpecified, null)];
+                }
             }
 
             result.errors ??= [];
