@@ -3,10 +3,17 @@
 public class OutputUnitViewModel : ViewModelBase
 {
     private readonly IOutputUnit _outputUnit;
+    private bool _isVisible = true;
     private OutputIcon _icon = OutputIcon.NotStarted;
     private string _iconEmoji = OutputIconEmoji.NotStarted;
     private string _text = "";
-
+    
+    public bool IsVisible
+    {
+        get => _isVisible;
+        set => SetProperty(ref _isVisible, value);
+    }
+    
     public OutputIcon Icon
     {
         get => _icon;
