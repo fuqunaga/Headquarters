@@ -27,3 +27,18 @@ public static class OutputIconEmoji
         };
     }
 }
+
+public static class OutputIconDescription
+{
+    public static string GetDescription(this OutputIcon icon)
+    {
+        return icon switch
+        {
+            OutputIcon.NotStarted => "実行前",
+            OutputIcon.Running => "実行中",
+            OutputIcon.Success => "正常終了",
+            OutputIcon.Failure => "異常終了",
+            _ => "",
+        };
+    }
+}

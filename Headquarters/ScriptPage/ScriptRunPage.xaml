@@ -262,9 +262,12 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
+                    
+                    <!-- Top Bar -->
                     <Grid Grid.Row="0"
                           Background="{DynamicResource MaterialDesign.Brush.ToolBar.Background}">
-                        
+                    
+                        <!-- Filter Buttons -->
                         <ListBox
                             ItemsSource="{Binding FilterButtonViewModels}"
                             SelectionMode="Multiple"
@@ -285,6 +288,7 @@
                                     <Setter Property="Margin" Value="0 1" />
                                     <Setter Property="Padding" Value="4 0" />
                                     <Setter Property="IsSelected" Value="{Binding IsOutputVisible, Mode=TwoWay}" />
+                                    <Setter Property="ToolTip" Value="{Binding IconDescription}" />
                                 </Style>
                             </ListBox.ItemContainerStyle>
 
@@ -304,7 +308,7 @@
 
                     <!-- OutputUnits -->
                     <ListBox Grid.Row="1"
-                             ItemsSource="{Binding OutputUnits}"
+                             ItemsSource="{Binding OutputUnitsViewSource.View}"
                              VirtualizingStackPanel.VirtualizationMode="Recycling"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              HorizontalContentAlignment="Stretch"
@@ -312,11 +316,11 @@
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="{x:Type ListBoxItem}">
                                 <Setter Property="Focusable" Value="False"/>
-                                <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <!-- <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" /> -->
                             </Style>
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
-                            <DataTemplate>
+                            <DataTemplate DataType="{x:Type local:OutputUnitViewModel}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="20" />
@@ -342,39 +346,6 @@
                     
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    
-                    <!-- <TextBox Grid.Row="1" -->
-                    <!--          ~1~ Text="{Binding OutputText, Mode=OneWay}" @1@ -->
-                    <!--          Style="{StaticResource MaterialDesignTextBox}" -->
-                    <!--          IsReadOnly="True" -->
-                    <!--          VerticalScrollBarVisibility="Auto" -->
-                    <!--          Margin="8 0 0 0" /> -->
-              
-                    <!-- <ScrollViewer  Grid.Row="1" -->
-                    <!--                HorizontalScrollBarVisibility="Disabled" -->
-                    <!--                VerticalScrollBarVisibility="Auto"> -->
-                    <!--     <emoji:TextBlock -->
-                    <!--         Text="{Binding OutputText, Mode=OneWay}" -->
-                    <!--         Style="{StaticResource MaterialDesignTextBlock}" -->
-                    <!--         Margin="8 0 0 0" /> -->
-                    <!-- </ScrollViewer> -->
-                    
-                    <!-- <emoji:TextBox  Grid.Row="1" -->
-                    <!--             Text="{Binding OutputText, Mode=OneWay}" -->
-                    <!--             Style="{StaticResource MaterialDesignTextBox}" -->
-                    <!--             IsReadOnly="True" -->
-                    <!--             VerticalScrollBarVisibility="Auto" -->
-                    <!--             Margin="8 0 0 0" -->
-                    <!--             > -->
-                    <!--     <emoji:TextBox.Resources> -->
-                    <!--         <Style TargetType="emoji:RichTextBox" BasedOn="{StaticResource MaterialDesignRichTextBox}" > -->
-                    <!--             <Setter Property="VerticalContentAlignment" Value="Top" /> -->
-                    <!--             <Setter Property="BorderThickness" Value="0" /> -->
-                    <!--             <Setter Property="materialDesign:TextFieldAssist.DecorationVisibility" Value="Collapsed" /> -->
-                    <!--         </Style> -->
-                    <!--     </emoji:TextBox.Resources> -->
-                    <!-- </emoji:TextBox> -->
-
                 </Grid>
             </Border>
         </Border>

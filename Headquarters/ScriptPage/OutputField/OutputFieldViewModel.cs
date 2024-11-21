@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Data;
 
 namespace Headquarters;
 
@@ -13,22 +14,32 @@ public class OutputFieldViewModel : ViewModelBase
             .Select(icon => new OutputFilterButtonViewModel(icon))
     );
     
-    public ObservableCollection<OutputUnitViewModel> OutputUnits { get; } = [];
+    public CollectionViewSource OutputUnitsViewSource { get; } = new();
+    private ObservableCollection<OutputUnitViewModel> OutputUnits { get; } = [];
     
     public OutputFieldViewModel()
     {
         OutputUnits.CollectionChanged += (_, _) => UpdateFilterButtonCount();
-        
-        foreach(var button in FilterButtonViewModels)
+
+        foreach (var button in FilterButtonViewModels)
         {
             button.PropertyChanged += (_, arg) =>
             {
                 if (arg.PropertyName == nameof(OutputFilterButtonViewModel.IsOutputVisible))
                 {
-                    UpdateOutputUnitsVisible(button.Icon, button.IsOutputVisible);
+                    OutputUnitsViewSource.View.Refresh();
                 }
             };
         }
+
+        OutputUnitsViewSource.Source = OutputUnits;
+        OutputUnitsViewSource.Filter += (_, e) =>
+        {
+            if (e.Item is OutputUnitViewModel outputUnitViewModel)
+            {
+                e.Accepted = GetFilterButtonViewModel(outputUnitViewModel.Icon).IsOutputVisible;
+            }
+        };
     }
     
     public void AddOutputUnit(IOutputUnit outputUnit)
@@ -39,7 +50,7 @@ public class OutputFieldViewModel : ViewModelBase
             if (arg.PropertyName == nameof(OutputUnitViewModel.Icon))
             {
                 // 別スレッドから呼ばれる可能性があるのでメインスレッドで実行
-                Application.Current.Dispatcher.Invoke(() => OnOutputUnityViewModelIconChanged(outputUnitViewModel));
+                Application.Current.Dispatcher.Invoke(UpdateFilterButtonCount);
             }
         };
 
@@ -51,25 +62,11 @@ public class OutputFieldViewModel : ViewModelBase
     private OutputFilterButtonViewModel GetFilterButtonViewModel(OutputIcon icon)
         => FilterButtonViewModels.First(button => button.Icon == icon);
     
-    private void OnOutputUnityViewModelIconChanged(OutputUnitViewModel outputUnitViewModel)
-    {
-        outputUnitViewModel.IsVisible = GetFilterButtonViewModel(outputUnitViewModel.Icon).IsOutputVisible;
-        UpdateFilterButtonCount();
-    }
-    
     private void UpdateFilterButtonCount()
     {
         foreach(var button in FilterButtonViewModels)
         {
             button.Count = OutputUnits.Count(u => u.Icon == button.Icon);
-        }
-    }
-    
-    private void UpdateOutputUnitsVisible(OutputIcon icon, bool isVisible)
-    {
-        foreach (var unit in OutputUnits.Where(u => u.Icon == icon))
-        {
-            unit.IsVisible = isVisible;
         }
     }
     
