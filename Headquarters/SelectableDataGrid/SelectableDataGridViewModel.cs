@@ -102,7 +102,7 @@ public class SelectableDataGridViewModel : ViewModelBase
     }
         
     // https://stackoverflow.com/questions/36215919/datatable-is-not-updating-datagrid-after-clearing-and-refilling-data-mvvm
-    public void RefreshDataGrid()
+    protected void RefreshDataGrid()
     {
         _tempDataTableForRefresh ??= new DataTable();
             
