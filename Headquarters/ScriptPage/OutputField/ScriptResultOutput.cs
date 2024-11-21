@@ -1,14 +1,28 @@
-﻿namespace Headquarters;
+﻿using System;
 
-public readonly struct ScriptResultOutput(ScriptResult result) : IOutputUnit
+namespace Headquarters;
+
+public class ScriptResultOutput: IOutputUnit
 {
-    public OutputIcon Icon => result.Result?.IsSucceed switch
-    {
-        true => OutputIcon.Success,
-        false => OutputIcon.Failure,
-        _ => OutputIcon.None
-    };
+    public event Action? onPropertyChanged;
+    private readonly ScriptResult _result;
 
-    public string Label => result.Label;
-    public string Text => result.GetResultString();
+    public OutputIcon Icon =>
+        _result.Result == null
+            ? _result.Info == null
+                ? OutputIcon.NotStarted
+                : OutputIcon.Running
+            : _result.Result.IsSucceed
+                ? OutputIcon.Success
+                : OutputIcon.Failure;
+
+    public string Label => _result.Label;
+    public string Text => _result.GetResultString();
+    
+
+    public ScriptResultOutput(ScriptResult result)
+    {
+        _result = result;
+        _result.onPropertyChanged += () => onPropertyChanged?.Invoke();
+    }
 }

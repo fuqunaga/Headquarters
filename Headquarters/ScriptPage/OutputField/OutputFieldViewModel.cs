@@ -1,106 +1,58 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Headquarters;
 
 public class OutputFieldViewModel : ViewModelBase
 {
-    private string _outputText = "";
-    private int _completedCount;
-    private int _failedCount;
-    private bool _isCompletedVisible = true;
-    private bool _isFailedVisible = true;
+    public ObservableCollection<OutputFilterButtonViewModel> FilterButtonViewModels { get; } = new(
+        Enum.GetValues(typeof(OutputIcon))
+            .Cast<OutputIcon>()
+            .Select(icon => new OutputFilterButtonViewModel(icon))
+    );
     
-    private readonly List<IOutputUnit> _outputUnits = [];
-
-    public string OutputText
-    {
-        get => _outputText;
-        private set => SetProperty(ref _outputText, value);
-    }
-
-    public int CompletedCount
-    {
-        get => _completedCount;
-        private set => SetProperty(ref _completedCount, value);
-    }
-    
-    public int FailedCount
-    {
-        get => _failedCount;
-        private set => SetProperty(ref _failedCount, value);
-    }
-
-    public bool IsCompletedVisible
-    {
-        get => _isCompletedVisible;
-        set
-        {
-            var changed = SetProperty(ref _isCompletedVisible, value);
-            if (changed) UpdateOutput();
-        }
-
-    }
-    
-    public bool IsFailedVisible
-    {
-        get => _isFailedVisible;
-        set
-        {
-            var changed = SetProperty(ref _isFailedVisible, value);
-            if (changed) UpdateOutput();
-        }
-    }
-
+    public ObservableCollection<OutputUnitViewModel> OutputUnits { get; } = [];
     
     public void AddOutputUnit(IOutputUnit outputUnit)
     {
-        lock (_outputUnits)
+        lock (OutputUnits)
         {
-            _outputUnits.Add(outputUnit);
+            OutputUnits.Add(new OutputUnitViewModel(outputUnit));
         }
     }
     
     public void AddScriptResult(ScriptResult result)
     {
         AddOutputUnit(new ScriptResultOutput(result));
+        result.onPropertyChanged += UpdateOutput;
     }
-   
-    public void UpdateOutput()
-    {
-        lock (_outputUnits)
-        {
-            OutputText = string.Join("\n", _outputUnits.Where(IsOutputUnitVisible).Select(OutputUnitToString));
-            CompletedCount = _outputUnits.Count(unit => unit.Icon == OutputIcon.Success);
-            FailedCount = _outputUnits.Count(unit => unit.Icon == OutputIcon.Failure);
-        }
-    }
-    
-    private bool IsOutputUnitVisible(IOutputUnit unit)
-    {
-        return unit.Icon switch
-        {
-            OutputIcon.Success => IsCompletedVisible,
-            OutputIcon.Failure => IsFailedVisible,
-            _ => true
-        };
-    }
-    
-    private static string OutputUnitToString(IOutputUnit unit)
-    {
-        var icon = unit.Icon.GetEmoji();
 
-        var text = unit.Text;
-        return string.IsNullOrEmpty(text) 
-            ? $"{icon} {unit.Label}" 
-            : $"{icon} {unit.Label}\n{unit.Text}";
+    private void UpdateOutput()
+    {
+        lock (OutputUnits)
+        {
+            var buttonAndNewCounts = OutputUnits
+                .GroupBy(unit => unit.Icon)
+                .Select(group => (icon: group.Key, count: group.Count()))
+                .Join(FilterButtonViewModels,
+                    countData => countData.icon,
+                    button => button.Icon,
+                    (countData, button) => (button, countData.count)
+                );
+            
+            foreach (var (button, newCount) in buttonAndNewCounts)
+            {
+                button.Count = newCount;
+            }
+        }
     }
     
     public void Clear()
     {
-        lock (_outputUnits)
+        lock (OutputUnits)
         {
-            _outputUnits.Clear();
+            OutputUnits.Clear();
         }
 
         UpdateOutput();

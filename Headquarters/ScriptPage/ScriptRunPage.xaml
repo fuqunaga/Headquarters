@@ -263,16 +263,17 @@
                     </Grid.RowDefinitions>
 
                     <Grid Grid.Row="0"
-                      Background="{DynamicResource MaterialDesign.Brush.ToolBar.Background}"
-                      >
+                          Background="{DynamicResource MaterialDesign.Brush.ToolBar.Background}">
+                        
                         <ListBox
-                             SelectionMode="Multiple"
-                             materialDesign:ListBoxAssist.CanUserToggleSelectedItem="True"
-                             Style="{StaticResource MaterialDesignToolToggleFlatListBox}"
-                             HorizontalAlignment="Right"
-                             Height="24"
-                             Padding="2 0"
-                             >
+                            ItemsSource="{Binding FilterButtonViewModels}"
+                            SelectionMode="Multiple"
+                            materialDesign:ListBoxAssist.CanUserToggleSelectedItem="True"
+                            Style="{StaticResource MaterialDesignToolToggleFlatListBox}"
+                            HorizontalAlignment="Right"
+                            Height="24"
+                            Padding="2 0">
+                            
                             <ListBox.Resources>
                                 <Style x:Key="FilterTextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
                                     <Setter Property="MinWidth" Value="24" />
@@ -283,47 +284,96 @@
                                 <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
                                     <Setter Property="Margin" Value="0 1" />
                                     <Setter Property="Padding" Value="4 0" />
+                                    <Setter Property="IsSelected" Value="{Binding IsOutputVisible, Mode=TwoWay}" />
                                 </Style>
                             </ListBox.ItemContainerStyle>
 
-
-                            <ListBoxItem  IsSelected="{Binding IsCompletedVisible, Mode=TwoWay}">
-                                <StackPanel Orientation="Horizontal">
-                                    <emoji:TextBlock Text="{x:Static local:OutputIconEmoji.Success}" FontSize="12" />
-                                    <TextBlock Text="{Binding CompletedCount}"
-                                           d:Text="123"
-                                           Style="{StaticResource FilterTextBlock}"
-                                           />
-
-                                </StackPanel>
-                            </ListBoxItem>
-
-                            <ListBoxItem IsSelected="{Binding IsFailedVisible, Mode=TwoWay}">
-                                <StackPanel Orientation="Horizontal" >
-                                    <emoji:TextBlock Text="{x:Static local:OutputIconEmoji.Failure}" FontSize="12"/>
-                                    <TextBlock Text="{Binding FailedCount}"
-                                           d:Text="456"
-                                           Style="{StaticResource FilterTextBlock}" />
-                                </StackPanel>
-                            </ListBoxItem>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <emoji:TextBlock Text="{Binding IconEmoji}"
+                                                             FontSize="12" />
+                                        <TextBlock Text="{Binding Count}"
+                                                       d:Text="123"
+                                                       Style="{StaticResource FilterTextBlock}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
                         </ListBox>
                     </Grid>
 
-                    <emoji:TextBox  Grid.Row="1"
-                                Text="{Binding OutputText, Mode=OneWay}"
-                                Style="{StaticResource MaterialDesignTextBox}"
-                                IsReadOnly="True"
-                                VerticalScrollBarVisibility="Auto"
-                                Margin="8 0 0 0"
-                                >
-                        <emoji:TextBox.Resources>
-                            <Style TargetType="emoji:RichTextBox" BasedOn="{StaticResource MaterialDesignRichTextBox}" >
-                                <Setter Property="VerticalContentAlignment" Value="Top" />
-                                <Setter Property="BorderThickness" Value="0" />
-                                <Setter Property="materialDesign:TextFieldAssist.DecorationVisibility" Value="Collapsed" />
+                    <!-- OutputUnits -->
+                    <ListBox Grid.Row="1"
+                             ItemsSource="{Binding OutputUnits}"
+                             VirtualizingStackPanel.VirtualizationMode="Recycling"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             HorizontalContentAlignment="Stretch"
+                             >
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <Setter Property="Focusable" Value="False"/>
                             </Style>
-                        </emoji:TextBox.Resources>
-                    </emoji:TextBox>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <emoji:TextBlock Grid.Column="0"
+                                                     Text="{Binding IconEmoji}"
+                                                     FontSize="12" />
+
+
+                                    <TextBox  Grid.Column="1"
+                                         Text="{Binding Text, Mode=OneWay}"
+                                         Style="{StaticResource MaterialDesignTextBoxBase}"
+                                         IsReadOnly="True"
+                                         HorizontalScrollBarVisibility="Disabled"
+                                         VerticalScrollBarVisibility="Disabled"
+                                         TextWrapping="Wrap"
+                                         BorderThickness="0"
+                                         materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"
+                                         />
+                                </Grid>
+                            </DataTemplate>
+                    
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    
+                    <!-- <TextBox Grid.Row="1" -->
+                    <!--          ~1~ Text="{Binding OutputText, Mode=OneWay}" @1@ -->
+                    <!--          Style="{StaticResource MaterialDesignTextBox}" -->
+                    <!--          IsReadOnly="True" -->
+                    <!--          VerticalScrollBarVisibility="Auto" -->
+                    <!--          Margin="8 0 0 0" /> -->
+              
+                    <!-- <ScrollViewer  Grid.Row="1" -->
+                    <!--                HorizontalScrollBarVisibility="Disabled" -->
+                    <!--                VerticalScrollBarVisibility="Auto"> -->
+                    <!--     <emoji:TextBlock -->
+                    <!--         Text="{Binding OutputText, Mode=OneWay}" -->
+                    <!--         Style="{StaticResource MaterialDesignTextBlock}" -->
+                    <!--         Margin="8 0 0 0" /> -->
+                    <!-- </ScrollViewer> -->
+                    
+                    <!-- <emoji:TextBox  Grid.Row="1" -->
+                    <!--             Text="{Binding OutputText, Mode=OneWay}" -->
+                    <!--             Style="{StaticResource MaterialDesignTextBox}" -->
+                    <!--             IsReadOnly="True" -->
+                    <!--             VerticalScrollBarVisibility="Auto" -->
+                    <!--             Margin="8 0 0 0" -->
+                    <!--             > -->
+                    <!--     <emoji:TextBox.Resources> -->
+                    <!--         <Style TargetType="emoji:RichTextBox" BasedOn="{StaticResource MaterialDesignRichTextBox}" > -->
+                    <!--             <Setter Property="VerticalContentAlignment" Value="Top" /> -->
+                    <!--             <Setter Property="BorderThickness" Value="0" /> -->
+                    <!--             <Setter Property="materialDesign:TextFieldAssist.DecorationVisibility" Value="Collapsed" /> -->
+                    <!--         </Style> -->
+                    <!--     </emoji:TextBox.Resources> -->
+                    <!-- </emoji:TextBox> -->
 
                 </Grid>
             </Border>

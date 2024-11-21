@@ -145,7 +145,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         if (!_script.HasParseError) return;
         
         OutputFieldViewModel.AddOutputUnit(new TextOutput(OutputIcon.Failure, "Script Parse Error", $"{string.Join("\n\n", _script.ParseErrorMessages)}"));
-        OutputFieldViewModel.UpdateOutput();
     }
         
     private void SubscribeIpListViewModel()
@@ -279,7 +278,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     private async Task RunScriptFunction(ScriptFunction scriptFunction, CancellationToken cancellationToken, RunspacePool runspacePool)
     {
         var scriptResult = new ScriptResult(scriptFunction.Name);
-        scriptResult.onPropertyChanged += OutputFieldViewModel.UpdateOutput;
+        
             
         OutputFieldViewModel.AddScriptResult(scriptResult);
                 
@@ -299,8 +298,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         var ipProcessParameterList = ipAndParameterList.Select(ipAndParameter =>
             {
                 var scriptResult = new ScriptResult(ipAndParameter.ipString);
-                scriptResult.onPropertyChanged += OutputFieldViewModel.UpdateOutput;
-
+                
                 OutputFieldViewModel.AddScriptResult(scriptResult);
                     
                 return new
