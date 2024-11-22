@@ -26,9 +26,9 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
     {
         // CS4014: Because this call is not awaited, execution of the current method continues before the call is completed.
         // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/cs4014?redirectedfrom=MSDN
-        AddColumnCommand = new DelegateCommand(_ => {var suppressWarning = AddColumn();}, _ => !_isLocked);
-        RenameColumnCommand = new DelegateCommand(o => {var suppressWarning = RenameColumn(o); }, IsColumnNameEditable);
-        DeleteColumnCommand = new DelegateCommand(o => {var suppressWarning = DeleteColumn(o); }, IsColumnNameEditable);
+        AddColumnCommand = new DelegateCommand(_ => {var suppressWarning = AddColumn();}, _ => !IsLocked);
+        RenameColumnCommand = new DelegateCommand(o => {var suppressWarning = RenameColumn(o); }, (obj) => !IsLocked && IsColumnNameEditable(obj));
+        DeleteColumnCommand = new DelegateCommand(o => {var suppressWarning = DeleteColumn(o); }, (obj) => !IsLocked && IsColumnNameEditable(obj));
     }
 
     private bool IsColumnNameEditable(object? obj)
@@ -107,6 +107,5 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
 
     public IEnumerable<IpParameterSet> IpParams => Items.Rows.OfType<DataRow>().Select(d => new IpParameterSet(d));
     public IEnumerable<IpParameterSet> SelectedParams => IpParams.Where(p => p.IsSelected);
-
     public bool Contains(string name) => Items.Columns.Contains(name);
 }
