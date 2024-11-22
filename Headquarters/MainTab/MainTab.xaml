@@ -19,8 +19,8 @@
         </Grid.ColumnDefinitions>
 
         <local:IpList Grid.Column="0"
-                      DataContext="{Binding IpListViewModel}"
-                      IsEnabled="{Binding DataContext.IsLocked, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainTab}}, Converter={StaticResource InverseBoolConverter}}" />
+                      DataContext="{Binding IpListViewModel}" />
+
 
         <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
 

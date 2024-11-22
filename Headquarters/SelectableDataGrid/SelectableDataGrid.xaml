@@ -29,6 +29,10 @@
               >
 
         <DataGrid.Resources>
+            <Style x:Key="IsSelectedColumnCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                <Setter Property="IsEnabled" Value="True" />
+            </Style>
+            
             <DataTemplate x:Key="IsSelectedHeader">
                 <CheckBox
                     IsChecked="{Binding DataContext.IsAllItemSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}, UpdateSourceTrigger=PropertyChanged}" />

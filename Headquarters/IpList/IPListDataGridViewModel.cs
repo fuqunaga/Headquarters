@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
@@ -12,6 +9,14 @@ namespace Headquarters;
 
 public class IpListDataGridViewModel : SelectableDataGridViewModel
 {
+    private bool _isLocked;
+    
+    public bool IsLocked
+    {
+        get => _isLocked;
+        set => SetProperty(ref _isLocked, value);
+    }
+    
     public ICommand AddColumnCommand { get; }
     public ICommand RenameColumnCommand { get; }
     public ICommand DeleteColumnCommand { get; }
@@ -21,7 +26,7 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
     {
         // CS4014: Because this call is not awaited, execution of the current method continues before the call is completed.
         // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/cs4014?redirectedfrom=MSDN
-        AddColumnCommand = new DelegateCommand(_ => {var suppressWarning = AddColumn();});
+        AddColumnCommand = new DelegateCommand(_ => {var suppressWarning = AddColumn();}, _ => !_isLocked);
         RenameColumnCommand = new DelegateCommand(o => {var suppressWarning = RenameColumn(o); }, IsColumnNameEditable);
         DeleteColumnCommand = new DelegateCommand(o => {var suppressWarning = DeleteColumn(o); }, IsColumnNameEditable);
     }

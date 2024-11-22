@@ -16,9 +16,15 @@ public class IpListViewModel : ViewModelBase
     public bool IsLocked
     {
         get => _isLocked;
-        set => SetProperty(ref _isLocked, value);
+        set
+        {
+            if ( SetProperty(ref _isLocked, value) )
+            {
+                DataGridViewModel.IsLocked = value;
+            }
+        }
     }
-    
+
     public IpListDataGridViewModel DataGridViewModel { get; } = new();
     
     public ICommand ExportCommand { get; protected set; }

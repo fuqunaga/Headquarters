@@ -21,7 +21,8 @@ public partial class SelectableDataGrid
             HeaderTemplate = TargetDataGrid.Resources["IsSelectedHeader"] as DataTemplate,
             HeaderStringFormat = e.Column.HeaderStringFormat,
             CellTemplate = TargetDataGrid.Resources["IsSelected"] as DataTemplate,
-            CanUserSort = false
+            CanUserSort = false,
+            CellStyle = TargetDataGrid.Resources["IsSelectedColumnCellStyle"] as Style
         };
         e.Column = c;
     }

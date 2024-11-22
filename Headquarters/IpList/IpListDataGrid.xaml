@@ -28,9 +28,22 @@
 
         <Style TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
             <Setter Property="GridLinesVisibility" Value="All" />
+            <Setter Property="CanUserAddRows" Value="{Binding (local:DataGridAssist.IsUnlocked), RelativeSource={RelativeSource AncestorType=local:SelectableDataGrid}}" />
+            <Setter Property="CanUserDeleteRows" Value="{Binding (local:DataGridAssist.IsUnlocked), RelativeSource={RelativeSource AncestorType=local:SelectableDataGrid}}" />
+        </Style>
+
+        <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+            <Setter Property="IsEnabled" Value="{Binding (local:DataGridAssist.IsUnlocked), RelativeSource={RelativeSource AncestorType=local:SelectableDataGrid}}" />
+            <!-- Tooltip on Lock -->
+            <Setter Property="ToolTip" Value="{StaticResource LockedControlToolTip}" />
+            <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
+            <Setter Property="ToolTipService.Placement" Value="Mouse" />
+            <Setter Property="ToolTipService.IsEnabled" Value="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InverseBoolConverter}}" />
         </Style>
     </UserControl.Resources>
     
-    <local:SelectableDataGrid DataContext="{Binding}"/>
+    <local:SelectableDataGrid DataContext="{Binding}"
+                              d:DataContext="{d:DesignInstance local:IpListDataGridViewModel}"
+                              local:DataGridAssist.IsUnlocked="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}" />
 
 </UserControl>
