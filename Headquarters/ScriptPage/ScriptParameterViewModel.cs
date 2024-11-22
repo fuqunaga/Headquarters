@@ -30,8 +30,6 @@ namespace Headquarters
         public string HelpFirstLine { get; private set; }
         public string HelpDetail { get; private set; }
 
-        public bool IsIndependentIp => !IsDependIp;
-
         public bool IsDependIp => _ipListViewModel?.DataGridViewModel.Contains(Name) ?? false;
         
         public ScriptParameterViewModel(string name, string help, IpListViewModel ipListViewModel, ParameterSet scriptParameterSet)
@@ -46,7 +44,7 @@ namespace Headquarters
             {
                 if (args.PropertyName == nameof(IpListDataGridViewModel.Items))
                 {
-                    OnPropertyChanged(nameof(IsIndependentIp));
+                    OnPropertyChanged(nameof(IsDependIp));
                 }
             };
         }

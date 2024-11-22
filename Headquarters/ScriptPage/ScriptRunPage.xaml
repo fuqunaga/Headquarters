@@ -169,20 +169,18 @@
                       ScrollViewer.VerticalScrollBarVisibility="Disabled"
                       ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
-
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Grid Margin="32 8 32 0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition SharedSizeGroup="FirstRow"/>
+                            <ColumnDefinition SharedSizeGroup="FirstRow" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0"
                                     Margin="16 0"
                                     HorizontalAlignment="Left"
-                                    VerticalAlignment="Center"
-                                >
+                                    VerticalAlignment="Center">
                             <TextBlock HorizontalAlignment="Left">
                                 <TextBlock.Style>
                                     <Style TargetType="{x:Type TextBlock}">
@@ -206,22 +204,28 @@
 
                         <Border Grid.Column="1">
                             <TextBox VerticalAlignment="Center"
-                                     IsEnabled="{Binding IsIndependentIp}"
                                      IsTabStop="True">
                                 <TextBox.Style>
                                     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignFilledTextBox}">
                                         <Setter Property="Text" Value="{Binding Value}" />
                                         <Setter Property="materialDesign:HintAssist.Hint" Value="{Binding Name}" />
+                                        
+                                        <Setter Property="ToolTip" Value="{StaticResource LockedControlToolTip}" />
+                                        <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
+                                        <Setter Property="ToolTipService.Placement" Value="Mouse" />
+                                        <Setter Property="ToolTipService.IsEnabled" Value="{Binding DataContext.IsLocked, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
+                                        
                                         <Style.Triggers>
-                                            <Trigger Property="IsEnabled" Value="False">
-                                                <Setter Property="Text" Value="On IP List" />
-                                            </Trigger>
-                                            <DataTrigger Binding="{Binding Path=HelpFirstLine}" Value="">
+                                            <DataTrigger Binding="{Binding HelpFirstLine}" Value="">
                                                 <Setter Property="materialDesign:HintAssist.Hint" Value="" />
                                             </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsDependIp}" Value="True">
+                                                <Setter Property="IsEnabled" Value="False" />
+                                                <Setter Property="Text" Value="IP Listの値を使用します" />
+                                            </DataTrigger>
                                         </Style.Triggers>
-
                                     </Style>
+                                    
                                 </TextBox.Style>
                             </TextBox>
                         </Border>
