@@ -13,7 +13,7 @@
             <Setter Property="ToolTip" Value="{StaticResource LockedControlToolTip}" />
             <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
             <Setter Property="ToolTipService.Placement" Value="Mouse" />
-            <Setter Property="ToolTipService.IsEnabled" Value="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InverseBoolConverter}}" />
+            <Setter Property="ToolTipService.IsEnabled" Value="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InvertBooleanConverter}}" />
         </Style>
         
         <Style x:Key="LockableWithAnotherToolTipMenuItemStyle" TargetType="MenuItem" BasedOn="{StaticResource LockableMenuItemStyle}">
@@ -56,7 +56,7 @@
             <Setter Property="ToolTip" Value="{StaticResource LockedControlToolTip}" />
             <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
             <Setter Property="ToolTipService.Placement" Value="Mouse" />
-            <Setter Property="ToolTipService.IsEnabled" Value="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InverseBoolConverter}}" />
+            <Setter Property="ToolTipService.IsEnabled" Value="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InvertBooleanConverter}}" />
         </Style>
     </UserControl.Resources>
     

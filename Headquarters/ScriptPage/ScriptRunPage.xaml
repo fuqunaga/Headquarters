@@ -27,7 +27,7 @@
                                   Padding="8,0,0,0" >
             <DockPanel>
                 <!-- Return Button -->
-                <Grid IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBoolConverter}}"
+                <Grid IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
                       Style="{StaticResource AddToolTipOfLockStyle}">
                     
                     <Button
@@ -84,7 +84,7 @@
                             </Button>
 
 
-                            <DockPanel IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBoolConverter}}"
+                            <DockPanel IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
                                        Style="{StaticResource AddToolTipOfLockStyle}">
                                 <ToggleButton IsChecked="{Binding IsStopOnError, Mode=TwoWay}"
                                               Margin="16 0 8 0"
@@ -94,7 +94,7 @@
                             </DockPanel>
 
                             <DockPanel HorizontalAlignment="Right"
-                                       IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBoolConverter}}"
+                                       IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
                                        Style="{StaticResource AddToolTipOfLockStyle}">
                                 <Label VerticalAlignment="Center" Margin="4"
                                        Content="最大同時実行数"
@@ -162,7 +162,7 @@
         <!-- Parameters -->
         <ItemsControl DockPanel.Dock="Top" Grid.IsSharedSizeScope="True"
                       ItemsSource="{Binding Parameters}"
-                      IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBoolConverter}}"
+                      IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
                       MaxHeight="200"
                       Margin="0,16,0,0"
                       KeyboardNavigation.TabNavigation="Continue"

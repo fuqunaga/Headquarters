@@ -46,7 +46,7 @@
                           ToolTip="{StaticResource LockedControlToolTip}"
                           ToolTipService.ShowOnDisabled="True"
                           ToolTipService.Placement="Mouse"
-                          ToolTipService.IsEnabled="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InverseBoolConverter}}" />
+                          ToolTipService.IsEnabled="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InvertBooleanConverter}}" />
             </ContextMenu>
 
             <Style x:Key="TabItemStyle"  TargetType="{x:Type dragablz:DragablzItem}" BasedOn="{StaticResource CustomMaterialDesignDragableTabItemStyle}">
