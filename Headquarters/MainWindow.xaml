@@ -49,7 +49,8 @@
                           ToolTipService.IsEnabled="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InvertBooleanConverter}}" />
             </ContextMenu>
 
-            <Style x:Key="TabItemStyle"  TargetType="{x:Type dragablz:DragablzItem}" BasedOn="{StaticResource CustomMaterialDesignDragableTabItemStyle}">
+            <Style x:Key="TabItemStyle" TargetType="{x:Type dragablz:DragablzItem}" BasedOn="{StaticResource CustomMaterialDesignDragableTabItemStyle}">
+                <Setter Property="Padding" Value="0" />
                 <Setter Property="ContextMenu" Value="{StaticResource TabItemContextMenu}" />
             </Style>
 
@@ -159,35 +160,35 @@
                             <local:MainTab />
                         </DataTemplate>
                     </TabControl.ContentTemplate>
-                    
+
                     <dragablz:TabablzControl.HeaderSuffixContent>
                         <Grid MinWidth="64">
                             <!-- Add new tab button -->
-                            <!-- RippleAssist.IsDisabledをいれておくとタブを追加したときに表示が荒ぶるのが軽減する気がするので一旦いれとく -->
+                            <!-- RippleAssist.IsDisabledをいれておくとタブを追加したときに表示が荒ぶる軽減する -->
                             <Button HorizontalAlignment="Left"
                                     Command="{x:Static dragablz:TabablzControl.AddItemCommand}"
                                     Style="{StaticResource MaterialDesignIconForegroundButton}"
                                     materialDesign:RippleAssist.IsDisabled="True"
                                     Width="24"
                                     Height="24">
-                                <materialDesign:PackIcon
-                                    Kind="Plus"
-                                    Width="18"
-                                    Height="18" />
+                                
+                                <materialDesign:PackIcon Kind="Plus"
+                                                         Width="18"
+                                                         Height="18" />
+                                
                             </Button>
-                            
+
                             <!-- Setting button -->
                             <Button HorizontalAlignment="Right"
                                     Command="{Binding OpenSettingPageCommand}"
                                     Style="{StaticResource MaterialDesignIconForegroundButton}"
                                     Width="32"
-                                    Height="32"
-                            >
+                                    Height="32">
                                 <materialDesign:PackIcon Kind="Settings" />
                             </Button>
                         </Grid>
                     </dragablz:TabablzControl.HeaderSuffixContent>
-                    
+
                 </dragablz:TabablzControl>
 
             </Grid>
