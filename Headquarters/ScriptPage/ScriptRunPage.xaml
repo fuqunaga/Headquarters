@@ -18,6 +18,47 @@
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="UseLayoutRounding" Value="True" />
         </Style>
+        
+        <!-- MaterialDesignToolのListBoxItemのスタイルを参考にシンプル化したもの
+             Rippleや選択時のアニメーションなどを削除
+             WPFデフォルトのマウスオーバー色が反映されてしまうのを修正 -->
+        <Style x:Key="OutputResultListBoxItemStyle" TargetType="ListBoxItem">
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocusWithin" Value="true">
+                    <Setter Property="IsSelected" Value="true" />
+                </Trigger>
+            </Style.Triggers>
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="materialDesign:ListBoxItemAssist.HoverBackground"
+                    Value="{Binding Foreground, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushOpacityConverter}, ConverterParameter=0.1}" />
+            <Setter Property="materialDesign:ListBoxItemAssist.SelectedFocusedBackground"
+                    Value="{Binding Foreground, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushOpacityConverter}, ConverterParameter=0.18}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!-- マウスオーバー時のトリガーを設定 -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background"
+                                        Value="{Binding Path=(materialDesign:ListBoxItemAssist.HoverBackground), RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Trigger>
+                            <!-- 選択時のトリガーを設定 -->
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background"
+                                        Value="{Binding Path=(materialDesign:ListBoxItemAssist.SelectedFocusedBackground), RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
 
@@ -315,14 +356,8 @@
                              ItemsSource="{Binding OutputUnitsViewSource.View}"
                              VirtualizingStackPanel.VirtualizationMode="Recycling"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                             HorizontalContentAlignment="Stretch"
-                             >
-                        <ListBox.ItemContainerStyle>
-                            <Style TargetType="{x:Type ListBoxItem}">
-                                <Setter Property="Focusable" Value="False"/>
-                                <!-- <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" /> -->
-                            </Style>
-                        </ListBox.ItemContainerStyle>
+                             ItemContainerStyle="{StaticResource OutputResultListBoxItemStyle}">
+
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type local:OutputUnitViewModel}">
                                 <Grid>
@@ -334,20 +369,19 @@
                                     <emoji:TextBlock Grid.Column="0"
                                                      Text="{Binding IconEmoji}"
                                                      FontSize="12" />
-                                    
-                                    <TextBox  Grid.Column="1"
-                                         Text="{Binding Text, Mode=OneWay}"
-                                         Style="{StaticResource MaterialDesignTextBoxBase}"
-                                         IsReadOnly="True"
-                                         HorizontalScrollBarVisibility="Disabled"
-                                         VerticalScrollBarVisibility="Disabled"
-                                         TextWrapping="Wrap"
-                                         BorderThickness="0"
-                                         materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"
-                                         />
+
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding Text, Mode=OneWay}"
+                                             Style="{StaticResource MaterialDesignTextBoxBase}"
+                                             IsReadOnly="True"
+                                             HorizontalScrollBarVisibility="Disabled"
+                                             VerticalScrollBarVisibility="Disabled"
+                                             TextWrapping="Wrap"
+                                             BorderThickness="0"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed" />
                                 </Grid>
                             </DataTemplate>
-                    
+
                         </ListBox.ItemTemplate>
                     </ListBox>
                 </Grid>
