@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 
 namespace Headquarters
 {
@@ -34,9 +35,11 @@ namespace Headquarters
         
         public ScriptParameterViewModel(string name, string help, IpListViewModel ipListViewModel, ParameterSet scriptParameterSet)
         {
+            using var reader = new StringReader(help);
+            
             Name = name;
-            HelpFirstLine = help.Split('\n').FirstOrDefault() ?? string.Empty;
-            HelpDetail = help.Split('\n').Skip(1).FirstOrDefault() ?? string.Empty;
+            HelpFirstLine = reader.ReadLine() ?? "";
+            HelpDetail = reader.ReadToEnd() ?? "";
             _ipListViewModel = ipListViewModel;
             _scriptParameterSet = scriptParameterSet;
             
