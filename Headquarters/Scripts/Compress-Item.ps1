@@ -2,21 +2,25 @@
 .SYNOPSIS
 ローカルＰＣ上のファイル、フォルダを圧縮します
 
-.PARAMETER sourcePath
+.PARAMETER SourcePath
 圧縮するファイルのパス
 ファイル、フォルダのどちらも指定できます
 
-.PARAMETER destinationPath
+.PARAMETER DestinationPath
 圧縮ファイルの保存先パス
 拡張子で自動的に圧縮フォーマットを選択します
 例: myFile.zip, myFile.7z
 #>
 
-param($sourcePath, $destinationPath)
-
+param
+(
+    [Parameter(Mandatory)]
+    $SourcePath, 
+    $DestinationPath
+)
 
 try {
-    $sourceItem = Get-Item -Path $sourcePath -ErrorAction Stop
+    $sourceItem = Get-Item -Path $SourcePath -ErrorAction Stop
 }
 catch {
     throw $_.Exception.Message
@@ -34,4 +38,4 @@ else {
     $sourceFile = $sourceItem.Name
 }
 
-tar.exe -C $sourceDir -a -cf $destinationPath $sourceFile
+tar.exe -C $sourceDir -a -cf $DestinationPath $sourceFile
