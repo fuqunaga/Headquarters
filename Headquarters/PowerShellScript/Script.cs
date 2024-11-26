@@ -53,7 +53,7 @@ namespace Headquarters
         public string Description => _helpInfo?.Description?.TrimEnd('\r', '\n') ?? "";
         
         public List<string> ParseErrorMessages { get; private set; } = [];        
-        public IEnumerable<string> EditableParameterNames => _scriptFunctionDictionary.Values.SelectMany(f => f.ParameterNames).Distinct().Except(ReservedParameterNames);
+        public IEnumerable<string> EditableParameterNames => _scriptFunctionDictionary.Values.SelectMany(f => f.ParameterNames).Distinct().Except(ReservedParameterNames, StringComparer.OrdinalIgnoreCase);
 
         public bool HasPreProcess => _scriptFunctionDictionary.ContainsKey(PreProcessFunctionName);
         public bool HasPostProcess => _scriptFunctionDictionary.ContainsKey(PostProcessFunctionName);

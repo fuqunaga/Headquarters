@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation.Language;
 using System.Threading.Tasks;
@@ -14,9 +15,9 @@ public class ScriptFunction
     public string Name { get; }
     public IReadOnlyList<string> ParameterNames { get; }
     
-    private bool IsSessionRequired => ParameterNames.Contains(Script.ReservedParameterName.Session);
-    private bool IsIpRequired => ParameterNames.Contains(Script.ReservedParameterName.Ip);
-    private bool IsCredentialRequired => ParameterNames.Contains(Script.ReservedParameterName.Credential);
+    private bool IsSessionRequired => ParameterNames.Contains(Script.ReservedParameterName.Session, StringComparer.OrdinalIgnoreCase);
+    private bool IsIpRequired => ParameterNames.Contains(Script.ReservedParameterName.Ip, StringComparer.OrdinalIgnoreCase);
+    private bool IsCredentialRequired => ParameterNames.Contains(Script.ReservedParameterName.Credential, StringComparer.OrdinalIgnoreCase);
     
     
     public ScriptFunction(string scriptName, ScriptBlockAst scriptBlockAst)
@@ -95,7 +96,7 @@ public class ScriptFunction
     public async Task<PowerShellRunner.Result> Run(PowerShellRunner.InvokeParameter param)
     {
         var functionParameters = param.Parameters
-            .Where(p => ParameterNames.Contains(p.Key))
+            .Where(p => ParameterNames.Contains(p.Key, StringComparer.OrdinalIgnoreCase))
             .ToDictionary(p => p.Key, p => p.Value);
         
         var functionInvokeParameter = new PowerShellRunner.InvokeParameter(
