@@ -94,6 +94,17 @@ public class ScriptFunction
     
     public async Task<PowerShellRunner.Result> Run(PowerShellRunner.InvokeParameter param)
     {
-        return await PowerShellRunner.InvokeAsync(_scriptString, _commandString, param);
+        var functionParameters = param.Parameters
+            .Where(p => ParameterNames.Contains(p.Key))
+            .ToDictionary(p => p.Key, p => p.Value);
+        
+        var functionInvokeParameter = new PowerShellRunner.InvokeParameter(
+            parameters: functionParameters,
+            cancellationToken: param.CancellationToken,
+            runspacePool: param.RunspacePool,
+            invocationStateChanged: param.InvocationStateChanged
+        );
+        
+        return await PowerShellRunner.InvokeAsync(_scriptString, _commandString, functionInvokeParameter);
     }
 }

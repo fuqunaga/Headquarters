@@ -12,7 +12,7 @@ namespace Headquarters
 {
     public static class PowerShellRunner
     {
-        public class InvokeParameter(
+        public readonly struct InvokeParameter(
             Dictionary<string, object> parameters,
             CancellationToken cancellationToken,
             RunspacePool runspacePool,
@@ -34,7 +34,7 @@ namespace Headquarters
             public bool HasError => errors is { Count: > 0 };
         }
         
-        public static async Task<Result> InvokeAsync(string scriptString,InvokeParameter param)
+        public static async Task<Result> InvokeAsync(string scriptString, InvokeParameter param)
             => await InvokeAsync(scriptString, null, param);
 
         public static async Task<Result> InvokeAsync(string scriptString, string? commandName, InvokeParameter param)
