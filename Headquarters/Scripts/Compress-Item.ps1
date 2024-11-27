@@ -1,41 +1,48 @@
 ﻿<#
 .SYNOPSIS
-ローカルPC上のファイル、フォルダを圧縮します
+ローカルPC上のファイルを圧縮します
+
+.DESCRIPTION
+ローカルPC上のファイルを圧縮します
+SourcePathと同じディレクトリに圧縮ファイルを作成します
+例: C:\Temp\sample.txt -> C:\Temp\sample.7z
 
 .PARAMETER SourcePath
-圧縮するファイルのパス
-ファイル、フォルダのどちらも指定できます
+圧縮するファイルまたディレクトリのパス
 
-.PARAMETER DestinationPath
-圧縮ファイルの保存先パス
-拡張子で自動的に圧縮フォーマットを選択します
-例: myFile.zip, myFile.7z
+.PARAMETER ArichiveFormat
+圧縮フォーマット
 #>
 
 param
 (
-    [Parameter(Mandatory)]
-    $SourcePath, 
-    $DestinationPath
+    [ValidateNotNullOrEmpty()]
+    $SourcePath,
+    [ValidateSet("7z", "zip")]
+    $ArichiveFormat
 )
 
-try {
-    $sourceItem = Get-Item -Path $SourcePath -ErrorAction Stop
-}
-catch {
-    throw $_.Exception.Message
+. .\Scripts\IncludeScripts\Test-PathExistence.ps1
+Test-PathExistence -Path $SourcePath
+
+$sourceItem = Get-Item $SourcePath
+if (!($sourceItem.Count -eq 1)) {
+    throw "SourcePath[$SourcePath]: 複数のアイテムが見つかりました。単一アイテムのみ対応しています。 $sourceItem"
 }
 
 $sourceDir = ""
-$sourceFile = ""
 
 if ($sourceItem.PSIsContainer) {
     $sourceDir = $sourceItem.Parent.FullName
-    $sourceFile = $sourceItem.Name
 }
 else {
     $sourceDir = $sourceItem.DirectoryName
-    $sourceFile = $sourceItem.Name
 }
 
-tar.exe -C $sourceDir -a -cf $DestinationPath $sourceFile
+. .\Scripts\IncludeScripts\Get-UniqueFileName.ps1
+$archiveFileName = Get-UniqueFileName -Directory $sourceDir -FileName "$($sourceItem.BaseName).$ArichiveFormat"
+$archiveFilePath = Join-Path $sourceDir $archiveFileName
+
+tar.exe -C $sourceDir -a -cf $archiveFilePath $($sourceItem.Name)
+
+return $archiveFilePath

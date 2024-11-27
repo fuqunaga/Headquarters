@@ -12,17 +12,14 @@
 
 param
 (
+    [ValidateNotNullOrEmpty()]
     $ArchivePath, 
+    [ValidateNotNullOrEmpty()]
     $DestinationDirectory
 )
 
-try {
-    $archiveItem = Get-Item -Path $ArchivePath -ErrorAction Stop
-}
-catch {
-    throw $_.Exception.Message
-}
-
+. .\Scripts\IncludeScripts\Test-PathExistance.ps1
+Test-PathExistance $ArchivePath
 
 # 解凍先のディレクトリが存在しない場合、作成
 if (-not (Test-Path -Path $DestinationDirectory)) {

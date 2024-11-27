@@ -19,9 +19,17 @@ RemotePathに"$(IP)"という文字列が含まれている場合、対応する
 #>
 
 param(
-    $Session, $Ip, $LocalPath, $RemotePath,
+    [ValidateNotNullOrEmpty()]
+    $LocalPath, 
+    [ValidateNotNullOrEmpty()]
+    $RemotePath,
+    $Session, 
+    $Ip, 
     [PSCredential]$Credential
 )
+
+. .\Scripts\IncludeScripts\Test-PathExistance.ps1
+Test-PathExistance $LocalPath
 
 $remotePathExtracted = $RemotePath.Replace("`$(IP)", $Ip)
 $remotePathInfo = [System.Uri]$remotePathExtracted
