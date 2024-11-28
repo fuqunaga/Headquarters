@@ -218,6 +218,7 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
+                        <!-- Help -->
                         <StackPanel Grid.Column="0"
                                     Margin="16 0"
                                     HorizontalAlignment="Left"
@@ -243,18 +244,18 @@
 
                         </StackPanel>
 
+                        <!-- Input Field -->
                         <Border Grid.Column="1">
                             <TextBox VerticalAlignment="Center"
-                                     IsTabStop="True">
+                                     IsTabStop="True"
+                                     ToolTip="{StaticResource LockedControlToolTip}"
+                                     ToolTipService.ShowOnDisabled="True"
+                                     ToolTipService.Placement="Mouse"
+                                     ToolTipService.IsEnabled="{Binding DataContext.IsLocked, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
                                 <TextBox.Style>
                                     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignFilledTextBox}">
                                         <Setter Property="Text" Value="{Binding Value}" />
                                         <Setter Property="materialDesign:HintAssist.Hint" Value="{Binding Name}" />
-                                        
-                                        <Setter Property="ToolTip" Value="{StaticResource LockedControlToolTip}" />
-                                        <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
-                                        <Setter Property="ToolTipService.Placement" Value="Mouse" />
-                                        <Setter Property="ToolTipService.IsEnabled" Value="{Binding DataContext.IsLocked, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
                                         
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding HelpFirstLine}" Value="">
