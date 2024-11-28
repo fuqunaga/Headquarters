@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Linq;
 
 namespace Headquarters
 {
@@ -7,8 +6,16 @@ namespace Headquarters
     /// スクリプトのパラメータを表すViewModel
     /// ParameterSetとIPListを参照し適切な値を取得・設定する
     /// </summary>
-    public class ScriptParameterViewModel : ViewModelBase
+    public class ScriptParameterInputFieldViewModel : ViewModelBase
     {
+        public enum ButtonType
+        {
+            None,
+            OpenFile,
+            OpenDirectory,
+            OpenFileOrDirectory
+        }
+        
         private readonly IpListViewModel _ipListViewModel;
         private readonly ParameterSet _scriptParameterSet;
         
@@ -26,20 +33,20 @@ namespace Headquarters
             }
         }
         
-        public bool HasHelp => !string.IsNullOrEmpty(HelpFirstLine) || !string.IsNullOrEmpty(HelpDetail);
-        
         public string HelpFirstLine { get; private set; }
         public string HelpDetail { get; private set; }
-
-        public bool IsDependIp => _ipListViewModel?.DataGridViewModel.Contains(Name) ?? false;
+        public bool IsDependIp => _ipListViewModel.DataGridViewModel.Contains(Name);
+        public ButtonType RightButtonType { get; private set; }
         
-        public ScriptParameterViewModel(string name, string help, IpListViewModel ipListViewModel, ParameterSet scriptParameterSet)
+        public ScriptParameterInputFieldViewModel(ScriptParameter scriptParameter, string help, IpListViewModel ipListViewModel, ParameterSet scriptParameterSet)
         {
             using var reader = new StringReader(help);
             
-            Name = name;
+            Name = scriptParameter.Name;
             HelpFirstLine = reader.ReadLine() ?? "";
             HelpDetail = reader.ReadToEnd() ?? "";
+            RightButtonType = GetButtonType(scriptParameter);
+            
             _ipListViewModel = ipListViewModel;
             _scriptParameterSet = scriptParameterSet;
             
@@ -50,6 +57,18 @@ namespace Headquarters
                     OnPropertyChanged(nameof(IsDependIp));
                 }
             };
+        }
+        
+        private static ButtonType GetButtonType(ScriptParameter scriptParameter)
+        {
+            foreach (var attribute in scriptParameter.Attributes)
+            {
+                if (attribute == typeof(FileInfo)) return ButtonType.OpenFile;
+                if (attribute == typeof(DirectoryInfo)) return ButtonType.OpenDirectory;
+                if (attribute == typeof(FileSystemInfo)) return ButtonType.OpenFileOrDirectory;
+            }
+            
+            return ButtonType.None;
         }
     }
 }

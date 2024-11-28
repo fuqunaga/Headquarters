@@ -1,0 +1,112 @@
+﻿<UserControl x:Class="Headquarters.ScriptParameterInputField"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:materialDesignInternal="clr-namespace:MaterialDesignThemes.Wpf.Internal;assembly=MaterialDesignThemes.Wpf"
+             xmlns:local="clr-namespace:Headquarters"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:ScriptParameterInputFieldViewModel}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    
+    <Grid Margin="32 8 32 0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition SharedSizeGroup="FirstRow" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Help -->
+        <StackPanel Grid.Column="0"
+                    Margin="16 0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center">
+            <TextBlock HorizontalAlignment="Left">
+                <TextBlock.Style>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Setter Property="Text" Value="{Binding HelpFirstLine}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=HelpFirstLine}" Value="">
+                                <Setter Property="Text" Value="{Binding Name}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <TextBlock Text="{Binding HelpDetail}"
+                       Visibility="{Binding HelpDetail, Converter={StaticResource StringIsEmptyVisibilityConverter}}"
+                       Opacity="0.7"
+                       TextWrapping="Wrap"
+                       FontSize="12"
+                       MaxWidth="400" />
+
+        </StackPanel>
+
+        <!-- Input Field -->
+        <!-- MaterialDesignToolkitのDatePickerあたりを参考にボタン付きTextBox -->
+        <Border Grid.Column="1"
+                Style="{StaticResource AddToolTipOfLockStyle}"
+                ToolTipService.IsEnabled="{Binding DataContext.IsLocked, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
+            
+            <Grid>
+                <TextBox x:Name="PART_TextBox"
+                         VerticalAlignment="Center" 
+                         IsTabStop="True"
+                         materialDesignInternal:InternalTextFieldAssist.IsMouseOver="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=IsMouseOver}">
+                    <TextBox.Style>
+                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+                            <Setter Property="Text" Value="{Binding Value}" />
+                            <Setter Property="materialDesign:HintAssist.Hint" Value="{Binding Name}" />
+                            <Setter Property="Padding" Value="4 0 32 0" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HelpFirstLine}" Value="">
+                                    <Setter Property="materialDesign:HintAssist.Hint" Value="" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsDependIp}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                    <Setter Property="Text" Value="IP Listの値を使用します" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RightButtonType}" Value="{x:Static local:ScriptParameterInputFieldViewModel+ButtonType.None}">
+                                    <Setter Property="Padding" Value="4 0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+
+                    </TextBox.Style>
+                </TextBox>
+
+                <Button HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Margin="8 0"
+                        Focusable="False">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Foreground" Value="{Binding ElementName=PART_TextBox, Path=Foreground}" />
+                            <Setter Property="Opacity" Value="0.7" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.5" />
+                                </Trigger>
+                                <DataTrigger Binding="{Binding RightButtonType}" Value="{x:Static local:ScriptParameterInputFieldViewModel+ButtonType.None}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+
+                    <Button.Template>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <materialDesign:PackIcon Kind="FolderOpen"
+                                                     VerticalAlignment="Center"
+                                                     Foreground="{TemplateBinding Foreground}"
+                                                     Opacity="{TemplateBinding Opacity}" />
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

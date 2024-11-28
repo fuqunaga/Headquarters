@@ -208,70 +208,12 @@
                       Margin="0,16,0,0"
                       KeyboardNavigation.TabNavigation="Continue"
                       ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                      ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                      >
 
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid Margin="32 8 32 0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition SharedSizeGroup="FirstRow" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Help -->
-                        <StackPanel Grid.Column="0"
-                                    Margin="16 0"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Center">
-                            <TextBlock HorizontalAlignment="Left">
-                                <TextBlock.Style>
-                                    <Style TargetType="{x:Type TextBlock}">
-                                        <Setter Property="Text" Value="{Binding HelpFirstLine}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=HelpFirstLine}" Value="">
-                                                <Setter Property="Text" Value="{Binding Name}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                            <TextBlock Text="{Binding HelpDetail}"
-                                       Visibility="{Binding HelpDetail, Converter={StaticResource StringIsEmptyVisibilityConverter}}"
-                                       Opacity="0.7"
-                                       TextWrapping="Wrap"
-                                       FontSize="12"
-                                       MaxWidth="400" />
-
-                        </StackPanel>
-
-                        <!-- Input Field -->
-                        <Border Grid.Column="1">
-                            <TextBox VerticalAlignment="Center"
-                                     IsTabStop="True"
-                                     ToolTip="{StaticResource LockedControlToolTip}"
-                                     ToolTipService.ShowOnDisabled="True"
-                                     ToolTipService.Placement="Mouse"
-                                     ToolTipService.IsEnabled="{Binding DataContext.IsLocked, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
-                                <TextBox.Style>
-                                    <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignFilledTextBox}">
-                                        <Setter Property="Text" Value="{Binding Value}" />
-                                        <Setter Property="materialDesign:HintAssist.Hint" Value="{Binding Name}" />
-                                        
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding HelpFirstLine}" Value="">
-                                                <Setter Property="materialDesign:HintAssist.Hint" Value="" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsDependIp}" Value="True">
-                                                <Setter Property="IsEnabled" Value="False" />
-                                                <Setter Property="Text" Value="IP Listの値を使用します" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                    
-                                </TextBox.Style>
-                            </TextBox>
-                        </Border>
-                    </Grid>
+                    <local:ScriptParameterInputField />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
 
