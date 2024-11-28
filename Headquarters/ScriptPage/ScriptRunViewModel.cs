@@ -236,6 +236,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         OutputFieldViewModel.Clear();
 
         IsRunning = true;
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
         using var cancelTokenSource = new CancellationTokenSource();
         _cancelTokenSource = cancelTokenSource;
@@ -243,6 +244,16 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         await RunScriptFunctions(ipAndParameterList, _cancelTokenSource.Token);
             
         _cancelTokenSource = null;
+        
+        // IsRunningをすぐにfalseにするとUIが更新されないことがある
+        var elapsed = stopwatch.Elapsed;
+        var remaining = TimeSpan.FromMilliseconds(1000) - elapsed;
+        if (remaining > TimeSpan.Zero)
+        {
+            // ReSharper disable once MethodSupportsCancellation
+            await Task.Delay(remaining);
+        }
+        
         IsRunning = false;
     }
 
