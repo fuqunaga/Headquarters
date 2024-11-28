@@ -13,7 +13,10 @@ public class ScriptFunction
     private readonly CommentHelpInfo? _helpInfo;
     
     public string Name { get; }
-    public IReadOnlyList<string> ParameterNames { get; }
+    
+    public IReadOnlyList<ScriptParameter> Parameters { get; }
+    
+    public IEnumerable<string> ParameterNames => Parameters.Select(p => p.Name); 
     
     private bool IsSessionRequired => ParameterNames.Contains(Script.ReservedParameterName.Session, StringComparer.OrdinalIgnoreCase);
     private bool IsIpRequired => ParameterNames.Contains(Script.ReservedParameterName.Ip, StringComparer.OrdinalIgnoreCase);
@@ -26,7 +29,7 @@ public class ScriptFunction
         _commandString = null;
         
         Name = scriptName;
-        ParameterNames = GetScriptBlockParameterNames(scriptBlockAst).ToList();
+        Parameters = GetScriptBlockParameterNames(scriptBlockAst).ToList();
 
         _helpInfo = scriptBlockAst.GetHelpContent();
     }
@@ -41,7 +44,7 @@ public class ScriptFunction
         // functionのパラメータは次の２形式ある
         // 1. function myFunc($param1, $param2) { ... }
         // 2. function myFunc{ param($param1, $param2); ... }
-        ParameterNames = functionDefinitionAst.Parameters != null
+        Parameters = functionDefinitionAst.Parameters != null
                 ? GetParameterNames(functionDefinitionAst.Parameters).ToList()
                 : GetScriptBlockParameterNames(functionDefinitionAst.Body).ToList()
         ;
@@ -49,7 +52,7 @@ public class ScriptFunction
         _helpInfo = functionDefinitionAst.GetHelpContent();
     }
     
-    private static IEnumerable<string> GetScriptBlockParameterNames(ScriptBlockAst ast)
+    private static IEnumerable<ScriptParameter> GetScriptBlockParameterNames(ScriptBlockAst ast)
     {
         var paramBlock = ast.ParamBlock;
         return paramBlock == null ? [] : GetParameterNames(paramBlock.Parameters);
@@ -65,9 +68,9 @@ public class ScriptFunction
         return ast;
     }
     
-    private static IEnumerable<string> GetParameterNames(IEnumerable<ParameterAst> parameterAstEnumerable)
+    private static IEnumerable<ScriptParameter> GetParameterNames(IEnumerable<ParameterAst> parameterAstEnumerable)
     {
-        return parameterAstEnumerable.Select(p => p.Name.ToString().TrimStart('$'));
+        return parameterAstEnumerable.Select(p => new ScriptParameter(p));
     }
 
     public async Task<PowerShellRunner.Result> Run(string ipAddress, PowerShellRunner.InvokeParameter param)

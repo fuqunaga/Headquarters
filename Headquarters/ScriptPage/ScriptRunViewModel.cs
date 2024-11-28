@@ -80,7 +80,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         set => SetProperty(ref _isStopOnError, value);
     }
 
-    public ObservableCollection<ScriptParameterViewModel> Parameters { get; } = [];
+    public ObservableCollection<ScriptParameterInputFieldViewModel> Parameters { get; } = [];
         
     public int MaxTaskCount
     {
@@ -128,11 +128,11 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     private void OnUpdateScript()
     {
         Parameters.Clear();
-        foreach (var parameterName in _script.EditableParameterNames)
+        foreach (var scriptParameter in _script.EditableScriptParameters)
         {
-            Parameters.Add(new ScriptParameterViewModel(
-                parameterName,
-                _script.GetParameterHelp(parameterName),
+            Parameters.Add(new ScriptParameterInputFieldViewModel(
+                scriptParameter,
+                _script.GetParameterHelp(scriptParameter.Name),
                 _ipListViewModel,
                 _scriptParameterSet)
             );

@@ -52,8 +52,14 @@ namespace Headquarters
         public string Synopsis => _helpInfo?.Synopsis?.TrimEnd('\r', '\n') ?? "";
         public string Description => _helpInfo?.Description?.TrimEnd('\r', '\n') ?? "";
         
-        public List<string> ParseErrorMessages { get; private set; } = [];        
-        public IEnumerable<string> EditableParameterNames => _scriptFunctionDictionary.Values.SelectMany(f => f.ParameterNames).Distinct().Except(ReservedParameterNames, StringComparer.OrdinalIgnoreCase);
+        public List<string> ParseErrorMessages { get; private set; } = [];
+        
+        // 変更可能なパラメータ
+        // 複数の関数に同じパラメータがあった場合とりあえず最初のものを採用
+        public IEnumerable<ScriptParameter> EditableScriptParameters => _scriptFunctionDictionary.Values.SelectMany(f => f.Parameters)
+            .GroupBy(p => p.Name)
+            .Select(group => group.First())
+            .Where(p => !ReservedParameterNames.Contains(p.Name, StringComparer.OrdinalIgnoreCase));
 
         public bool HasPreProcess => _scriptFunctionDictionary.ContainsKey(PreProcessFunctionName);
         public bool HasPostProcess => _scriptFunctionDictionary.ContainsKey(PostProcessFunctionName);
