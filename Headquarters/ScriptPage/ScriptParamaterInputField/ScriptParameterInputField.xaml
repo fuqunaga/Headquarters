@@ -10,7 +10,7 @@
              d:DataContext="{d:DesignInstance local:ScriptParameterInputFieldViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
     
-    <Grid Margin="32 8 32 0">
+    <Grid Margin="32 24 32 0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition SharedSizeGroup="FirstRow" />
             <ColumnDefinition Width="*" />
@@ -45,16 +45,17 @@
         <!-- Input Field -->
         <!-- MaterialDesignToolkitのDatePickerあたりを参考にボタン付きTextBox -->
         <Border Grid.Column="1"
+
                 Style="{StaticResource AddToolTipOfLockStyle}"
                 ToolTipService.IsEnabled="{Binding DataContext.IsLocked, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
             
             <Grid>
                 <TextBox x:Name="PART_TextBox"
-                         VerticalAlignment="Center" 
+                         VerticalAlignment="Center"
                          IsTabStop="True"
                          materialDesignInternal:InternalTextFieldAssist.IsMouseOver="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=IsMouseOver}">
                     <TextBox.Style>
-                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
                             <Setter Property="Text" Value="{Binding Value}" />
                             <Setter Property="materialDesign:HintAssist.Hint" Value="{Binding Name}" />
                             <Setter Property="Padding" Value="4 0 32 0" />
@@ -86,6 +87,7 @@
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}" />
+                                    <Setter Property="Opacity" Value="1" />
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="False">
                                     <Setter Property="Opacity" Value="0.5" />
