@@ -1,4 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Windows.Input;
 
 namespace Headquarters
 {
@@ -8,13 +12,10 @@ namespace Headquarters
     /// </summary>
     public class ScriptParameterInputFieldViewModel : ViewModelBase
     {
-        public enum ButtonType
+        private static readonly IReadOnlyList<Type> SupportedExpectedTypes = new List<Type>
         {
-            None,
-            OpenFile,
-            OpenDirectory,
-            OpenFileOrDirectory
-        }
+            typeof(FileSystemInfo)
+        };
         
         private readonly IpListViewModel _ipListViewModel;
         private readonly ParameterSet _scriptParameterSet;
@@ -36,7 +37,11 @@ namespace Headquarters
         public string HelpFirstLine { get; private set; }
         public string HelpDetail { get; private set; }
         public bool IsDependIp => _ipListViewModel.DataGridViewModel.Contains(Name);
-        public ButtonType RightButtonType { get; private set; }
+        public bool IsOpenFileButtonEnabled { get; private set; }
+
+        public ICommand OpenFileCommand { get; private set; } 
+        
+        private Type? ExpectedType { get; set; }
         
         public ScriptParameterInputFieldViewModel(ScriptParameter scriptParameter, string help, IpListViewModel ipListViewModel, ParameterSet scriptParameterSet)
         {
@@ -45,7 +50,11 @@ namespace Headquarters
             Name = scriptParameter.Name;
             HelpFirstLine = reader.ReadLine() ?? "";
             HelpDetail = reader.ReadToEnd() ?? "";
-            RightButtonType = GetButtonType(scriptParameter);
+            ExpectedType = GetExpectedType(scriptParameter);
+            IsOpenFileButtonEnabled = ExpectedType == typeof(FileSystemInfo);
+            
+            OpenFileCommand = new DelegateCommand(_ => OnOpenFile(), _ => IsOpenFileButtonEnabled);
+           
             
             _ipListViewModel = ipListViewModel;
             _scriptParameterSet = scriptParameterSet;
@@ -58,17 +67,24 @@ namespace Headquarters
                 }
             };
         }
-        
-        private static ButtonType GetButtonType(ScriptParameter scriptParameter)
+
+        private static Type? GetExpectedType(ScriptParameter scriptParameter)
         {
-            foreach (var attribute in scriptParameter.Attributes)
+            return scriptParameter.Attributes.FirstOrDefault(attr => SupportedExpectedTypes.Contains(attr));
+        }
+        
+        private void OnOpenFile()
+        {
+            var dialog = new OpenFileOrFolderDialog();
+       
+            if (dialog.ShowDialog())
             {
-                if (attribute == typeof(FileInfo)) return ButtonType.OpenFile;
-                if (attribute == typeof(DirectoryInfo)) return ButtonType.OpenDirectory;
-                if (attribute == typeof(FileSystemInfo)) return ButtonType.OpenFileOrDirectory;
+                //開く以外を選択された場合はfalseを返す。
+                // select_path = dlg.FileName;
+                
+                Console.WriteLine($"Selected file: {dialog.FileOrFolderName}");
             }
-            
-            return ButtonType.None;
+  
         }
     }
 }

@@ -10,6 +10,38 @@
              d:DataContext="{d:DesignInstance local:ScriptParameterInputFieldViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
     
+    <UserControl.Resources>
+        <Style x:Key="FolderOpenButtonStyle" TargetType="Control">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Control}">
+                        <materialDesign:PackIcon Kind="FolderOpen"
+                                                 VerticalAlignment="Center"
+                                                 Foreground="{TemplateBinding Foreground}"
+                                                 Opacity="{TemplateBinding Opacity}" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            
+            <Setter Property="Foreground" Value="{Binding ElementName=PART_TextBox, Path=Foreground}" />
+            <Setter Property="Opacity" Value="0.7" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}" />
+                    <Setter Property="Opacity" Value="1" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.5" />
+                </Trigger>
+                <DataTrigger Binding="{Binding IsOpenFileButtonEnabled}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+     
+        </Style>
+
+    </UserControl.Resources>
+    
     <Grid Margin="32 24 32 0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition SharedSizeGroup="FirstRow" />
@@ -45,7 +77,6 @@
         <!-- Input Field -->
         <!-- MaterialDesignToolkitのDatePickerあたりを参考にボタン付きTextBox -->
         <Border Grid.Column="1"
-
                 Style="{StaticResource AddToolTipOfLockStyle}"
                 ToolTipService.IsEnabled="{Binding DataContext.IsLocked, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
             
@@ -67,7 +98,7 @@
                                     <Setter Property="IsEnabled" Value="False" />
                                     <Setter Property="Text" Value="IP Listの値を使用します" />
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding RightButtonType}" Value="{x:Static local:ScriptParameterInputFieldViewModel+ButtonType.None}">
+                                <DataTrigger Binding="{Binding IsOpenFileButtonEnabled}" Value="True">
                                     <Setter Property="Padding" Value="4 0" />
                                 </DataTrigger>
                             </Style.Triggers>
@@ -76,38 +107,14 @@
                     </TextBox.Style>
                 </TextBox>
 
-                <Button HorizontalAlignment="Right"
+
+                <Button x:Name="PART_Button"
+                        Command="{Binding OpenFileCommand}"
+                        HorizontalAlignment="Right"
                         VerticalAlignment="Center"
                         Margin="8 0"
-                        Focusable="False">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Setter Property="Foreground" Value="{Binding ElementName=PART_TextBox, Path=Foreground}" />
-                            <Setter Property="Opacity" Value="0.7" />
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}" />
-                                    <Setter Property="Opacity" Value="1" />
-                                </Trigger>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Opacity" Value="0.5" />
-                                </Trigger>
-                                <DataTrigger Binding="{Binding RightButtonType}" Value="{x:Static local:ScriptParameterInputFieldViewModel+ButtonType.None}">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-
-                    <Button.Template>
-                        <ControlTemplate TargetType="{x:Type Button}">
-                            <materialDesign:PackIcon Kind="FolderOpen"
-                                                     VerticalAlignment="Center"
-                                                     Foreground="{TemplateBinding Foreground}"
-                                                     Opacity="{TemplateBinding Opacity}" />
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
+                        Focusable="False"
+                        Style="{StaticResource FolderOpenButtonStyle}" />
             </Grid>
         </Border>
     </Grid>
