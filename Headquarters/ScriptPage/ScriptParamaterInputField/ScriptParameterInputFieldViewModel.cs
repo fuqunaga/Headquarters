@@ -14,7 +14,8 @@ namespace Headquarters
     {
         private static readonly IReadOnlyList<Type> SupportedExpectedTypes = new List<Type>
         {
-            typeof(FileSystemInfo)
+            typeof(FileInfo),
+            typeof(DirectoryInfo)
         };
         
         private readonly IpListViewModel _ipListViewModel;
@@ -37,9 +38,9 @@ namespace Headquarters
         public string HelpFirstLine { get; private set; }
         public string HelpDetail { get; private set; }
         public bool IsDependIp => _ipListViewModel.DataGridViewModel.Contains(Name);
-        public bool IsOpenFileButtonEnabled { get; private set; }
+        public bool IsExpectFileSystemInfo { get; }
 
-        public ICommand OpenFileCommand { get; private set; } 
+        public ICommand OpenFileCommand { get; } 
         
         private Type? ExpectedType { get; set; }
         
@@ -51,11 +52,10 @@ namespace Headquarters
             HelpFirstLine = reader.ReadLine() ?? "";
             HelpDetail = reader.ReadToEnd() ?? "";
             ExpectedType = GetExpectedType(scriptParameter);
-            IsOpenFileButtonEnabled = ExpectedType == typeof(FileSystemInfo);
+            IsExpectFileSystemInfo = ExpectedType?.IsSubclassOf(typeof(FileSystemInfo)) ?? false;
             
-            OpenFileCommand = new DelegateCommand(_ => OnOpenFile(), _ => IsOpenFileButtonEnabled);
+            OpenFileCommand = new DelegateCommand(_ => OnOpenFile(), _ => IsExpectFileSystemInfo);
            
-            
             _ipListViewModel = ipListViewModel;
             _scriptParameterSet = scriptParameterSet;
             
@@ -79,12 +79,8 @@ namespace Headquarters
        
             if (dialog.ShowDialog())
             {
-                //開く以外を選択された場合はfalseを返す。
-                // select_path = dlg.FileName;
-                
-                Console.WriteLine($"Selected file: {dialog.FileOrFolderName}");
+                Value = dialog.FileOrFolderName;
             }
-  
         }
     }
 }
