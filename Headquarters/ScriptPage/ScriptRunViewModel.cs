@@ -185,7 +185,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
                 var ipParamsTable = Parameters
                     .ToDictionary(
                         p => p.Name,
-                        object (p) => ipParams.Get(p.Name) ?? p.Value
+                        p => p.GetParameterForScript(ipParams.Get(p.Name))
                     );
                         
 
@@ -294,7 +294,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         OutputFieldViewModel.AddScriptResult(scriptResult);
                 
         var invokeParameter = new PowerShellRunner.InvokeParameter(
-            parameters: Parameters.ToDictionary(p => p.Name, object (p) => p.Value),
+            parameters: Parameters.ToDictionary(p => p.Name, p => p.GetParameterForScript()),
             cancellationToken: cancellationToken,
             runspacePool: runspacePool,
             invocationStateChanged: (_, args) => scriptResult.Info = args.InvocationStateInfo

@@ -85,9 +85,32 @@ namespace Headquarters
             };
         }
 
+        // スクリプト実行用のパラメータを取得する
+        // bool値はstringのままだとエラーになるのでキャストする
+        public object GetParameterForScript(string? ipListParameter = null)
+        {
+            var stringValue = ipListParameter ?? Value;
+            
+            if (ExpectedType == typeof(bool))
+            {
+                if ( bool.TryParse(stringValue, out var boolValue))
+                {
+                    return boolValue;
+                }
+            }
+
+            return stringValue;
+        }
+
         private static Type? GetExpectedType(ScriptParameter scriptParameter)
         {
-            return scriptParameter.AttributeTypes.FirstOrDefault(attr => SupportedExpectedTypes.Contains(attr));
+            var type = scriptParameter.AttributeTypes.FirstOrDefault(attr => SupportedExpectedTypes.Contains(attr));
+            if ( type == typeof(SwitchParameter))
+            {
+                type = typeof(bool);
+            }
+
+            return type;
         }
  
         
