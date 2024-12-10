@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Management.Automation;
+using System.Management.Automation.Language;
 using System.Windows.Input;
 
 namespace Headquarters
@@ -20,6 +22,8 @@ namespace Headquarters
         
         private readonly IpListViewModel _ipListViewModel;
         private readonly ParameterSet _scriptParameterSet;
+
+        private ScriptParameterInputFieldType _baseFieldType;
         
         public string Name { get; }
         public string Value
@@ -27,7 +31,7 @@ namespace Headquarters
             get => _scriptParameterSet.Get(Name);
             set
             {
-                if (IsDependIp) return;
+                if (IsUseIpListParameter) return;
                 if ( _scriptParameterSet.Set(Name, value) )
                 {
                     OnPropertyChanged();
@@ -35,15 +39,18 @@ namespace Headquarters
             }
         }
         
-        public string HelpFirstLine { get; private set; }
-        public string HelpDetail { get; private set; }
-        public bool IsDependIp => _ipListViewModel.DataGridViewModel.Contains(Name);
+        public string HelpFirstLine { get; }
+        public string HelpDetail { get;  }
+        public ScriptParameterInputFieldType FieldType => IsUseIpListParameter ? ScriptParameterInputFieldType.UseIpList : _baseFieldType; 
+        
+        public bool IsUseIpListParameter => _ipListViewModel.DataGridViewModel.Contains(Name);
         public bool IsExpectFileSystemInfo { get; }
 
         public ICommand OpenFileCommand { get; } 
         
         private Type? ExpectedType { get; set; }
-        
+        public IReadOnlyList<string> ComboBoxItems { get; }
+
         public ScriptParameterInputFieldViewModel(ScriptParameter scriptParameter, string help, IpListViewModel ipListViewModel, ParameterSet scriptParameterSet)
         {
             using var reader = new StringReader(help);
@@ -63,15 +70,22 @@ namespace Headquarters
             {
                 if (args.PropertyName == nameof(IpListDataGridViewModel.Items))
                 {
-                    OnPropertyChanged(nameof(IsDependIp));
+                    OnPropertyChanged(nameof(IsUseIpListParameter));
+                    OnPropertyChanged(nameof(FieldType));
                 }
             };
+            
+            ComboBoxItems = scriptParameter.ValidateSetValues.ToList();
+            _baseFieldType = ComboBoxItems.Any() 
+                ? ScriptParameterInputFieldType.ComboBox
+                : ScriptParameterInputFieldType.TextBox;
         }
 
         private static Type? GetExpectedType(ScriptParameter scriptParameter)
         {
-            return scriptParameter.Attributes.FirstOrDefault(attr => SupportedExpectedTypes.Contains(attr));
+            return scriptParameter.AttributeTypes.FirstOrDefault(attr => SupportedExpectedTypes.Contains(attr));
         }
+ 
         
         private void OnOpenFile()
         {

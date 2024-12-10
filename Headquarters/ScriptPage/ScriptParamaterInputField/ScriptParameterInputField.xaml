@@ -11,6 +11,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
     
     <UserControl.Resources>
+        
         <Style x:Key="FolderOpenButtonStyle" TargetType="Control">
             <Setter Property="Template">
                 <Setter.Value>
@@ -35,10 +36,86 @@
                     <Setter Property="Opacity" Value="0.5" />
                 </Trigger>
             </Style.Triggers>
-     
         </Style>
 
+        
+        <!-- ScriptParameterInputFieldType別コンテンツ -->
+        
+        <DataTemplate x:Key="Field-UseIpList" DataType="{x:Type local:ScriptParameterInputFieldViewModel}">
+            <TextBox IsEnabled="False"
+                     Text="IP Listの値を仕様します"
+                     Padding="0"
+                     />
+        </DataTemplate>
+
+        <DataTemplate x:Key="Field-TextBox" DataType="{x:Type local:ScriptParameterInputFieldViewModel}">
+            <Grid>
+                <TextBox x:Name="PART_TextBox"
+                         VerticalAlignment="Center"
+                         IsTabStop="True"
+                         materialDesignInternal:InternalTextFieldAssist.IsMouseOver="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=IsMouseOver}">
+                    <TextBox.Style>
+                        <Style TargetType="{x:Type TextBox}"
+                               BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
+                            <Setter Property="Text" Value="{Binding Value}" />
+                            <Setter Property="Padding" Value="0" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsExpectFileSystemInfo}" Value="True">
+                                    <Setter Property="Padding" Value="0 0 32 0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+
+                    </TextBox.Style>
+                </TextBox>
+
+
+                <Button Command="{Binding OpenFileCommand}"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        
+                        Focusable="False"
+                        Style="{StaticResource FolderOpenButtonStyle}" />
+            </Grid>
+        </DataTemplate>
+        
+        <DataTemplate x:Key="Field-ComboBox" DataType="{x:Type local:ScriptParameterInputFieldViewModel}">
+            <ComboBox  ItemsSource="{Binding ComboBoxItems}"
+                       SelectedValue="{Binding Value}"
+                       VerticalAlignment="Center"
+                       materialDesign:TextFieldAssist.OutlinedBorderActiveThickness="0"
+                       Style="{StaticResource MaterialDesignFloatingHintComboBox}"
+                       Padding="0"
+                       IsTabStop="True" />
+        </DataTemplate>
+
+
+        <!-- ScriptParameterInputFieldType別コンテンツ出し分け -->
+        <Style x:Key="InputField" TargetType="ContentControl">
+            <Setter Property="materialDesign:HintAssist.Hint" Value="{Binding Name}" />
+            
+            <Setter Property="ContentTemplate" Value="{StaticResource Field-UseIpList}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HelpFirstLine}" Value="">
+                    <Setter Property="materialDesign:HintAssist.Hint" Value="" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding FieldType}"
+                             Value="{x:Static local:ScriptParameterInputFieldType.TextBox}">
+                    <Setter Property="ContentTemplate" Value="{StaticResource Field-TextBox}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding FieldType}"
+                             Value="{x:Static local:ScriptParameterInputFieldType.ComboBox}">
+                    <Setter Property="ContentTemplate" Value="{StaticResource Field-ComboBox}" />
+                </DataTrigger>
+            </Style.Triggers>
+
+           
+        </Style>
+        
     </UserControl.Resources>
+    
+    
     
     <Grid Margin="32 24 32 0">
         <Grid.ColumnDefinitions>
@@ -79,39 +156,7 @@
                 ToolTipService.IsEnabled="{Binding DataContext.IsLocked, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
             
             <Grid>
-                <TextBox x:Name="PART_TextBox"
-                         VerticalAlignment="Center"
-                         IsTabStop="True"
-                         materialDesignInternal:InternalTextFieldAssist.IsMouseOver="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=IsMouseOver}">
-                    <TextBox.Style>
-                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
-                            <Setter Property="Text" Value="{Binding Value}" />
-                            <Setter Property="materialDesign:HintAssist.Hint" Value="{Binding Name}" />
-                            <Setter Property="Padding" Value="4 0 32 0" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding HelpFirstLine}" Value="">
-                                    <Setter Property="materialDesign:HintAssist.Hint" Value="" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsDependIp}" Value="True">
-                                    <Setter Property="IsEnabled" Value="False" />
-                                    <Setter Property="Text" Value="IP Listの値を使用します" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsExpectFileSystemInfo}" Value="True">
-                                    <Setter Property="Padding" Value="4 0" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-
-                    </TextBox.Style>
-                </TextBox>
-
-
-                <Button Command="{Binding OpenFileCommand}"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        Margin="8 0"
-                        Focusable="False"
-                        Style="{StaticResource FolderOpenButtonStyle}" />
+                <ContentControl Style="{StaticResource InputField}" Content="{Binding }"/>
             </Grid>
         </Border>
     </Grid>
