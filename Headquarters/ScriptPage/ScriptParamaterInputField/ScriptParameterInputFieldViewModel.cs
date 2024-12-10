@@ -59,7 +59,7 @@ namespace Headquarters
             Name = scriptParameter.Name;
             HelpFirstLine = reader.ReadLine() ?? "";
             HelpDetail = reader.ReadToEnd() ?? "";
-            
+
             ExpectedType = GetExpectedType(scriptParameter);
             IsExpectFileSystemInfo = ExpectedType?.IsSubclassOf(typeof(FileSystemInfo)) ?? false;
             OpenFileCommand = new DelegateCommand(_ => OnOpenFile(), _ => IsExpectFileSystemInfo);
@@ -83,6 +83,19 @@ namespace Headquarters
                     OnPropertyChanged(nameof(FieldType));
                 }
             };
+            
+            
+            // Valueが無かったらデフォルト値を入れる
+            if (string.IsNullOrEmpty(Value))
+            {
+                Value = scriptParameter.DefaultValue?.ToString() ?? "";
+            }
+            
+            // Valueが無くComboBoxなら値を入れる
+            if (FieldType == ScriptParameterInputFieldType.ComboBox && string.IsNullOrEmpty(Value))
+            {
+                Value = ComboBoxItems.FirstOrDefault() ?? "";
+            }
         }
 
         // スクリプト実行用のパラメータを取得する
