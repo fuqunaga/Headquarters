@@ -62,8 +62,15 @@
     </UserControl.Resources>
 
 
-    <DockPanel>
-        <materialDesign:ColorZone DockPanel.Dock="Top"
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        <materialDesign:ColorZone Grid.Row="0"
                                   Mode="PrimaryDark"
                                   Padding="8,0,0,0" >
             <DockPanel>
@@ -183,49 +190,55 @@
 
 
         <!-- Description -->
-        <Expander DockPanel.Dock="Top"
-                  HorizontalAlignment="Stretch"
-                  Visibility="{Binding Description, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}">
-            <Expander.Header>
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="TextBox" Margin="4 0 4 0" />
-                    <TextBlock Text="Description" />
-                </StackPanel>
-            </Expander.Header>
+        <ScrollViewer  Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <Expander HorizontalAlignment="Stretch"
+                      Visibility="{Binding Description, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}">
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="TextBox" Margin="4 0 4 0" />
+                            <TextBlock Text="Description" />
+                        </StackPanel>
+                    </Expander.Header>
 
-            <TextBlock Text="{Binding Description}"
-                       Margin="32 0 16 16"
-                       TextWrapping="Wrap"
-                       Opacity="0.7" />
-        </Expander>
-        <Border DockPanel.Dock="Top" Style="{StaticResource HorizontalDividerBorder}" />
+                    <TextBlock Text="{Binding Description}"
+                           Margin="32 0 16 16"
+                           TextWrapping="Wrap"
+                           Opacity="0.7" />
+                </Expander>
+                <Border Style="{StaticResource HorizontalDividerBorder}" />
 
-        <!-- Parameters -->
-        <ItemsControl DockPanel.Dock="Top" Grid.IsSharedSizeScope="True"
-                      ItemsSource="{Binding Parameters}"
-                      IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
-                      MaxHeight="200"
-                      Margin="0,16,0,0"
-                      KeyboardNavigation.TabNavigation="Continue"
-                      ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                      >
 
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <local:ScriptParameterInputField />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
+                <!-- Parameters -->
+                <ItemsControl DockPanel.Dock="Top" Grid.IsSharedSizeScope="True"
+                          ItemsSource="{Binding Parameters}"
+                          IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
+                          Margin="0,16"
+                          KeyboardNavigation.TabNavigation="Continue">
 
-        </ItemsControl>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <local:ScriptParameterInputField />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
 
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+
+        <GridSplitter Grid.Row="2" 
+                      HorizontalAlignment="Stretch"
+                      Height="5" 
+                      Margin="0 8"
+                      />
+        
         <!-- Output Field -->
-        <Border DockPanel.Dock="Bottom"
+        <Border Grid.Row="3"
                 DataContext="{Binding OutputFieldViewModel}"
                 BorderBrush="{DynamicResource MaterialDesign.Brush.TextBox.OutlineBorder}"
                 BorderThickness="{x:Static materialDesign:Constants.DefaultOutlinedBorderInactiveThickness}"
                 CornerRadius="4"
-                Margin="4 32 4 4">
+                Margin="4 4 4 4">
 
             <!-- 中のコンテンツが丸角でもクリッピングされるトリック
                  https://stackoverflow.com/a/28344788/2015881 -->
@@ -330,5 +343,5 @@
                 </Grid>
             </Border>
         </Border>
-    </DockPanel>
+    </Grid>
 </UserControl>
