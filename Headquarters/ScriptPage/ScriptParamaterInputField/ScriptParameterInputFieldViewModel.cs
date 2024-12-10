@@ -17,13 +17,14 @@ namespace Headquarters
         private static readonly IReadOnlyList<Type> SupportedExpectedTypes = new List<Type>
         {
             typeof(FileInfo),
-            typeof(DirectoryInfo)
+            typeof(DirectoryInfo),
+            typeof(bool),
+            typeof(SwitchParameter)
         };
         
         private readonly IpListViewModel _ipListViewModel;
         private readonly ParameterSet _scriptParameterSet;
-
-        private ScriptParameterInputFieldType _baseFieldType;
+        private readonly ScriptParameterInputFieldType _baseFieldType;
         
         public string Name { get; }
         public string Value
@@ -32,7 +33,7 @@ namespace Headquarters
             set
             {
                 if (IsUseIpListParameter) return;
-                if ( _scriptParameterSet.Set(Name, value) )
+                if (_scriptParameterSet.Set(Name, value))
                 {
                     OnPropertyChanged();
                 }
@@ -58,10 +59,18 @@ namespace Headquarters
             Name = scriptParameter.Name;
             HelpFirstLine = reader.ReadLine() ?? "";
             HelpDetail = reader.ReadToEnd() ?? "";
+            
             ExpectedType = GetExpectedType(scriptParameter);
             IsExpectFileSystemInfo = ExpectedType?.IsSubclassOf(typeof(FileSystemInfo)) ?? false;
-            
             OpenFileCommand = new DelegateCommand(_ => OnOpenFile(), _ => IsExpectFileSystemInfo);
+            
+            ComboBoxItems = scriptParameter.ValidateSetValues.ToList();
+            _baseFieldType = ComboBoxItems.Any() switch
+            {
+                true => ScriptParameterInputFieldType.ComboBox,
+                false when ExpectedType == typeof(bool) || ExpectedType == typeof(SwitchParameter) => ScriptParameterInputFieldType.ToggleButton,
+                _ => ScriptParameterInputFieldType.TextBox
+            };
            
             _ipListViewModel = ipListViewModel;
             _scriptParameterSet = scriptParameterSet;
@@ -74,11 +83,6 @@ namespace Headquarters
                     OnPropertyChanged(nameof(FieldType));
                 }
             };
-            
-            ComboBoxItems = scriptParameter.ValidateSetValues.ToList();
-            _baseFieldType = ComboBoxItems.Any() 
-                ? ScriptParameterInputFieldType.ComboBox
-                : ScriptParameterInputFieldType.TextBox;
         }
 
         private static Type? GetExpectedType(ScriptParameter scriptParameter)

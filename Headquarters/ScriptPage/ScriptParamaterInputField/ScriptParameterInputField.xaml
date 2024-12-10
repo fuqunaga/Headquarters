@@ -89,11 +89,21 @@
                        IsTabStop="True" />
         </DataTemplate>
 
+        <DataTemplate x:Key="Field-ToggleButton" DataType="{x:Type local:ScriptParameterInputFieldViewModel}">
+            <StackPanel Orientation="Horizontal">
+                <ToggleButton IsChecked="{Binding Value}"
+                              HorizontalAlignment="Left" />
+                <TextBlock
+                    Text="{Binding (materialDesign:HintAssist.Hint), RelativeSource={RelativeSource TemplatedParent}}"
+                    VerticalAlignment="Center"
+                    Margin="16 0"
+                    Opacity="0.5" />
+            </StackPanel>
+        </DataTemplate>
 
         <!-- ScriptParameterInputFieldType別コンテンツ出し分け -->
         <Style x:Key="InputField" TargetType="ContentControl">
             <Setter Property="materialDesign:HintAssist.Hint" Value="{Binding Name}" />
-            
             <Setter Property="ContentTemplate" Value="{StaticResource Field-UseIpList}" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding HelpFirstLine}" Value="">
@@ -108,9 +118,11 @@
                              Value="{x:Static local:ScriptParameterInputFieldType.ComboBox}">
                     <Setter Property="ContentTemplate" Value="{StaticResource Field-ComboBox}" />
                 </DataTrigger>
+                <DataTrigger Binding="{Binding FieldType}"
+                             Value="{x:Static local:ScriptParameterInputFieldType.ToggleButton}">
+                    <Setter Property="ContentTemplate" Value="{StaticResource Field-ToggleButton}" />
+                </DataTrigger>
             </Style.Triggers>
-
-           
         </Style>
         
     </UserControl.Resources>

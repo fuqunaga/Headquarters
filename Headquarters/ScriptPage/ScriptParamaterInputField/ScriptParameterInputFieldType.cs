@@ -5,4 +5,5 @@ public enum ScriptParameterInputFieldType
     UseIpList,
     TextBox,
     ComboBox,
+    ToggleButton,
 }
