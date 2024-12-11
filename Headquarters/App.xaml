@@ -31,6 +31,11 @@
                 <Setter Property="ToolTipService.Placement" Value="Mouse" />
                 <Setter Property="ToolTipService.IsEnabled" Value="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InvertBooleanConverter}}" />
             </Style>
+            
+            <!-- ComboBoxアクティブ時に枠が表示されるのを防ぐ -->
+            <Style TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignComboBox}">
+                <Setter Property="materialDesign:TextFieldAssist.OutlinedBorderActiveThickness" Value="0" />
+            </Style>
 
         </ResourceDictionary>
     </Application.Resources>
