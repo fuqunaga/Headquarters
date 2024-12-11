@@ -58,14 +58,13 @@
                     </TextBox.Style>
                 </TextBox>
 
-
                 <Button Command="{Binding OpenFileCommand}"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
                         Focusable="False"
                         Width="24"
                         Height="24"
-                        Style="{StaticResource FolderOpenIconButtonStyle}"
+                        Style="{StaticResource FolderOpenIconButtonStyle}">
                     <materialDesign:PackIcon Kind="FolderOpen" Width="16" Height="16"/>
                 </Button>
             </Grid>
