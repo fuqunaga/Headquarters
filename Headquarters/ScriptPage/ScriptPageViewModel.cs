@@ -24,7 +24,16 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
     public Page CurrentPage
     {
         get => _currentPage;
-        set => SetProperty(ref _currentPage, value);
+        set
+        {
+            if (SetProperty(ref _currentPage, value))
+            {
+                if ( value == Page.SelectScript )
+                {
+                    _ipListViewModel?.DataGridViewModel.ClearScriptParameterNames();
+                }
+            }
+        }
     }
 
     public ObservableCollection<ScriptButtonViewModel> Items { get; } = [];

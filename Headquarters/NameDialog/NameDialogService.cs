@@ -8,10 +8,16 @@ using MaterialDesignThemes.Wpf;
 
 namespace Headquarters;
 
+/// <summary>
+/// NameDialogを表示するサービス
+///
+/// TextBoxとComboBoxのバインディングを１つにまとめたいがいい方法がわからず２重に管理している
+/// </summary>
 public static class NameDialogService
 {
     private static readonly NameDialog Dialog = new();
-    private static readonly Binding Binding;
+    private static readonly Binding TextBoxBinding;
+    private static readonly Binding ComboBoxBinding;
     private static readonly ValidationRule NotEmptyValidationRule = new NotEmptyValidationRule()
     {
         ValidatesOnTargetUpdated = true
@@ -20,8 +26,11 @@ public static class NameDialogService
     
     static NameDialogService()
     {
-        var binding = BindingOperations.GetBinding(Dialog.NameTextBox, TextBox.TextProperty);
-        Binding = binding ?? throw new InvalidOperationException("Binding not found.");
+        TextBoxBinding = BindingOperations.GetBinding(Dialog.NameTextBox, TextBox.TextProperty) 
+                         ?? throw new InvalidOperationException("Binding not found.");
+        
+        ComboBoxBinding = BindingOperations.GetBinding(Dialog.NameComboBox, ComboBox.TextProperty)
+                          ?? throw new InvalidOperationException("Binding not found.");
     }
 
     public static async Task<(bool success, string)> ShowDialog(NameDialogViewModel viewModel, params ValidationRule[] validationRules)
@@ -33,15 +42,17 @@ public static class NameDialogService
 
     private static async Task<(bool success, string)> ShowDialog(NameDialogViewModel viewModel, IEnumerable<ValidationRule> validationRules)
     {
+        var targetBinding = viewModel.Suggestions is not null ? ComboBoxBinding : TextBoxBinding;
+        
         foreach(var validationRule in validationRules)
         {
-            Binding.ValidationRules.Add(validationRule);
+            targetBinding.ValidationRules.Add(validationRule);
         }
         
         Dialog.DataContext = viewModel;
         var result = await DialogHost.Show(Dialog, "RootDialog");
 
-        Binding.ValidationRules.Clear();
+        targetBinding.ValidationRules.Clear();
 
         return (
             result != null && (bool)result,

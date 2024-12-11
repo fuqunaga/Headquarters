@@ -8,20 +8,33 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:Headquarters"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="350" d:DataContext="{d:NameDialogViewModel}">
+             d:DataContext="{d:DesignInstance local:NameDialogViewModel}"
+             d:DesignHeight="300" d:DesignWidth="350">
     <UserControl.Resources>
         <local:BooleanAllFalseConverter x:Key="BooleanAllFalseConverter" />
     </UserControl.Resources>
 
     <StackPanel Margin="16">
+        
         <Label Content="{Binding Title}" />
-        <!-- UpdateRouceTrigger==Default だとエンターでACCEPTしたとき文字列がViewModelに反映されない -->
+        <!-- UpdateSourceTrigger==Default だとエンターでACCEPTしたとき文字列がViewModelに反映されない -->
         <TextBox x:Name="NameTextBox"
+                 Visibility="{Binding HasSuggestions, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
                  Text = "{Binding Name, UpdateSourceTrigger=PropertyChanged}"
                  IsEnabled="{Binding IsEnabled}"
                  materialDesign:TextFieldAssist.SuffixText="{Binding Suffix}"
                  Margin="0 14"
                  FontSize="18" />
+        
+        <ComboBox x:Name="NameComboBox"
+                  Visibility="{Binding HasSuggestions, Converter={StaticResource BooleanToVisibilityConverter}}"
+                  Text = "{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                  IsEnabled="{Binding IsEnabled}"
+                  materialDesign:TextFieldAssist.SuffixText="{Binding Suffix}"
+                  Margin="0 14"
+                  FontSize="18" 
+                  IsEditable="True"
+                  ItemsSource="{Binding Suggestions}" />
         
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
        

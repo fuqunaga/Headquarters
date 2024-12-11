@@ -10,6 +10,7 @@ namespace Headquarters;
 public class IpListDataGridViewModel : SelectableDataGridViewModel
 {
     private bool _isLocked;
+    private readonly List<string> _scriptParameterNames = [];
     
     public bool IsLocked
     {
@@ -21,6 +22,10 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
     public ICommand RenameColumnCommand { get; }
     public ICommand DeleteColumnCommand { get; }
 
+    public IEnumerable<IpParameterSet> IpParams => Items.Rows.OfType<DataRow>().Select(d => new IpParameterSet(d));
+    public IEnumerable<IpParameterSet> SelectedParams => IpParams.Where(p => p.IsSelected);
+    public bool Contains(string name) => Items.Columns.Contains(name);
+    
 
     public IpListDataGridViewModel()
     {
@@ -30,14 +35,25 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
         RenameColumnCommand = new DelegateCommand(o => {var suppressWarning = RenameColumn(o); }, (obj) => !IsLocked && IsColumnNameEditable(obj));
         DeleteColumnCommand = new DelegateCommand(o => {var suppressWarning = DeleteColumn(o); }, (obj) => !IsLocked && IsColumnNameEditable(obj));
     }
+    
+    public void SetScriptParameterNames(IEnumerable<string> scriptParameterNames)
+    {
+        _scriptParameterNames.Clear();
+        _scriptParameterNames.AddRange(scriptParameterNames);
+    }
+    
+    public void ClearScriptParameterNames()
+    {
+        _scriptParameterNames.Clear();
+    }
 
-    private bool IsColumnNameEditable(object? obj)
+    private static bool IsColumnNameEditable(object? obj)
     {
         var columnName = GetColumnNameFromMenuItem(obj);
         return (columnName != SelectedPropertyName) && (columnName != IpParameterSet.IpPropertyName);
     }
 
-    private string GetColumnNameFromMenuItem(object? obj)
+    private static string GetColumnNameFromMenuItem(object? obj)
     {
         if ( obj is not DataGridColumnHeader header )
         {
@@ -47,10 +63,20 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
         return (string)header.Content;
     }
 
+    private IEnumerable<string> GetScriptParameterNamesWithoutColumnNames()
+    {
+        return _scriptParameterNames.Except(Items.Columns.OfType<DataColumn>().Select(c => c.ColumnName));
+    }
 
     private async Task AddColumn()
     {
-        var (success, name) = await ShowColumnNameDialog("Add Column", "Add");
+        var viewModel = new NameDialogViewModel()
+        {
+            Title = "Add Column",
+            OkButtonContent = "Add",
+            Suggestions = GetScriptParameterNamesWithoutColumnNames(),
+        };
+        var (success, name) = await ShowColumnNameDialog(viewModel);
         if (!success) return;
         if (Items.Columns.Contains(name)) return;
             
@@ -62,7 +88,14 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
     {
         var name = GetColumnNameFromMenuItem(obj);
         
-        var (success, newName) = await ShowColumnNameDialog("Rename Column", "Rename", name);
+        var viewModel = new NameDialogViewModel()
+        {
+            Title = "Rename Column",
+            OkButtonContent = "Rename",
+            Name = name,
+            Suggestions = GetScriptParameterNamesWithoutColumnNames(),
+        };
+        var (success, newName) = await ShowColumnNameDialog(viewModel);
         if (!success) return;
         if (Items.Columns.Contains(newName)) return;
 
@@ -78,7 +111,14 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
     {
         var name = GetColumnNameFromMenuItem(obj);
 
-        var (success, _) = await ShowColumnNameDialog("Delete Column", "Delete",  name, false);
+        var viewModel = new NameDialogViewModel()
+        {
+            Title = "Delete Column",
+            OkButtonContent = "Delete",
+            Name = name,
+            IsEnabled = false
+        };
+        var (success, _) = await ShowColumnNameDialog(viewModel);
         if (!success) return;
         
         if (Items.Columns.Contains(name))
@@ -88,24 +128,9 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
         }
     }
 
-    private async Task<(bool success, string)> ShowColumnNameDialog(string? title, string okButtonContent, string? name = null, bool isEnabled = true)
+    private async Task<(bool success, string)> ShowColumnNameDialog(NameDialogViewModel viewModel)
     {
-        var viewModel = new NameDialogViewModel()
-        {
-            Title = title,
-            OkButtonContent = okButtonContent,
-            Name = name,
-            IsEnabled = isEnabled
-        };
-        
         var validationRule = new NotContainDataColumnCollectionValidationRule(Items.Columns, "Column already exists.");
-        
         return await NameDialogService.ShowDialog(viewModel, validationRule);
     }
- 
-
-
-    public IEnumerable<IpParameterSet> IpParams => Items.Rows.OfType<DataRow>().Select(d => new IpParameterSet(d));
-    public IEnumerable<IpParameterSet> SelectedParams => IpParams.Where(p => p.IsSelected);
-    public bool Contains(string name) => Items.Columns.Contains(name);
 }
