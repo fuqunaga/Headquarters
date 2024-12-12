@@ -15,7 +15,7 @@
         <Style x:Key="FolderOpenIconButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
             <Setter Property="Foreground" Value="{Binding ElementName=PART_TextBox, Path=Foreground}" />
             <Setter Property="Opacity" Value="0.7" />
-            <Setter Property="Visibility" Value="{Binding IsExpectFileSystemInfo, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <Setter Property="Visibility" Value="{Binding ShowOpenFileButton, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}" />
@@ -49,7 +49,7 @@
                             <Setter Property="Text" Value="{Binding Value}" />
                             <Setter Property="Padding" Value="0" />
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsExpectFileSystemInfo}" Value="True">
+                                <DataTrigger Binding="{Binding ShowOpenFileButton}" Value="True">
                                     <Setter Property="Padding" Value="0 0 32 0" />
                                 </DataTrigger>
                             </Style.Triggers>

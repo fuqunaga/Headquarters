@@ -14,9 +14,11 @@ public class ScriptParameter
     public object? DefaultValue { get; }
     
     public IReadOnlyList<AttributeBaseAst> Attributes => _parameterAst.Attributes;
-    public IEnumerable<Type> AttributeTypes => Attributes.Select(ast => ast.TypeName.GetReflectionType());
+    public IEnumerable<Type> AttributeTypes => Attributes.Select(ast => ast.TypeName.GetReflectionType()).Where(type => type != null);
+    public IEnumerable<string> AttributeNames => Attributes.Select(ast => ast.TypeName.Name);
+    
     public IEnumerable<string> ValidateSetValues => Attributes.OfType<AttributeAst>()
-        .Where(ast => ast.TypeName.GetReflectionType() == typeof(ValidateSetAttribute))
+        .Where(ast => ast.TypeName.GetReflectionAttributeType() == typeof(ValidateSetAttribute))
         .SelectMany(ast => ast.PositionalArguments)
         .Select(ast => ast.SafeGetValue().ToString());
 

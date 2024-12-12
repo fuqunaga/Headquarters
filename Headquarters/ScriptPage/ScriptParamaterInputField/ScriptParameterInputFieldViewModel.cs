@@ -16,8 +16,6 @@ namespace Headquarters
     {
         private static readonly IReadOnlyList<Type> SupportedExpectedTypes = new List<Type>
         {
-            typeof(FileInfo),
-            typeof(DirectoryInfo),
             typeof(bool),
             typeof(SwitchParameter)
         };
@@ -45,7 +43,7 @@ namespace Headquarters
         public ScriptParameterInputFieldType FieldType => IsUseIpListParameter ? ScriptParameterInputFieldType.UseIpList : _baseFieldType; 
         
         public bool IsUseIpListParameter => _ipListViewModel.DataGridViewModel.Contains(Name);
-        public bool IsExpectFileSystemInfo { get; }
+        public bool ShowOpenFileButton { get; }
 
         public ICommand OpenFileCommand { get; } 
         
@@ -61,14 +59,14 @@ namespace Headquarters
             HelpDetail = reader.ReadToEnd() ?? "";
 
             ExpectedType = GetExpectedType(scriptParameter);
-            IsExpectFileSystemInfo = ExpectedType?.IsSubclassOf(typeof(FileSystemInfo)) ?? false;
-            OpenFileCommand = new DelegateCommand(_ => OnOpenFile(), _ => IsExpectFileSystemInfo);
+            ShowOpenFileButton = scriptParameter.AttributeNames.Contains(CustomAttributeName.WithNamespace(CustomAttributeName.Path));
+            OpenFileCommand = new DelegateCommand(_ => OnOpenFile(), _ => ShowOpenFileButton);
             
             ComboBoxItems = scriptParameter.ValidateSetValues.ToList();
             _baseFieldType = ComboBoxItems.Any() switch
             {
                 true => ScriptParameterInputFieldType.ComboBox,
-                false when ExpectedType == typeof(bool) || ExpectedType == typeof(SwitchParameter) => ScriptParameterInputFieldType.ToggleButton,
+                false when ExpectedType == typeof(bool) => ScriptParameterInputFieldType.ToggleButton,
                 _ => ScriptParameterInputFieldType.TextBox
             };
            

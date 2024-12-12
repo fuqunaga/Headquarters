@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Threading;
@@ -12,6 +10,17 @@ namespace Headquarters
 {
     public static class PowerShellRunner
     {
+        private const string AddAttributeString = $$"""
+                                                   Add-Type @"
+                                                       using System;
+                                                       namespace {{CustomAttributeName.NamespaceName}}
+                                                       {
+                                                           public class {{CustomAttributeName.Path}}Attribute : Attribute
+                                                           {}
+                                                       }
+                                                   "@
+                                                   """;
+
         public readonly struct InvokeParameter(
             Dictionary<string, object> parameters,
             CancellationToken cancellationToken,
@@ -44,7 +53,10 @@ namespace Headquarters
             powerShell.InvocationStateChanged += param.InvocationStateChanged;
             powerShell.RunspacePool = param.RunspacePool;
             
-            powerShell.AddScript(scriptString, false);
+            
+            powerShell.AddScript(AddAttributeString);
+            powerShell.AddStatement();
+            powerShell.AddScript(scriptString);
             if (commandName != null)
             {
                 powerShell.AddStatement();
