@@ -7,9 +7,9 @@
 #>
 
 param(
-    $Session, 
     [ValidateNotNullOrEmpty()]
-    $FilePath
+    $FilePath,
+    $Session
 )
 
 
