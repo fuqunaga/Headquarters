@@ -311,6 +311,7 @@
                     <ListBox Grid.Row="1"
                              ItemsSource="{Binding OutputUnitsViewSource.View}"
                              VirtualizingStackPanel.VirtualizationMode="Recycling"
+                             VirtualizingStackPanel.ScrollUnit="Pixel"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              ItemContainerStyle="{StaticResource OutputResultListBoxItemStyle}">
 
