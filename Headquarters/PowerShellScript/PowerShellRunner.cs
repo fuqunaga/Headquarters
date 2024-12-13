@@ -10,6 +10,14 @@ namespace Headquarters
 {
     public static class PowerShellRunner
     {
+        private static readonly string AddModulePathString = $$"""
+                                                               $path = "{{Environment.CurrentDirectory}}\Scripts\Modules"
+                                                               if ( $env:PSModulePath.EndsWith($path) -eq $false )
+                                                               {
+                                                                   $env:PSModulePath += ";$path"
+                                                               }
+                                                               """;
+
         private const string AddAttributeString = $$"""
                                                    Add-Type @"
                                                        using System;
@@ -20,7 +28,7 @@ namespace Headquarters
                                                        }
                                                    "@
                                                    """;
-
+        
         public readonly struct InvokeParameter(
             Dictionary<string, object> parameters,
             CancellationToken cancellationToken,
@@ -53,7 +61,7 @@ namespace Headquarters
             powerShell.InvocationStateChanged += param.InvocationStateChanged;
             powerShell.RunspacePool = param.RunspacePool;
             
-            
+            powerShell.AddScript(AddModulePathString);
             powerShell.AddScript(AddAttributeString);
             powerShell.AddStatement();
             powerShell.AddScript(scriptString);
