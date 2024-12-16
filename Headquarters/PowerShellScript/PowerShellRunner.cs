@@ -33,22 +33,21 @@ namespace Headquarters
             Dictionary<string, object> parameters,
             CancellationToken cancellationToken,
             RunspacePool runspacePool,
-            EventHandler<PSInvocationStateChangedEventArgs> invocationStateChanged)
+            PowerShellEventSubscriber eventSubscriber)
         {
             public Dictionary<string, object> Parameters => parameters;
             public CancellationToken CancellationToken => cancellationToken;
             public RunspacePool RunspacePool => runspacePool;
-            public EventHandler<PSInvocationStateChangedEventArgs> InvocationStateChanged => invocationStateChanged;
+            public PowerShellEventSubscriber EventSubscriber => eventSubscriber;
         }
 
         public class Result
         {
             public bool canceled;
+            public bool hasError;
             public Collection<PSObject>? objs;
-            public List<ErrorRecord>? errors;
 
-            public bool IsSucceed => !canceled && !HasError;
-            public bool HasError => errors is { Count: > 0 };
+            public bool IsSucceed => !canceled && !hasError;
         }
         
         public static async Task<Result> InvokeAsync(string scriptString, InvokeParameter param)
@@ -58,7 +57,6 @@ namespace Headquarters
         {
             using var powerShell = PowerShell.Create();
             
-            powerShell.InvocationStateChanged += param.InvocationStateChanged;
             powerShell.RunspacePool = param.RunspacePool;
             
             powerShell.AddScript(AddModulePathString);
@@ -73,12 +71,21 @@ namespace Headquarters
             
             powerShell.AddParameters(param.Parameters);
 
-
+            
             var result = new Result();
+            
+            var output = new PSDataCollection<PSObject>();
+            param.EventSubscriber.onOutputAdded += obj =>
+            {
+                result.objs ??= [];
+                result.objs.Add(obj);
+            };
+            
+            param.EventSubscriber.Subscribe(powerShell, output);
 
             try
             {
-                result.objs = await Task.Run(() =>
+                await Task.Run(() =>
                 {  
                     using var _ = param.CancellationToken.Register(
                         state => {
@@ -92,7 +99,8 @@ namespace Headquarters
                         powerShell
                     );
                     
-                    return powerShell.Invoke();
+                    powerShell.Invoke<PSObject, PSObject>(null, output, null);
+                    
                 }, param.CancellationToken);
             }
             catch (Exception e)
@@ -100,12 +108,12 @@ namespace Headquarters
                 // キャンセルの例外は無視
                 if (e is not OperationCanceledException)
                 {
-                    result.errors = [new ErrorRecord(e, "Invoke", ErrorCategory.NotSpecified, null)];
+                    powerShell.Streams.Error.Add(new ErrorRecord(e, "Invoke", ErrorCategory.NotSpecified, null));
+                    result.hasError = true;
                 }
             }
 
-            result.errors ??= [];
-            result.errors.AddRange(powerShell.Streams.Error);
+            result.hasError |= powerShell.HadErrors;
             
             return result;
         }

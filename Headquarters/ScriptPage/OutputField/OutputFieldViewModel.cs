@@ -57,7 +57,7 @@ public class OutputFieldViewModel : ViewModelBase
         OutputUnits.Add(outputUnitViewModel);
     }
     
-    public void AddScriptResult(ScriptResult result) => AddOutputUnit(new ScriptResultOutput(result));
+    public void AddScriptResult(ScriptExecutionInfo executionInfo) => AddOutputUnit(new ScriptResultOutput(executionInfo));
 
     private OutputFilterButtonViewModel GetFilterButtonViewModel(OutputIcon icon)
         => FilterButtonViewModels.First(button => button.Icon == icon);

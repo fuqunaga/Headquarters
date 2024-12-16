@@ -293,30 +293,30 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
 
     private async Task RunScriptFunction(ScriptFunction scriptFunction, CancellationToken cancellationToken, RunspacePool runspacePool)
     {
-        var scriptResult = new ScriptResult(scriptFunction.Name);
+        var scriptExecInfo = new ScriptExecutionInfo(scriptFunction.Name);
         
             
-        OutputFieldViewModel.AddScriptResult(scriptResult);
+        OutputFieldViewModel.AddScriptResult(scriptExecInfo);
                 
         var invokeParameter = new PowerShellRunner.InvokeParameter(
             parameters: Parameters.ToDictionary(p => p.Name, p => p.GetParameterForScript()),
             cancellationToken: cancellationToken,
             runspacePool: runspacePool,
-            invocationStateChanged: (_, args) => scriptResult.Info = args.InvocationStateInfo
+            eventSubscriber: scriptExecInfo.EventSubscriber
         );
                 
-        scriptResult.Result = await scriptFunction.Run(invokeParameter);
-        CheckAndStopIfResultHasError(scriptResult.Result);
+        scriptExecInfo.Result = await scriptFunction.Run(invokeParameter);
+        CheckAndStopIfResultHasError(scriptExecInfo.Result);
     }
 
     private async Task RunIpAddressProcesses(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken, RunspacePool runspacePool)
     {
         var ipProcessParameterList = ipAndParameterList.Select(ipAndParameter =>
             {
-                var scriptResult = new ScriptResult(ipAndParameter.ipString);
-                
+                var scriptResult = new ScriptExecutionInfo(ipAndParameter.ipString);
+
                 OutputFieldViewModel.AddScriptResult(scriptResult);
-                    
+
                 return new
                 {
                     ipAndParameter,
@@ -372,22 +372,22 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     }
         
     private async Task RunProcess(string ip, Dictionary<string, object> parameters,
-        ScriptResult scriptResult, CancellationToken cancelToken, RunspacePool runspacePool)
+        ScriptExecutionInfo scriptExecutionInfo, CancellationToken cancelToken, RunspacePool runspacePool)
     {
         var param = new PowerShellRunner.InvokeParameter(
             parameters: parameters,
             cancellationToken: cancelToken,
             runspacePool: runspacePool,
-            invocationStateChanged: (_, e) => scriptResult.Info = e.InvocationStateInfo
+            eventSubscriber: scriptExecutionInfo.EventSubscriber
         );
 
-        scriptResult.Result = await _script.IpAddressProcess.Run(ip, param);
-        CheckAndStopIfResultHasError(scriptResult.Result);
+        scriptExecutionInfo.Result = await _script.IpAddressProcess.Run(ip, param);
+        CheckAndStopIfResultHasError(scriptExecutionInfo.Result);
     }
 
     private void CheckAndStopIfResultHasError(PowerShellRunner.Result? result)
     {
-        if (IsStopOnError && (result is { HasError: true }))
+        if (IsStopOnError && (result is { hasError: true }))
         {
             Stop();
         }

@@ -24,7 +24,7 @@ namespace Headquarters
                 },
                 cancellationToken: param.CancellationToken,
                 runspacePool: param.RunspacePool,
-                invocationStateChanged: param.InvocationStateChanged
+                eventSubscriber: param.EventSubscriber
             );
 
             return await PowerShellRunner.InvokeAsync(CreateSessionString, p);

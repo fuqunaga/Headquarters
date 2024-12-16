@@ -87,6 +87,10 @@ public class ScriptFunction
             var session = sessionResult.objs?.FirstOrDefault()?.BaseObject;
             if (session == null)
             {
+                if (!sessionResult.hasError)
+                {
+                    throw new Exception("Failed to create session but no error occurred.");
+                }
                 return sessionResult;
             }
                 
@@ -106,7 +110,7 @@ public class ScriptFunction
             parameters: functionParameters,
             cancellationToken: param.CancellationToken,
             runspacePool: param.RunspacePool,
-            invocationStateChanged: param.InvocationStateChanged
+            eventSubscriber: param.EventSubscriber
         );
         
         return await PowerShellRunner.InvokeAsync(_scriptString, _commandString, functionInvokeParameter);

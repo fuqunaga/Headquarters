@@ -1,0 +1,126 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Management.Automation;
+
+namespace Headquarters;
+
+
+public class ScriptExecutionInfo
+{
+    public event Action? onPropertyChanged;
+
+    private readonly string _name;
+    private PSInvocationStateInfo? _info;
+    private PowerShellRunner.Result? _result;
+    private string _customState = "";
+    private string _outputString = "";
+    private string _errorString = "";
+
+    public PowerShellEventSubscriber EventSubscriber { get; }
+    
+    public PSInvocationStateInfo? Info
+    {
+        get => _info;
+        private set
+        {
+            _info = value;
+            onPropertyChanged?.Invoke();
+        }
+    }
+    
+    public PowerShellRunner.Result? Result
+    {
+        get => _result;
+        set
+        {
+            _result = value;
+            onPropertyChanged?.Invoke();
+        }
+    }
+
+    public string CustomState
+    {
+        get => _customState;
+        set
+        {
+            _customState = value;
+            onPropertyChanged?.Invoke();
+        }
+    }
+    
+    public string Label => $"{_name}: {Info?.State.ToString() ?? _customState}";
+
+    public ScriptExecutionInfo(string name)
+    {
+        _name = name;
+        EventSubscriber = CreateEventSubscriber();
+    }
+    
+    public void SetCancelledIfNoResult()
+    {
+        if (Result != null)
+        {
+            return;
+        }
+        
+        Result = new PowerShellRunner.Result { canceled = true };
+        CustomState = "Cancelled - Not Started";
+    }
+    
+    public string GetResultString()
+    {
+        return StringJoinWithoutNullOrEmpty("\n", _outputString, _errorString);
+    }
+    
+    private static string StringJoinWithoutNullOrEmpty(string separator, params string[] strings)
+    {
+        return string.Join(separator, strings.Where(str => !string.IsNullOrEmpty(str)));
+    }
+    
+    private PowerShellEventSubscriber CreateEventSubscriber()
+    {
+        var subscriber = new PowerShellEventSubscriber();
+
+        subscriber.onInvocationStateChanged += (arg) => Info = arg.InvocationStateInfo;
+        
+        subscriber.onOutputAdded += (psObj) =>
+        {
+            if (psObj.BaseObject is not string str)
+            {
+                return;
+            }
+            OnListAdded(str, ref _outputString);
+        };
+        subscriber.onErrorAdded += (errorRecord) => OnListAdded(errorRecord, ref _errorString);
+        
+        return subscriber;
+        
+        void OnListAdded<T>(T addedObj, ref string output)
+        {
+            var text = addedObj?.ToString() ?? "";
+            if (string.IsNullOrEmpty(text))
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(output))
+            {
+                output = text;
+            }
+            else
+            {
+                output += "\n" + text;
+            }
+            
+            onPropertyChanged?.Invoke();
+        }
+        
+        string ListToString<T>(IList<T>? collection)
+        {
+            return collection == null || collection.Count == 0
+                ? ""
+                : $"{string.Join("\n ", collection.Select(elem => $" {elem?.ToString()}"))}\n";
+        }
+    }
+}

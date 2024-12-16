@@ -5,24 +5,24 @@ namespace Headquarters;
 public class ScriptResultOutput: IOutputUnit
 {
     public event Action? onPropertyChanged;
-    private readonly ScriptResult _result;
+    private readonly ScriptExecutionInfo _executionInfo;
 
     public OutputIcon Icon =>
-        _result.Result == null
-            ? _result.Info == null
+        _executionInfo.Result == null
+            ? _executionInfo.Info == null
                 ? OutputIcon.NotStarted
                 : OutputIcon.Running
-            : _result.Result.IsSucceed
+            : _executionInfo.Result.IsSucceed
                 ? OutputIcon.Success
                 : OutputIcon.Failure;
 
-    public string Label => _result.Label;
-    public string Text => _result.GetResultString();
+    public string Label => _executionInfo.Label;
+    public string Text => _executionInfo.GetResultString();
     
 
-    public ScriptResultOutput(ScriptResult result)
+    public ScriptResultOutput(ScriptExecutionInfo executionInfo)
     {
-        _result = result;
-        _result.onPropertyChanged += () => onPropertyChanged?.Invoke();
+        _executionInfo = executionInfo;
+        _executionInfo.onPropertyChanged += () => onPropertyChanged?.Invoke();
     }
 }
