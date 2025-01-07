@@ -10,15 +10,15 @@ namespace Headquarters
     {
         #region Static
         
-        private const string PreProcessFunctionName = "PreProcess";
-        private const string IpAddressProcessFunctionName = "IpAddressProcess";
-        private const string PostProcessFunctionName = "PostProcess";
+        private const string BeginTaskFunctionName = "BeginTask";
+        private const string IpAddressTaskFunctionName = "IpAddressTask";
+        private const string EndTaskFunctionName = "EndTask";
 
         private static readonly IReadOnlyCollection<string> ReservedFunctionNames = new HashSet<string>(
             [
-                PreProcessFunctionName,
-                IpAddressProcessFunctionName,
-                PostProcessFunctionName
+                BeginTaskFunctionName,
+                IpAddressTaskFunctionName,
+                EndTaskFunctionName
             ],
             StringComparer.OrdinalIgnoreCase);
         
@@ -82,12 +82,13 @@ namespace Headquarters
             } 
         }
 
-        public bool HasPreProcess => _scriptFunctionDictionary.ContainsKey(PreProcessFunctionName);
-        public bool HasPostProcess => _scriptFunctionDictionary.ContainsKey(PostProcessFunctionName);
+        public bool HasBeginTask => _scriptFunctionDictionary.ContainsKey(BeginTaskFunctionName);
+        public bool HasIpAddressTask => _scriptFunctionDictionary.ContainsKey(IpAddressTaskFunctionName);
+        public bool HasEndTask => _scriptFunctionDictionary.ContainsKey(EndTaskFunctionName);
         
-        public ScriptFunction PreProcess => _scriptFunctionDictionary[PreProcessFunctionName];
-        public ScriptFunction IpAddressProcess => _scriptFunctionDictionary[IpAddressProcessFunctionName];
-        public ScriptFunction PostProcess => _scriptFunctionDictionary[PostProcessFunctionName];
+        public ScriptFunction BeginTask => _scriptFunctionDictionary[BeginTaskFunctionName];
+        public ScriptFunction IpAddressTask => _scriptFunctionDictionary[IpAddressTaskFunctionName];
+        public ScriptFunction EndTask => _scriptFunctionDictionary[EndTaskFunctionName];
 
 
         public Script(string filePath)
@@ -146,7 +147,7 @@ namespace Headquarters
             // 予約済み関数がない場合は、スクリプト全体として登録
             if (_scriptFunctionDictionary.Count == 0)
             {
-                _scriptFunctionDictionary.Add(IpAddressProcessFunctionName, new ScriptFunction(Name, ast));
+                _scriptFunctionDictionary.Add(IpAddressTaskFunctionName, new ScriptFunction(Name, ast));
             }
             
             _helpInfo = ast.GetHelpContent();

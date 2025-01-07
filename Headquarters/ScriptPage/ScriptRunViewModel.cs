@@ -268,26 +268,29 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         runspacePool.Open();
         
         // --------------------------------------------------------------------------------
-        // PreProcess
+        // BeginTask
         // --------------------------------------------------------------------------------
-        if (_script.HasPreProcess)
+        if (_script.HasBeginTask)
         {
-            await RunScriptFunction(_script.PreProcess, cancellationToken, runspacePool);
+            await RunScriptFunction(_script.BeginTask, cancellationToken, runspacePool);
             if (cancellationToken.IsCancellationRequested) return;
         }
 
         // --------------------------------------------------------------------------------
-        // IpAddressProcess parallel
+        // IpAddressTask parallel
         // --------------------------------------------------------------------------------
-        await RunIpAddressProcesses(ipAndParameterList, cancellationToken, runspacePool);
-        if (cancellationToken.IsCancellationRequested) return;
+        if (_script.HasIpAddressTask)
+        {
+            await RunIpAddressProcesses(ipAndParameterList, cancellationToken, runspacePool);
+            if (cancellationToken.IsCancellationRequested) return;
+        }
 
         // --------------------------------------------------------------------------------
-        // PostProcess
+        // EndTask
         // --------------------------------------------------------------------------------
-        if (_script.HasPostProcess)
+        if (_script.HasEndTask)
         {
-            await RunScriptFunction(_script.PostProcess, cancellationToken, runspacePool);
+            await RunScriptFunction(_script.EndTask, cancellationToken, runspacePool);
         }
     }
 
@@ -381,7 +384,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             eventSubscriber: scriptExecutionInfo.EventSubscriber
         );
 
-        scriptExecutionInfo.Result = await _script.IpAddressProcess.Run(ip, param);
+        scriptExecutionInfo.Result = await _script.IpAddressTask.Run(ip, param);
         CheckAndStopIfResultHasError(scriptExecutionInfo.Result);
     }
 

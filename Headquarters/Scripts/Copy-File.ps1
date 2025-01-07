@@ -32,7 +32,7 @@ Windowsの共有フォルダ機能（UNCパス）でのコピーも可能です
 #>
 
 
-function PreProcess()
+function BeginTask()
 {
     param(
         [ValidateScript({Test-PathExistence $_})]
@@ -76,7 +76,7 @@ function PreProcess()
     }
 }
 
-function IpAddressProcess()
+function IpAddressTask()
 {
     param(
         [ValidateNotNullOrEmpty()]
@@ -166,7 +166,7 @@ function IpAddressProcess()
     }
 }
 
-function PostProcess()
+function EndTask()
 {
     param(
         [ValidateNotNullOrEmpty()]
