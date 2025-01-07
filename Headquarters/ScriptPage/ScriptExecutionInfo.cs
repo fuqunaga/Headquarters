@@ -16,6 +16,7 @@ public class ScriptExecutionInfo
     private string _customState = "";
     private string _outputString = "";
     private string _errorString = "";
+    private readonly Dictionary<int, ProgressRecord> _progressRecords = [];
 
     public PowerShellEventSubscriber EventSubscriber { get; }
     
@@ -70,7 +71,28 @@ public class ScriptExecutionInfo
     
     public string GetResultString()
     {
-        return StringJoinWithoutNullOrEmpty("\n", _outputString, _errorString);
+        return StringJoinWithoutNullOrEmpty("\n", _outputString, GetProgressString(), _errorString);
+    }
+    
+    private string GetProgressString()
+    {
+        if(_progressRecords.Count == 0)
+        {
+            return "";
+        }
+        
+        var removeIds =_progressRecords
+            .Where(kv => kv.Value.RecordType == ProgressRecordType.Completed)
+            .Select(kv => kv.Key)
+            .ToList();
+        
+        foreach (var id in removeIds)
+        {
+            _progressRecords.Remove(id);
+        }
+        
+        var progressStrings = _progressRecords.Values.Select(record => $"{record.Activity} {record.PercentComplete}%");
+        return StringJoinWithoutNullOrEmpty("\n", progressStrings.ToArray());
     }
     
     private static string StringJoinWithoutNullOrEmpty(string separator, params string[] strings)
@@ -90,13 +112,18 @@ public class ScriptExecutionInfo
             {
                 return;
             }
-            OnListAdded(str, ref _outputString);
+            AddString(str, ref _outputString);
         };
-        subscriber.onErrorAdded += (errorRecord) => OnListAdded(errorRecord, ref _errorString);
+        subscriber.onErrorAdded += (errorRecord) => AddString(errorRecord, ref _errorString);
+        subscriber.onProgressAdded += (progressRecord) =>
+        {
+            _progressRecords[progressRecord.ActivityId] = progressRecord;
+            onPropertyChanged?.Invoke();
+        };
         
         return subscriber;
         
-        void OnListAdded<T>(T addedObj, ref string output)
+        void AddString<T>(T addedObj, ref string output)
         {
             var text = addedObj?.ToString() ?? "";
             if (string.IsNullOrEmpty(text))
@@ -114,13 +141,6 @@ public class ScriptExecutionInfo
             }
             
             onPropertyChanged?.Invoke();
-        }
-        
-        string ListToString<T>(IList<T>? collection)
-        {
-            return collection == null || collection.Count == 0
-                ? ""
-                : $"{string.Join("\n ", collection.Select(elem => $" {elem?.ToString()}"))}\n";
         }
     }
 }
