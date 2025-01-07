@@ -106,11 +106,11 @@ function IpAddressTask()
         $destinationFolder = $remoteFolderExtracted
         $root = [System.IO.Path]::GetPathRoot($remoteFolderExtracted)
         
-        # UNC認証が必要な場合、一時的なドライブを作成
+        # UNC認証が必要な場合、一時的なドライブを作成して認証を通すハック
+        # https://stackoverflow.com/questions/67469217/powershell-unc-path-with-credentials
         if (!(Test-Path $root))
         {
             New-PSDrive -Name "Copy-Item_TempDrive" -PSProvider FileSystem -Root $root -Credential $Credential > $null
-            $destinationFolder = $remoteFolderExtracted.Replace($root, "Copy-Item_TempDrive:")
         }
     }
 
