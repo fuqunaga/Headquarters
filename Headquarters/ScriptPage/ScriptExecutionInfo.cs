@@ -15,7 +15,6 @@ public class ScriptExecutionInfo
     private PowerShellRunner.Result? _result;
     private string _customState = "";
     private string _outputString = "";
-    private string _errorString = "";
     private readonly Dictionary<int, ProgressRecord> _progressRecords = [];
 
     public PowerShellEventSubscriber EventSubscriber { get; }
@@ -71,7 +70,7 @@ public class ScriptExecutionInfo
     
     public string GetResultString()
     {
-        return StringJoinWithoutNullOrEmpty("\n", _outputString, GetProgressString(), _errorString);
+        return StringJoinWithoutNullOrEmpty("\n", _outputString, GetProgressString());
     }
     
     private string GetProgressString()
@@ -114,7 +113,11 @@ public class ScriptExecutionInfo
             }
             AddString(str, ref _outputString);
         };
-        subscriber.onErrorAdded += (errorRecord) => AddString(errorRecord, ref _errorString);
+        subscriber.onErrorAdded += (errorRecord) =>
+        {
+            var message = $"[Error] {errorRecord.ToString().TrimEnd('\r', '\n')}\n{errorRecord.InvocationInfo?.PositionMessage}";
+            AddString(message, ref _outputString);
+        };
         subscriber.onProgressAdded += (progressRecord) =>
         {
             _progressRecords[progressRecord.ActivityId] = progressRecord;
@@ -131,16 +134,19 @@ public class ScriptExecutionInfo
                 return;
             }
 
-            if (string.IsNullOrEmpty(output))
+            lock (subscriber)
             {
-                output = text;
+                if (string.IsNullOrEmpty(output))
+                {
+                    output = text;
+                }
+                else
+                {
+                    output += "\n" + text;
+                }
+
+                onPropertyChanged?.Invoke();
             }
-            else
-            {
-                output += "\n" + text;
-            }
-            
-            onPropertyChanged?.Invoke();
         }
     }
 }
