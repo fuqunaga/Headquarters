@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -36,6 +37,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     private bool _isStopOnError = true;
     private readonly List<Task> _runningTasks = [];
     private CancellationTokenSource? _cancelTokenSource;
+    private ConcurrentDictionary<string, object> _sharedDictionary = [];
 
 
     #region Binding Properties
@@ -281,7 +283,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         // --------------------------------------------------------------------------------
         if (_script.HasIpAddressTask)
         {
-            await RunIpAddressProcesses(ipAndParameterList, cancellationToken, runspacePool);
+            await RunIpAddressTasks(ipAndParameterList, cancellationToken, runspacePool);
             if (cancellationToken.IsCancellationRequested) return;
         }
 
@@ -312,9 +314,9 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         CheckAndStopIfResultHasError(scriptExecInfo.Result);
     }
 
-    private async Task RunIpAddressProcesses(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken, RunspacePool runspacePool)
+    private async Task RunIpAddressTasks(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken, RunspacePool runspacePool)
     {
-        var ipProcessParameterList = ipAndParameterList.Select(ipAndParameter =>
+        var ipAddressTaskParameterList = ipAndParameterList.Select(ipAndParameter =>
             {
                 var scriptResult = new ScriptExecutionInfo(ipAndParameter.ipString);
 
@@ -328,6 +330,8 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             }
         ).ToList();
         
+        _sharedDictionary.Clear();
+        
         // 自前のSemaphoreSlimで各Taskが実行可能になってから実行することでMaxTaskCount通りの同時実行数にする
         // RunspacePool任せの並列実行だとすべてRunning状態になってからRunspacePool待ちになる
         var semaphore = new SemaphoreSlim(MaxTaskCount);
@@ -340,7 +344,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         
         try
         {
-            foreach (var paramSet in ipProcessParameterList)
+            foreach (var paramSet in ipAddressTaskParameterList)
             {
                  await semaphore.WaitAsync(cancellationToken);
                  var task = RunProcess(
@@ -348,7 +352,8 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
                         paramSet.ipAndParameter.parameters,
                         paramSet.scriptResult,
                         cancellationToken,
-                        runspacePool
+                        runspacePool,
+                        _sharedDictionary
                     ).ContinueWith(_ => semaphore.Release(), cancellationToken);
                 
                 _runningTasks.Add(task);
@@ -362,7 +367,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         }
         catch (OperationCanceledException)
         {
-            foreach(var paramSet in ipProcessParameterList)
+            foreach(var paramSet in ipAddressTaskParameterList)
             {
                 paramSet.scriptResult.SetCancelledIfNoResult();
             }
@@ -375,7 +380,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     }
         
     private async Task RunProcess(string ip, Dictionary<string, object> parameters,
-        ScriptExecutionInfo scriptExecutionInfo, CancellationToken cancelToken, RunspacePool runspacePool)
+        ScriptExecutionInfo scriptExecutionInfo, CancellationToken cancelToken, RunspacePool runspacePool, ConcurrentDictionary<string, object> sharedDictionary)
     {
         var param = new PowerShellRunner.InvokeParameter(
             parameters: parameters,
@@ -384,7 +389,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             eventSubscriber: scriptExecutionInfo.EventSubscriber
         );
 
-        scriptExecutionInfo.Result = await _script.IpAddressTask.Run(ip, param);
+        scriptExecutionInfo.Result = await _script.IpAddressTask.Run(ip, param, sharedDictionary);
         CheckAndStopIfResultHasError(scriptExecutionInfo.Result);
     }
 

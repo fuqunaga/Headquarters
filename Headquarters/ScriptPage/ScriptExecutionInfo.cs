@@ -108,7 +108,7 @@ public class ScriptExecutionInfo
         
         subscriber.onOutputAdded += (psObj) =>
         {
-            if (psObj.BaseObject is not string str)
+            if (psObj?.BaseObject is not string str)
             {
                 return;
             }

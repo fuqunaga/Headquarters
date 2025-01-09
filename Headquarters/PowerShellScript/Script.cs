@@ -10,10 +10,19 @@ namespace Headquarters
     {
         #region Static
         
+        public static class ReservedParameterName
+        {
+            public const string Session = "session";
+            public const string Ip = "ip";
+            public const string TaskContext = "taskContext";
+        }
+        
         private const string BeginTaskFunctionName = "BeginTask";
         private const string IpAddressTaskFunctionName = "IpAddressTask";
         private const string EndTaskFunctionName = "EndTask";
 
+        public static Script Empty => new("");
+        
         private static readonly IReadOnlyCollection<string> ReservedFunctionNames = new HashSet<string>(
             [
                 BeginTaskFunctionName,
@@ -22,20 +31,11 @@ namespace Headquarters
             ],
             StringComparer.OrdinalIgnoreCase);
         
-        public static Script Empty => new("");
-        
-        public static class ReservedParameterName
-        {
-            public const string Session = "session";
-            public const string Ip = "ip";
-            public const string Credential = "credential";
-        }
-        
         public static readonly IReadOnlyList<string> ReservedParameterNames =
         [
             ReservedParameterName.Session,
             ReservedParameterName.Ip,
-            ReservedParameterName.Credential
+            ReservedParameterName.TaskContext
         ];
         
         #endregion

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation.Language;
@@ -18,10 +19,9 @@ public class ScriptFunction
     
     public IEnumerable<string> ParameterNames => Parameters.Select(p => p.Name); 
     
+    private bool IsTaskContextRequired => ParameterNames.Contains(Script.ReservedParameterName.TaskContext, StringComparer.OrdinalIgnoreCase);
     private bool IsSessionRequired => ParameterNames.Contains(Script.ReservedParameterName.Session, StringComparer.OrdinalIgnoreCase);
     private bool IsIpRequired => ParameterNames.Contains(Script.ReservedParameterName.Ip, StringComparer.OrdinalIgnoreCase);
-    private bool IsCredentialRequired => ParameterNames.Contains(Script.ReservedParameterName.Credential, StringComparer.OrdinalIgnoreCase);
-    
     
     public ScriptFunction(string scriptName, ScriptBlockAst scriptBlockAst)
     {
@@ -73,17 +73,15 @@ public class ScriptFunction
         return parameterAstEnumerable.Select(p => new ScriptParameter(p));
     }
 
-    public async Task<PowerShellRunner.Result> Run(string ipAddress, PowerShellRunner.InvokeParameter param)
+    public async Task<PowerShellRunner.Result> Run(string ipAddress, PowerShellRunner.InvokeParameter param, ConcurrentDictionary<string, object> sharedDictionary)
     {
-        var needCredential = IsCredentialRequired || IsSessionRequired;
-        if (needCredential)
-        {
-            param.Parameters[Script.ReservedParameterName.Credential] = SessionManager.CreateCredential(param.Parameters);
-        }
-        
+        // TaskContext作成
+        // Session作成時に必要なのでIsSessionRequiredでも作成しておく
+        TaskContext? taskContext = null;
         if (IsSessionRequired)
         {
-            var sessionResult = await SessionManager.CreateSession(ipAddress, param);
+            taskContext ??= CreateTaskContext();
+            var sessionResult = await SessionManager.CreateSession(ipAddress, taskContext.Credential, param);
             var session = sessionResult.objs?.FirstOrDefault()?.BaseObject;
             if (session == null)
             {
@@ -97,7 +95,22 @@ public class ScriptFunction
             param.Parameters[Script.ReservedParameterName.Session] = session;
         }
         
+        if (IsTaskContextRequired)
+        {
+            taskContext ??= CreateTaskContext();
+            param.Parameters[Script.ReservedParameterName.TaskContext] = taskContext;
+        }
+
+        
         return await Run(param);
+        
+        
+        TaskContext CreateTaskContext()
+        {
+            var userName = param.Parameters[GlobalParameter.UserNameParameterName] as string ?? GlobalParameter.UserName;
+            var userPassword = param.Parameters[GlobalParameter.UserPasswordParameterName] as string ?? GlobalParameter.UserName;
+            return new TaskContext(ipAddress, userName, userPassword, sharedDictionary);
+        }
     }
     
     public async Task<PowerShellRunner.Result> Run(PowerShellRunner.InvokeParameter param)
