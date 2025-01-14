@@ -111,13 +111,25 @@ public class ScriptExecutionInfo
             {
                 return;
             }
-            AddString(str, ref _outputString);
+            AddToOutputString(str);
+        };
+        
+        subscriber.onDebugAdded += AddToOutputString;
+        subscriber.onInformationAdded += AddToOutputString;
+        subscriber.onVerboseAdded += AddToOutputString;
+        
+        subscriber.onWarningAdded += (warningRecord) =>
+        {
+            var message = $"[Warning] {warningRecord.ToString().TrimEnd('\r', '\n')}\n{warningRecord.InvocationInfo?.PositionMessage}";
+            AddToOutputString(message);
         };
         subscriber.onErrorAdded += (errorRecord) =>
         {
             var message = $"[Error] {errorRecord.ToString().TrimEnd('\r', '\n')}\n{errorRecord.InvocationInfo?.PositionMessage}";
-            AddString(message, ref _outputString);
+            AddToOutputString(message);
         };
+
+        
         subscriber.onProgressAdded += (progressRecord) =>
         {
             _progressRecords[progressRecord.ActivityId] = progressRecord;
@@ -126,7 +138,8 @@ public class ScriptExecutionInfo
         
         return subscriber;
         
-        void AddString<T>(T addedObj, ref string output)
+        
+        void AddToOutputString<T>(T addedObj)
         {
             var text = addedObj?.ToString() ?? "";
             if (string.IsNullOrEmpty(text))
@@ -136,13 +149,13 @@ public class ScriptExecutionInfo
 
             lock (subscriber)
             {
-                if (string.IsNullOrEmpty(output))
+                if (string.IsNullOrEmpty(_outputString))
                 {
-                    output = text;
+                    _outputString = text;
                 }
                 else
                 {
-                    output += "\n" + text;
+                    _outputString += "\n" + text;
                 }
 
                 onPropertyChanged?.Invoke();
