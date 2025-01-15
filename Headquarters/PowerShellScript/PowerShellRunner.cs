@@ -18,17 +18,26 @@ namespace Headquarters
                                                                }
                                                                """;
 
+        /// <summary>
+        /// Headquarters.Path 属性を定義
+        /// 「生成された型は、パブリック メソッドまたはパブリック プロパティを定義していません。」の警告を抑制するために WarningPreference を一時的に変更している
+        /// 3>$null みたいなリダイレクトだと警告が抑制できなかった
+        /// </summary>
         private const string AddAttributeString = $$"""
-                                                   Add-Type @"
-                                                       using System;
-                                                       namespace {{CustomAttributeName.NamespaceName}}
-                                                       {
-                                                           public class {{CustomAttributeName.Path}}Attribute : Attribute
-                                                           {}
-                                                       }
-                                                   "@
-                                                   """;
-        
+                                                    $tmpWarningPreference = $WarningPreference
+                                                    $WarningPreference = 'SilentlyContinue'
+
+                                                    Add-Type @"
+                                                        using System;
+                                                        namespace {{CustomAttributeName.NamespaceName}}
+                                                        {
+                                                            public class {{CustomAttributeName.Path}}Attribute : Attribute{}
+                                                        }
+                                                    "@
+
+                                                    $WarningPreference = $tmpWarningPreference 
+                                                    """;
+            
         public readonly struct InvokeParameter(
             Dictionary<string, object> parameters,
             CancellationToken cancellationToken,
