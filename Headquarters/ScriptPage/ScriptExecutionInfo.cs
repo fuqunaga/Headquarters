@@ -90,11 +90,18 @@ public class ScriptExecutionInfo
             _progressRecords.Remove(id);
         }
         
-        var progressStrings = _progressRecords.Values.Select(record => $"{record.Activity} {record.PercentComplete}%");
-        return StringJoinWithoutNullOrEmpty("\n", progressStrings.ToArray());
+        var progressStrings = _progressRecords.Values.Select(record =>
+        {
+            var percent = record.PercentComplete < 0 ? "" : $"{record.PercentComplete}%";
+            return $"{record.Activity} {percent}";
+        });
+        return StringJoinWithoutNullOrEmpty("\n", progressStrings);
     }
     
     private static string StringJoinWithoutNullOrEmpty(string separator, params string[] strings)
+        => StringJoinWithoutNullOrEmpty(separator, strings.AsEnumerable());
+    
+    private static string StringJoinWithoutNullOrEmpty(string separator, IEnumerable<string> strings)
     {
         return string.Join(separator, strings.Where(str => !string.IsNullOrEmpty(str)));
     }
