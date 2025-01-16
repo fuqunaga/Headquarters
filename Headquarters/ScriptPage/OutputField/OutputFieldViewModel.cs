@@ -33,6 +33,9 @@ public class OutputFieldViewModel : ViewModelBase
         }
 
         OutputUnitsViewSource.Source = OutputUnits;
+        
+        OutputUnitsViewSource.IsLiveFilteringRequested = true;
+        OutputUnitsViewSource.LiveFilteringProperties.Add(nameof(OutputUnitViewModel.Icon));
         OutputUnitsViewSource.Filter += (_, e) =>
         {
             if (e.Item is OutputUnitViewModel outputUnitViewModel)
