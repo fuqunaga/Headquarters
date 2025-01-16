@@ -41,12 +41,10 @@ namespace Headquarters
         public readonly struct InvokeParameter(
             Dictionary<string, object> parameters,
             CancellationToken cancellationToken,
-            RunspacePool runspacePool,
             PowerShellEventSubscriber eventSubscriber)
         {
             public Dictionary<string, object> Parameters => parameters;
             public CancellationToken CancellationToken => cancellationToken;
-            public RunspacePool RunspacePool => runspacePool;
             public PowerShellEventSubscriber EventSubscriber => eventSubscriber;
         }
 
@@ -65,8 +63,6 @@ namespace Headquarters
         public static async Task<Result> InvokeAsync(string scriptString, string? commandName, InvokeParameter param)
         {
             using var powerShell = PowerShell.Create();
-            
-            powerShell.RunspacePool = param.RunspacePool;
             
             powerShell.AddScript(AddModulePathString);
             powerShell.AddScript(AddAttributeString);

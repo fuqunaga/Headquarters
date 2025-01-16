@@ -122,7 +122,6 @@ public class ScriptFunction
         var functionInvokeParameter = new PowerShellRunner.InvokeParameter(
             parameters: functionParameters,
             cancellationToken: param.CancellationToken,
-            runspacePool: param.RunspacePool,
             eventSubscriber: param.EventSubscriber
         );
         

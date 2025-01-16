@@ -22,7 +22,6 @@ namespace Headquarters
                     { "credential", credential }
                 },
                 cancellationToken: param.CancellationToken,
-                runspacePool: param.RunspacePool,
                 eventSubscriber: param.EventSubscriber
             );
 
