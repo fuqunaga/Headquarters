@@ -228,8 +228,7 @@
 
         <GridSplitter Grid.Row="2" 
                       HorizontalAlignment="Stretch"
-                      Height="5" 
-                      Margin="0 8"
+                      Height="5" Cursor="SizeNS" 
                       />
         
         <!-- Output Field -->
