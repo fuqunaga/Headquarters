@@ -395,6 +395,13 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
 
     private void Stop()
     {
-        _cancelTokenSource?.Cancel();
+        if (_cancelTokenSource == null) return;
+        
+        Task.Run(() =>
+        {
+            var tmp = _cancelTokenSource;
+            _cancelTokenSource = null;
+            tmp?.Cancel();
+        });
     }
 }
