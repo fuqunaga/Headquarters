@@ -267,44 +267,68 @@
                     <!-- Top Bar -->
                     <Grid Grid.Row="0"
                           Background="{DynamicResource MaterialDesign.Brush.ToolBar.Background}">
-                    
-                        <!-- Filter Buttons -->
-                        <ListBox
-                            ItemsSource="{Binding FilterButtonViewModels}"
-                            SelectionMode="Multiple"
-                            materialDesign:ListBoxAssist.CanUserToggleSelectedItem="True"
-                            Style="{StaticResource MaterialDesignToolToggleFlatListBox}"
-                            HorizontalAlignment="Right"
-                            Height="24"
-                            Padding="2 0">
-                            
-                            <ListBox.Resources>
-                                <Style x:Key="FilterTextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
-                                    <Setter Property="MinWidth" Value="24" />
-                                    <Setter Property="Padding" Value="2 1 0 0" />
-                                </Style>
-                            </ListBox.Resources>
-                            <ListBox.ItemContainerStyle>
-                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                                    <Setter Property="Margin" Value="0 1" />
-                                    <Setter Property="Padding" Value="4 0" />
-                                    <Setter Property="IsSelected" Value="{Binding IsOutputVisible, Mode=TwoWay}" />
-                                    <Setter Property="ToolTip" Value="{Binding IconDescription}" />
-                                </Style>
-                            </ListBox.ItemContainerStyle>
 
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <emoji:TextBlock Text="{Binding IconEmoji}"
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Search field -->
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding SearchText, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}"
+                                     HorizontalAlignment="Left"
+                                     materialDesign:TextFieldAssist.HasClearButton="True"
+                                     materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                                     materialDesign:TextFieldAssist.LeadingIcon="Search"
+                                     materialDesign:TextFieldAssist.TextFieldCornerRadius="0"
+                                     materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"
+                                     Style="{StaticResource MaterialDesignFilledTextBox}"
+                                     BorderThickness="0"
+                                     MinWidth="200"
+                                     Height="20"
+                                     Padding="4 0"
+                                     Margin="2" />
+
+                            <!-- Filter Buttons -->
+                            <ListBox Grid.Column="1"
+                                     ItemsSource="{Binding FilterButtonViewModels}"
+                                     SelectionMode="Multiple"
+                                     materialDesign:ListBoxAssist.CanUserToggleSelectedItem="True"
+                                     Style="{StaticResource MaterialDesignToolToggleFlatListBox}"
+                                     HorizontalAlignment="Right"
+                                     Height="24"
+                                     Padding="2 0">
+
+                                <ListBox.Resources>
+                                    <Style x:Key="FilterTextBlock" TargetType="{x:Type TextBlock}"
+                                           BasedOn="{StaticResource {x:Type TextBlock}}">
+                                        <Setter Property="MinWidth" Value="24" />
+                                        <Setter Property="Padding" Value="2 1 0 0" />
+                                    </Style>
+                                </ListBox.Resources>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                        <Setter Property="Margin" Value="0 1" />
+                                        <Setter Property="Padding" Value="4 0" />
+                                        <Setter Property="IsSelected" Value="{Binding IsOutputVisible, Mode=TwoWay}" />
+                                        <Setter Property="ToolTip" Value="{Binding IconDescription}" />
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <emoji:TextBlock Text="{Binding IconEmoji}"
                                                              FontSize="12" />
-                                        <TextBlock Text="{Binding Count}"
+                                            <TextBlock Text="{Binding Count}"
                                                        d:Text="123"
                                                        Style="{StaticResource FilterTextBlock}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
                     </Grid>
 
                     <!-- OutputUnits -->

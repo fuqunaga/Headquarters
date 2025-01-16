@@ -8,6 +8,20 @@ namespace Headquarters;
 
 public class OutputFieldViewModel : ViewModelBase
 {
+    private string _searchText = "";
+    
+    public string SearchText
+    {
+        get => _searchText;
+        set
+        {
+            if (SetProperty(ref _searchText, value))
+            {
+                OnSearchTextChanged();
+            }
+        }
+    }
+    
     public ObservableCollection<OutputFilterButtonViewModel> FilterButtonViewModels { get; } = new(
         Enum.GetValues(typeof(OutputIcon))
             .Cast<OutputIcon>()
@@ -38,11 +52,31 @@ public class OutputFieldViewModel : ViewModelBase
         OutputUnitsViewSource.LiveFilteringProperties.Add(nameof(OutputUnitViewModel.Icon));
         OutputUnitsViewSource.Filter += (_, e) =>
         {
-            if (e.Item is OutputUnitViewModel outputUnitViewModel)
-            {
-                e.Accepted = GetFilterButtonViewModel(outputUnitViewModel.Icon).IsOutputVisible;
-            }
+            if (e.Item is not OutputUnitViewModel outputUnitViewModel) return;
+            
+            e.Accepted = GetFilterButtonViewModel(outputUnitViewModel.Icon).IsOutputVisible
+                         && (
+                             string.IsNullOrWhiteSpace(SearchText)
+                             || (outputUnitViewModel.Text.IndexOf(SearchText, StringComparison.OrdinalIgnoreCase) >= 0)
+                         );
         };
+    }
+        
+    private void OnSearchTextChanged()
+    {
+        const string propertyName = nameof(OutputUnitViewModel.Text);
+        
+        var filteringProperties = OutputUnitsViewSource.LiveFilteringProperties;
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            filteringProperties.Remove(propertyName);
+        }
+        else if(filteringProperties.Contains(propertyName))
+        {
+            filteringProperties.Add(propertyName);
+        }
+        
+        OutputUnitsViewSource.View.Refresh();
     }
     
     public void AddOutputUnit(IOutputUnit outputUnit)
