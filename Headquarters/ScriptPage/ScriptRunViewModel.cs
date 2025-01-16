@@ -329,7 +329,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         
         // 自前のSemaphoreSlimで各Taskが実行可能になってから実行することでMaxTaskCount通りの同時実行数にする
         // RunspacePool任せの並列実行だとすべてRunning状態になってからRunspacePool待ちになる
-        var semaphore = new SemaphoreSlim(MaxTaskCount);
+        using var semaphore = new SemaphoreSlim(MaxTaskCount);
         
         // _runningTasksが空でない場合は別のタスクが実行中っぽそうでまずい
         if (_runningTasks.Count > 0)
@@ -368,7 +368,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         }
         finally
         {
-            semaphore.Dispose();
             _runningTasks.Clear();
         }
     }
