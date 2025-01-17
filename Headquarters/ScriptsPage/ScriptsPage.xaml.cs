@@ -2,9 +2,9 @@
 
 namespace Headquarters;
 
-public partial class ScriptPage : UserControl
+public partial class ScriptsPage : UserControl
 {
-    public ScriptPage()
+    public ScriptsPage()
     {
         InitializeComponent();
     }
