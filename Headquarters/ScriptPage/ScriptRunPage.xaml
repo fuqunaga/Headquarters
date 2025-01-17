@@ -189,9 +189,12 @@
         </materialDesign:ColorZone>
 
 
-        <!-- Description -->
-        <ScrollViewer  Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        
+        <ScrollViewer  Grid.Row="1" 
+                       VerticalScrollBarVisibility="Auto"
+                       HorizontalScrollBarVisibility="Auto">
             <StackPanel>
+                <!-- Description -->
                 <Expander HorizontalAlignment="Stretch"
                       Visibility="{Binding Description, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}">
                     <Expander.Header>
