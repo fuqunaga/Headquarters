@@ -36,7 +36,7 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         }
     }
 
-    public ObservableCollection<ScriptButtonViewModel> Items { get; } = [];
+    public ObservableCollection<ScriptButtonViewModel> Items { get; }
 
     public ScriptRunViewModel CurrentScriptRunViewModel
     {
