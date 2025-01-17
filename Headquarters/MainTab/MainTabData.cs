@@ -12,21 +12,20 @@ public struct MainTabData
 {
     public string Name { get; set; } = "";
     public bool IsLocked { get; set; }
-    public string ScriptName { get; set; } = "";
     public List<Dictionary<string, string>> IpList { get; set; }
-    public Dictionary<string, Dictionary<string, string>> TabParameterDictionary { get; set; }
-
+    
+    public ScriptChainData ScriptChainData { get; set; }
     
     public MainTabData()
     {
         IpList = [];
-        TabParameterDictionary = new Dictionary<string, Dictionary<string, string>>();
+        ScriptChainData = new ScriptChainData();
     }
 
-    public MainTabData(DataTable dataTable, TabParameterSet tabParameterSet)
+    public MainTabData(DataTable dataTable, ScriptChainData scriptChainData)
     {
         IpList = CreateIpList(dataTable);
-        TabParameterDictionary = tabParameterSet.ScriptParameterSetTable;
+        ScriptChainData = scriptChainData;
     }
 
     public DataTable CreateIpListDataTable()
@@ -76,7 +75,4 @@ public struct MainTabData
             )).ToList();
 
     }
-
-    public TabParameterSet CreateTabParameterSet() => new(TabParameterDictionary);
-    
 }

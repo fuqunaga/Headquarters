@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using ScriptParameterSetTable = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, string>>;
 
 namespace Headquarters;
 
@@ -17,7 +18,7 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
     private readonly ScriptDirectoryWatcher _watcher;
     private Page _currentPage;
     private IpListViewModel? _ipListViewModel;
-    private TabParameterSet? _tabParameterSet;
+    private ScriptParameterSetTable? _scriptParameterSetTable;
     private readonly Dictionary<Script, ScriptRunViewModel> _scriptRunViewModelDictionary = new();
     private ScriptRunViewModel _currentScriptRunViewModel = new();
 
@@ -118,10 +119,10 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         ScriptButtonViewModel ScriptToViewModel(Script s) => new(s, OnSelectScript);
     }
 
-    public void Initialize(IpListViewModel ipListViewModel, TabParameterSet tabParameterSet, string scriptName)
+    public void Initialize(IpListViewModel ipListViewModel, string scriptName, ScriptParameterSetTable scriptParameterSetTable)
     {
         _ipListViewModel = ipListViewModel;
-        _tabParameterSet = tabParameterSet;
+        _scriptParameterSetTable = scriptParameterSetTable;
 
         if (string.IsNullOrEmpty(scriptName))
         {
@@ -136,7 +137,7 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
 
     private void OnSelectScript(Script script)
     {
-        if (_tabParameterSet is null)
+        if (_scriptParameterSetTable is null)
         {
             throw new NullReferenceException("TabParameterSet is not set.");
         }
@@ -151,7 +152,7 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
             scriptRunViewModel = new ScriptRunViewModel(
                 script,
                 _ipListViewModel,
-                _tabParameterSet.GetScriptParameterSet(script.Name)
+                CreateParameterSet(script.Name)
             );
 
             _scriptRunViewModelDictionary[script] = scriptRunViewModel;
@@ -159,5 +160,17 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         
         CurrentScriptRunViewModel = scriptRunViewModel;
         CurrentPage = Page.RunScript;
+        return;
+
+        ParameterSet CreateParameterSet(string scriptName)
+        {
+            if (!_scriptParameterSetTable.TryGetValue(scriptName, out var scriptParameterDictionary))
+            {
+                scriptParameterDictionary = new Dictionary<string, string>();
+                _scriptParameterSetTable[scriptName] = scriptParameterDictionary;
+            }
+
+            return new ParameterSet(scriptParameterDictionary);
+        }
     }
 }

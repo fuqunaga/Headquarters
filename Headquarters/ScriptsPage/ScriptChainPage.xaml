@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="Headquarters.ScriptChainPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:Headquarters"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:ScriptChainPageViewModel}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        <materialDesign:ColorZone Grid.Row="0"
+                                  Mode="PrimaryDark"
+                                  Padding="8">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="ScriptText" />
+                <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">Scripts</TextBlock>
+            </StackPanel>
+        </materialDesign:ColorZone>
+        
+        <local:ScriptsPage Grid.Row="1"
+                           DataContext="{Binding CurrentScriptPageViewModel}" />
+    </Grid>
+</UserControl>

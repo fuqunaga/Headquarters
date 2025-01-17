@@ -8,8 +8,7 @@ namespace Headquarters;
 public class MainTabViewModel : ViewModelBase, IDisposable
 {
     public static Func<MainTabViewModel> Factory => () => new MainTabViewModel();
-
-    private readonly TabParameterSet _tabParameterSet;
+    
     private string _name = string.Empty;
     private string _header = string.Empty;
     private bool _isLocked;
@@ -32,7 +31,7 @@ public class MainTabViewModel : ViewModelBase, IDisposable
         set { 
             SetProperty(ref _isLocked, value);
             IpListViewModel.IsLocked = value;
-            ScriptPageViewModel.CurrentScriptRunViewModel.IsLocked = value;
+            ScriptChainPageViewModel.IsLocked = value;
         }
     }
 
@@ -51,7 +50,7 @@ public class MainTabViewModel : ViewModelBase, IDisposable
     
     
     public IpListViewModel IpListViewModel { get; } = new();
-    public ScriptPageViewModel ScriptPageViewModel { get; } = new();
+    public ScriptChainPageViewModel ScriptChainPageViewModel { get; } = new();
 
     
     public MainTabViewModel(MainTabData data)
@@ -67,12 +66,11 @@ public class MainTabViewModel : ViewModelBase, IDisposable
         CloseTabCommand = new DelegateCommand(_ => CloseTab(), _ => !IsLocked);
         
         IpListViewModel.DataGridViewModel.Items = data.CreateIpListDataTable();
-
-        _tabParameterSet = data.CreateTabParameterSet();
-        ScriptPageViewModel.Initialize(IpListViewModel, _tabParameterSet, data.ScriptName);
-        ScriptPageViewModel.PropertyChanged += (_, args) =>
+        
+        ScriptChainPageViewModel.Initialize(IpListViewModel, data.ScriptChainData);
+        ScriptChainPageViewModel.PropertyChanged += (_, args) =>
         {
-            if (args.PropertyName == nameof(ScriptPageViewModel.CurrentPage))
+            if (args.PropertyName == nameof(ScriptChainPageViewModel.FirstScriptName))
             {
                 UpdateHeader();
             }
@@ -90,7 +88,7 @@ public class MainTabViewModel : ViewModelBase, IDisposable
 
     public void Dispose()
     {
-        ScriptPageViewModel.Dispose();
+        ScriptChainPageViewModel.Dispose();
     }
     
     private void UpdateHeader()
@@ -98,18 +96,18 @@ public class MainTabViewModel : ViewModelBase, IDisposable
         // NameがあるならHeaderは更新しない
         if (!string.IsNullOrEmpty(Name)) return;
         
-        Header = ScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.SelectScript
+        var firstScriptName = ScriptChainPageViewModel.FirstScriptName;
+        Header = string.IsNullOrEmpty(firstScriptName)
             ? "Select Script"
-            : ScriptPageViewModel.CurrentScriptRunViewModel.ScriptName;
+            : firstScriptName;
     }
     
     public MainTabData CreateMainTabData()
     {
-        return new MainTabData(IpListViewModel.DataGridViewModel.Items, _tabParameterSet)
+        return new MainTabData(IpListViewModel.DataGridViewModel.Items, ScriptChainPageViewModel.GenerateScriptChainData())
         {
             Name = Name,
-            IsLocked = IsLocked,
-            ScriptName = ScriptPageViewModel.CurrentScriptRunViewModel.ScriptName
+            IsLocked = IsLocked
         };
     }
     
