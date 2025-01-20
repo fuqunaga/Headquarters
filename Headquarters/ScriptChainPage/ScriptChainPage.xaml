@@ -23,7 +23,7 @@
             </StackPanel>
         </materialDesign:ColorZone>
         
-        <local:ScriptsPage Grid.Row="1"
+        <local:ScriptPage Grid.Row="1"
                            DataContext="{Binding CurrentScriptPageViewModel}" />
     </Grid>
 </UserControl>

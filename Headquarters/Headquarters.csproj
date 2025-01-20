@@ -65,7 +65,7 @@
       <XamlRuntime>Wpf</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="ScriptChainPage\ScriptPage\ScriptsPage.xaml">
+    <Page Update="ScriptChainPage\ScriptPage\ScriptPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <XamlRuntime>Wpf</XamlRuntime>
       <SubType>Designer</SubType>
