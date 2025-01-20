@@ -57,57 +57,6 @@
         </ResourceDictionary>
     </Window.Resources>
     
-    <!-- <Window.Resources> -->
-    <!--     <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}"> -->
-    <!--         <Setter Property="CaretBrush" Value="{DynamicResource PrimaryHueLightBrush}" /> -->
-    <!--     </Style> -->
-    <!-- -->
-    <!--      -->
-    <!--     <PasswordBox -->
-    <!--         x:Key="TopPasswordBox" -->
-    <!--         PasswordChanged="OnTopPasswordChanged" -->
-    <!--         materialDesign:HintAssist.Hint="Password" -->
-    <!--         Width="200" -->
-    <!--         > -->
-    <!--         ~1~ For strange font color,size when delete "UserPassword" column at IPList @1@ -->
-    <!--         <PasswordBox.Style> -->
-    <!--             <Style TargetType="PasswordBox" BasedOn="{StaticResource MaterialDesignFloatingHintPasswordBox}" > -->
-    <!--                 <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialDesignBody}" /> -->
-    <!--                 <Setter Property="FontFamily" Value="{DynamicResource MaterialDesignFont}" /> -->
-    <!--             </Style> -->
-    <!--         </PasswordBox.Style> -->
-    <!--     </PasswordBox> -->
-    <!-- -->
-    <!-- -->
-    <!--     <DataTemplate x:Key="PasswordBoxTemplate"> -->
-    <!--         <TextBlock> -->
-    <!--             <materialDesign:PackIcon -->
-    <!--                 Kind="Key" Foreground="{Binding Content.BorderBrush, ElementName=TopPasswordBox}"/> -->
-    <!--             <ContentControl Content="{StaticResource TopPasswordBox}" Name="TopPasswordBox" IsTabStop="False"/> -->
-    <!--         </TextBlock> -->
-    <!--     </DataTemplate> -->
-    <!-- -->
-    <!--     <DataTemplate x:Key="PasswordTextBoxTemplate"> -->
-    <!--         <TextBlock> -->
-    <!--             <materialDesign:PackIcon Grid.Column="0" -->
-    <!--                 Kind="Key" Foreground="{Binding BorderBrush, ElementName=TopPasswordBox}"/> -->
-    <!--             <TextBox Grid.Column="1" -->
-    <!--                 Name="TopPasswordBox" -->
-    <!--                 Text="{Binding Value}" -->
-    <!--                 IsEnabled="{Binding IsIndependentIp}" -->
-    <!--                 materialDesign:HintAssist.Hint="Password" -->
-    <!--                 Style="{StaticResource MaterialDesignFloatingHintTextBox}" -->
-    <!--                      Width="200"/> -->
-    <!--         </TextBlock> -->
-    <!--     </DataTemplate> -->
-    <!-- -->
-    <!--      -->
-    <!--     <local:BoolDataTemplateSelector x:Key="passwordBoxTemplateSelector" -->
-    <!--                                     BoolPropertyName="IsIndependentIP" -->
-    <!--                                     TrueTemplate="{StaticResource PasswordBoxTemplate}" -->
-    <!--                                     FalseTemplate="{StaticResource PasswordTextBoxTemplate}"/> -->
-    <!-- </Window.Resources> -->
-
     <materialDesign:DialogHost Identifier="RootDialog">
 
         <materialDesign:DrawerHost
@@ -118,34 +67,6 @@
             <materialDesign:DrawerHost.TopDrawerContent>
                 <local:SettingPage DataContext="{Binding SettingPageViewModel}"/>
             </materialDesign:DrawerHost.TopDrawerContent>
-
-            <!--<StackPanel>
-                
-                <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto">
-                <TabControl>
-                <TabItem Header="Tab 0" />
-                <TabItem Header="Tab 1" />
-                <TabItem Header="Tab 2" />
-                <TabItem Header="Tab 3" />
-                <TabItem Header="Tab 4" />
-                <TabItem Header="Tab 5" />
-                <TabItem Header="Tab 6" />
-                <TabItem Header="Tab 7" />
-                <TabItem Header="Tab 8" />
-                <TabItem Header="Tab 9" />
-                <TabItem Header="Tab 10" />
-                <TabItem Header="Tab 11" />
-                <TabItem Header="Tab 12" />
-                <TabItem Header="Tab 13" />
-                <TabItem Header="Tab 14" />
-                <TabItem Header="Tab 15" />
-                <TabItem Header="Tab 16" />
-                <TabItem Header="Tab 17" />
-                <TabItem Header="Tab 18" />
-                <TabItem Header="Tab 19" />
-            </TabControl>
-                </ScrollViewer>-->
             
                 
             <Grid>
