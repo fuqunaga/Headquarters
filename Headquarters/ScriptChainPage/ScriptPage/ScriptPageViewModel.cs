@@ -18,9 +18,10 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
     private readonly ScriptDirectoryWatcher _watcher;
     private Page _currentPage;
     private readonly IpListViewModel _ipListViewModel;
+    private readonly ScriptParameterSetTable _scriptParameterSetTable;
     private readonly Dictionary<Script, ScriptRunViewModel> _scriptRunViewModelDictionary = new();
     private ScriptRunViewModel _currentScriptRunViewModel = new();
-
+    
     public Page CurrentPage
     {
         get => _currentPage;
@@ -48,8 +49,8 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         ? ""
         : CurrentScriptRunViewModel.ScriptName;
 
+
     
-    public ScriptParameterSetTable ScriptParameterSetTable { get; private set; }
    
     
     public ScriptPageViewModel(IpListViewModel ipListViewModel, ScriptChainData.ScriptData scriptData, string folderPath=@".\Scripts")
@@ -62,7 +63,7 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         );
         
         _ipListViewModel = ipListViewModel;
-        ScriptParameterSetTable = scriptData.ScriptToParameterSet;
+        _scriptParameterSetTable = scriptData.ScriptToParameterSet;
 
         var scriptName = scriptData.ScriptName;
         if (string.IsNullOrEmpty(scriptName))
@@ -137,7 +138,7 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
 
     private void OnSelectScript(Script script)
     {
-        if (ScriptParameterSetTable is null)
+        if (_scriptParameterSetTable is null)
         {
             throw new NullReferenceException("ScriptParameterSetTable is not set.");
         }
@@ -164,10 +165,10 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
 
         ParameterSet CreateParameterSet(string scriptName)
         {
-            if (!ScriptParameterSetTable.TryGetValue(scriptName, out var scriptParameterDictionary))
+            if (!_scriptParameterSetTable.TryGetValue(scriptName, out var scriptParameterDictionary))
             {
                 scriptParameterDictionary = new Dictionary<string, string>();
-                ScriptParameterSetTable[scriptName] = scriptParameterDictionary;
+                _scriptParameterSetTable[scriptName] = scriptParameterDictionary;
             }
 
             return new ParameterSet(scriptParameterDictionary);
@@ -179,7 +180,7 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         return new ScriptChainData.ScriptData
         {
             ScriptName = CurrentScriptName,
-            ScriptToParameterSet = ScriptParameterSetTable
+            ScriptToParameterSet = _scriptParameterSetTable
         };
     }
 }
