@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Headquarters;
 
 public class ScriptChainPageViewModel : ViewModelBase, IDisposable
 {
     private bool _isLocked;
-    private string _firstScriptName = string.Empty;
-    
     private readonly IpListViewModel _ipListViewModel;
-    private readonly ScriptChainData _scriptChainData;
 
     public bool IsLocked
     {
@@ -19,10 +17,7 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     
     // 最初のスクリプト名
     // 命名されていないタブの名前として使う
-    public string FirstScriptName { 
-        get => _firstScriptName;
-        set => SetProperty(ref _firstScriptName, value);
-    }
+    public string FirstScriptName => CurrentScriptPageViewModel.CurrentScriptName;
     
     public ScriptPageViewModel CurrentScriptPageViewModel => ScriptPageViewModels[0];
     
@@ -31,10 +26,9 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     public ScriptChainPageViewModel(IpListViewModel ipListViewModel, ScriptChainData scriptChainData)
     {
         _ipListViewModel = ipListViewModel;
-        _scriptChainData = scriptChainData;
 
         ScriptPageViewModels = [];
-        foreach (var scriptData in _scriptChainData.ScriptDataList)
+        foreach (var scriptData in scriptChainData.ScriptDataList)
         {
             AddScriptPageViewModel(scriptData);
         }
@@ -46,8 +40,7 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
 
     private void AddScriptPageViewModel(ScriptChainData.ScriptData scriptData )
     {
-        var scriptPageViewModel = new ScriptPageViewModel();
-        scriptPageViewModel.Initialize(_ipListViewModel, scriptData.SelectedScriptName, scriptData.ScriptToParameterSet);
+        var scriptPageViewModel = new ScriptPageViewModel(_ipListViewModel, scriptData);
         ScriptPageViewModels.Add(scriptPageViewModel);
     }
     
@@ -61,6 +54,9 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
 
     public ScriptChainData GenerateScriptChainData()
     {
-        throw new NotImplementedException();
+        return new ScriptChainData()
+        {
+            ScriptDataList = ScriptPageViewModels.Select(scriptPageViewModel => scriptPageViewModel.GenerateScriptData()).ToList()
+        };
     }
 }

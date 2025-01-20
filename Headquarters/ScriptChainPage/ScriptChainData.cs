@@ -7,9 +7,13 @@ namespace Headquarters;
 /// </summary>
 public class ScriptChainData
 {
+    /// <summary>
+    /// ScriptsPageに相当するデータクラス
+    /// 選択中のスクリプトと入力済みの各スクリプトのパラメータも保存しておく
+    /// </summary>
     public class ScriptData
     {
-        public string SelectedScriptName { get; set; } = "";
+        public string ScriptName { get; set; } = "";
         public Dictionary<string, Dictionary<string, string>> ScriptToParameterSet { get; set; } = new();
      
     }

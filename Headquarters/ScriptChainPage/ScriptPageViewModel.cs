@@ -17,8 +17,7 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
     
     private readonly ScriptDirectoryWatcher _watcher;
     private Page _currentPage;
-    private IpListViewModel? _ipListViewModel;
-    private ScriptParameterSetTable? _scriptParameterSetTable;
+    private readonly IpListViewModel _ipListViewModel;
     private readonly Dictionary<Script, ScriptRunViewModel> _scriptRunViewModelDictionary = new();
     private ScriptRunViewModel _currentScriptRunViewModel = new();
 
@@ -45,12 +44,15 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         private set => SetProperty(ref _currentScriptRunViewModel, value);
     }
 
+    public string CurrentScriptName => CurrentPage == Page.SelectScript
+        ? ""
+        : CurrentScriptRunViewModel.ScriptName;
 
-    public ScriptPageViewModel() : this(@".\Scripts")
-    {
-    }
-
-    public ScriptPageViewModel(string folderPath)
+    
+    public ScriptParameterSetTable ScriptParameterSetTable { get; private set; }
+   
+    
+    public ScriptPageViewModel(IpListViewModel ipListViewModel, ScriptChainData.ScriptData scriptData, string folderPath=@".\Scripts")
     {
         _watcher = ScriptDirectoryWatcher.GetOrCreate(folderPath);
         _watcher.Scripts.CollectionChanged += OnScriptsChanged;
@@ -58,7 +60,21 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         Items = new ObservableCollection<ScriptButtonViewModel>(
             _watcher.Scripts.Select(s => new ScriptButtonViewModel(s, OnSelectScript))
         );
+        
+        _ipListViewModel = ipListViewModel;
+        ScriptParameterSetTable = scriptData.ScriptToParameterSet;
+
+        var scriptName = scriptData.ScriptName;
+        if (string.IsNullOrEmpty(scriptName))
+        {
+            return;
+        }
+
+        var initialScript = Items.FirstOrDefault(scriptButtonViewModel => scriptButtonViewModel.Name == scriptName)?.Script;
+        initialScript ??= _watcher.GetOrCreateNonExistentScript(scriptName);
+        OnSelectScript(initialScript);
     }
+    
     
     public void Dispose()
     {
@@ -119,25 +135,9 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         ScriptButtonViewModel ScriptToViewModel(Script s) => new(s, OnSelectScript);
     }
 
-    public void Initialize(IpListViewModel ipListViewModel, string scriptName, ScriptParameterSetTable scriptParameterSetTable)
-    {
-        _ipListViewModel = ipListViewModel;
-        _scriptParameterSetTable = scriptParameterSetTable;
-
-        if (string.IsNullOrEmpty(scriptName))
-        {
-            return;
-        }
-
-        var initialScript = Items.FirstOrDefault(scriptButtonViewModel => scriptButtonViewModel.Name == scriptName)?.Script;
-        initialScript ??= _watcher.GetOrCreateNonExistentScript(scriptName);
-        OnSelectScript(initialScript);
-    }
-
-
     private void OnSelectScript(Script script)
     {
-        if (_scriptParameterSetTable is null)
+        if (ScriptParameterSetTable is null)
         {
             throw new NullReferenceException("ScriptParameterSetTable is not set.");
         }
@@ -164,13 +164,22 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
 
         ParameterSet CreateParameterSet(string scriptName)
         {
-            if (!_scriptParameterSetTable.TryGetValue(scriptName, out var scriptParameterDictionary))
+            if (!ScriptParameterSetTable.TryGetValue(scriptName, out var scriptParameterDictionary))
             {
                 scriptParameterDictionary = new Dictionary<string, string>();
-                _scriptParameterSetTable[scriptName] = scriptParameterDictionary;
+                ScriptParameterSetTable[scriptName] = scriptParameterDictionary;
             }
 
             return new ParameterSet(scriptParameterDictionary);
         }
+    }
+    
+    public ScriptChainData.ScriptData GenerateScriptData()
+    {
+        return new ScriptChainData.ScriptData
+        {
+            ScriptName = CurrentScriptName,
+            ScriptToParameterSet = ScriptParameterSetTable
+        };
     }
 }
