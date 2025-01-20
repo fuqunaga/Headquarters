@@ -139,7 +139,7 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
     {
         if (_scriptParameterSetTable is null)
         {
-            throw new NullReferenceException("TabParameterSet is not set.");
+            throw new NullReferenceException("ScriptParameterSetTable is not set.");
         }
 
         if (!_scriptRunViewModelDictionary.TryGetValue(script, out var scriptRunViewModel))

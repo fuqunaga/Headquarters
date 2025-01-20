@@ -50,7 +50,7 @@ public class MainTabViewModel : ViewModelBase, IDisposable
     
     
     public IpListViewModel IpListViewModel { get; } = new();
-    public ScriptChainPageViewModel ScriptChainPageViewModel { get; } = new();
+    public ScriptChainPageViewModel ScriptChainPageViewModel { get; }
 
     
     public MainTabViewModel(MainTabData data)
@@ -67,7 +67,7 @@ public class MainTabViewModel : ViewModelBase, IDisposable
         
         IpListViewModel.DataGridViewModel.Items = data.CreateIpListDataTable();
         
-        ScriptChainPageViewModel.Initialize(IpListViewModel, data.ScriptChainData);
+        ScriptChainPageViewModel = new ScriptChainPageViewModel(IpListViewModel, data.ScriptChainData);
         ScriptChainPageViewModel.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName == nameof(ScriptChainPageViewModel.FirstScriptName))

@@ -5,10 +5,11 @@ namespace Headquarters;
 
 public class ScriptChainPageViewModel : ViewModelBase, IDisposable
 {
-    private IpListViewModel _ipListViewModel;
     private bool _isLocked;
     private string _firstScriptName = string.Empty;
-    private ScriptChainData _scriptChainData = new();
+    
+    private readonly IpListViewModel _ipListViewModel;
+    private readonly ScriptChainData _scriptChainData;
 
     public bool IsLocked
     {
@@ -23,24 +24,23 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         set => SetProperty(ref _firstScriptName, value);
     }
     
-    public ScriptPageViewModel CurrentScriptPageViewModel { get; } = new();
+    public ScriptPageViewModel CurrentScriptPageViewModel => ScriptPageViewModels[0];
     
-    public ObservableCollection<ScriptPageViewModel> ScriptPageViewModels { get; } = [new()];
+    public ObservableCollection<ScriptPageViewModel> ScriptPageViewModels { get; }
 
-    public void Initialize(IpListViewModel ipListViewModel, ScriptChainData scriptChainData)
+    public ScriptChainPageViewModel(IpListViewModel ipListViewModel, ScriptChainData scriptChainData)
     {
         _ipListViewModel = ipListViewModel;
         _scriptChainData = scriptChainData;
-        
-        ResetScriptPageViewModels();
-    }
-    
-    private void ResetScriptPageViewModels()
-    {
-        ScriptPageViewModels.Clear();
+
+        ScriptPageViewModels = [];
         foreach (var scriptData in _scriptChainData.ScriptDataList)
         {
             AddScriptPageViewModel(scriptData);
+        }
+        if (ScriptPageViewModels.Count == 0)
+        {
+            AddScriptPageViewModel(new ScriptChainData.ScriptData());
         }
     }
 
