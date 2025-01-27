@@ -48,21 +48,20 @@
                                 <!-- Button -->
                                 <!-- 選択中は濃くするがボタンは押せない -->
                                 <Button Content="{Binding ScriptPageViewModel.HeaderText, Mode=OneWay}"
+                                        Command="{Binding DataContext.SelectScriptPageCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}"
                                         Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
-                                        IsEnabled="{Binding IsSelected, Converter={StaticResource InvertBooleanConverter}}"
-                                        >
-                                        <!-- IsEnabled="{Binding Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter={Binding CurrentScriptRunViewModel}}" -->
-                                        <!-- > -->
-                                    <!-- <Button.Style> -->
-                                    <!--     <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}"> -->
-                                    <!--         <Setter Property="Opacity" Value="0.38" /> -->
-                                    <!--         <Style.Triggers> -->
-                                    <!--             <DataTrigger Binding="{Binding IsActive}" Value="True"> -->
-                                    <!--                 <Setter Property="Opacity" Value="1" /> -->
-                                    <!--             </DataTrigger> -->
-                                    <!--         </Style.Triggers> -->
-                                    <!--     </Style> -->
-                                    <!-- </Button.Style> -->
+                                        IsEnabled="{Binding IsSelected, Converter={StaticResource InvertBooleanConverter}}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+                                            <Setter Property="Opacity" Value="0.38" />
+                                            <Style.Triggers>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Opacity" Value="1" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
                                 </Button>
                             </StackPanel>
 

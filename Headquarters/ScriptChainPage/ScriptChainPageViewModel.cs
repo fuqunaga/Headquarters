@@ -40,7 +40,9 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     public ICommand AddNewScriptPageCommand => new DelegateCommand(_ =>
     {
         AddScriptPage(new ScriptChainData.ScriptData());
-    }); 
+    });
+    
+    public ICommand SelectScriptPageCommand { get; }
     
     public ScriptPageViewModel CurrentScriptPageViewModel => CurrentHeaderViewModel.ScriptPageViewModel;
     
@@ -51,6 +53,17 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     {
         _ipListViewModel = ipListViewModel;
 
+        SelectScriptPageCommand = new DelegateCommand(header =>
+            {
+                if (header is ScriptChainHeaderViewModel scriptChainHeaderViewModel)
+                {
+                    CurrentHeaderViewModel = scriptChainHeaderViewModel;
+                }
+            },
+            header => header is ScriptChainHeaderViewModel scriptChainHeaderViewModel &&
+                      scriptChainHeaderViewModel != CurrentHeaderViewModel);
+        
+        
         HeaderViewModels = [];
         foreach (var scriptData in scriptChainData.ScriptDataList)
         {
