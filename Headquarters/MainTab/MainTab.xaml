@@ -24,9 +24,6 @@
 
         <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
 
-        <!-- <local:ScriptsPage Grid.Column="2" -->
-        <!--                   DataContext="{Binding ScriptPageViewModel}" /> -->
-
         <local:ScriptChainPage Grid.Column="2"
                           DataContext="{Binding ScriptChainPageViewModel}" />
         

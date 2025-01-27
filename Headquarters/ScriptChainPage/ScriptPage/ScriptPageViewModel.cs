@@ -33,6 +33,8 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
                 {
                     _ipListViewModel?.DataGridViewModel.ClearScriptParameterNames();
                 }
+                
+                OnPropertyChanged(nameof(HeaderText));
             }
         }
     }
@@ -42,16 +44,29 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
     public ScriptRunViewModel CurrentScriptRunViewModel
     {
         get => _currentScriptRunViewModel;
-        private set => SetProperty(ref _currentScriptRunViewModel, value);
+        private set
+        {
+            if(SetProperty(ref _currentScriptRunViewModel, value))
+            {
+                OnPropertyChanged(nameof(HeaderText));
+            }
+        }
     }
 
-    public string CurrentScriptName => CurrentPage == Page.SelectScript
+    private string CurrentScriptName => CurrentPage == Page.SelectScript
         ? ""
         : CurrentScriptRunViewModel.ScriptName;
-
-
     
-   
+    public string HeaderText
+    {
+        get
+        {
+            var scriptName = CurrentScriptName;
+            return string.IsNullOrEmpty(scriptName)
+                ? "Select Script"
+                : scriptName;
+        }
+    } 
     
     public ScriptPageViewModel(IpListViewModel ipListViewModel, ScriptChainData.ScriptData scriptData, string folderPath=@".\Scripts")
     {

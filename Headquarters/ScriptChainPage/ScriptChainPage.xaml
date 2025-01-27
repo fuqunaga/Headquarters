@@ -18,9 +18,79 @@
                                   Mode="PrimaryDark"
                                   Padding="8">
             <StackPanel Orientation="Horizontal">
-                <materialDesign:PackIcon Kind="ScriptText" />
-                <TextBlock VerticalAlignment="Center" Margin="8,0,0,0">Scripts</TextBlock>
+                
+                <materialDesign:PackIcon Kind="ScriptText" 
+                                         Margin="4 0 8 0"
+                                         VerticalAlignment="Center"/>
+
+                <!-- Script chain list -->
+                <!-- ListBoxだとアイテム選択の機能があるのがよいが、アイテム間にマージンを設けてそこにアイコンを表示するのがむずかしい -->
+                <!-- ItemsControlでボタンを並べる形式にする -->
+                <ItemsControl
+                    ItemsSource="{Binding HeaderViewModels}">
+
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type local:ScriptChainHeaderViewModel}">
+                            <StackPanel Orientation="Horizontal">
+                                <!-- Separator icon -->
+                                <materialDesign:PackIcon x:Name="SeparatorIcon"
+                                                         Kind="ChevronRight" 
+                                                         VerticalAlignment="Center"
+                                                         />
+
+                                <!-- Button -->
+                                <!-- 選択中は濃くするがボタンは押せない -->
+                                <Button Content="{Binding ScriptPageViewModel.HeaderText, Mode=OneWay}"
+                                        Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
+                                        IsEnabled="{Binding IsSelected, Converter={StaticResource InvertBooleanConverter}}"
+                                        >
+                                        <!-- IsEnabled="{Binding Converter={StaticResource EqualityToBooleanConverter}, ConverterParameter={Binding CurrentScriptRunViewModel}}" -->
+                                        <!-- > -->
+                                    <!-- <Button.Style> -->
+                                    <!--     <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}"> -->
+                                    <!--         <Setter Property="Opacity" Value="0.38" /> -->
+                                    <!--         <Style.Triggers> -->
+                                    <!--             <DataTrigger Binding="{Binding IsActive}" Value="True"> -->
+                                    <!--                 <Setter Property="Opacity" Value="1" /> -->
+                                    <!--             </DataTrigger> -->
+                                    <!--         </Style.Triggers> -->
+                                    <!--     </Style> -->
+                                    <!-- </Button.Style> -->
+                                </Button>
+                            </StackPanel>
+
+                            <!-- Hide the separator icon if this is the first item in the list -->
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource PreviousData}}"
+                                             Value="{x:Null}">
+                                    <Setter TargetName="SeparatorIcon" Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Add new script button -->
+                <Button Style="{StaticResource MaterialDesignIconButton}"
+                        Command="{Binding AddNewScriptPageCommand}"
+                        Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
+                        Width="24"
+                        Height="24">
+
+                    <materialDesign:PackIcon Kind="Plus"
+                                             Width="18"
+                                             Height="18" />
+                </Button>
             </StackPanel>
+            
+            
         </materialDesign:ColorZone>
         
         <local:ScriptPage Grid.Row="1"

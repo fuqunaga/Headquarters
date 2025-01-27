@@ -70,7 +70,7 @@ public class MainTabViewModel : ViewModelBase, IDisposable
         ScriptChainPageViewModel = new ScriptChainPageViewModel(IpListViewModel, data.ScriptChainData);
         ScriptChainPageViewModel.PropertyChanged += (_, args) =>
         {
-            if (args.PropertyName == nameof(ScriptChainPageViewModel.FirstScriptName))
+            if (args.PropertyName == nameof(ScriptChainPageViewModel.HeaderText))
             {
                 UpdateHeader();
             }
@@ -95,11 +95,7 @@ public class MainTabViewModel : ViewModelBase, IDisposable
     {
         // NameがあるならHeaderは更新しない
         if (!string.IsNullOrEmpty(Name)) return;
-        
-        var firstScriptName = ScriptChainPageViewModel.FirstScriptName;
-        Header = string.IsNullOrEmpty(firstScriptName)
-            ? "Select Script"
-            : firstScriptName;
+        Header = ScriptChainPageViewModel.HeaderText;
     }
     
     public MainTabData CreateMainTabData()
