@@ -59,11 +59,9 @@ public class MainTabViewModel : ViewModelBase, IDisposable
         
         NewTabCommand = new DelegateCommand(_ => NewTab());
         DuplicateTabCommand = new DelegateCommand(_ => DuplicateTab());
-        // CS4014: Because this call is not awaited, execution of the current method continues before the call is completed.
-        // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/cs4014?redirectedfrom=MSDN
-        RenameTabCommand = new DelegateCommand((_) => { var suppressWarning = RenameTab(); });
+        RenameTabCommand = new DelegateCommand((_) => RenameTab());
         ToggleLockCommand = new DelegateCommand(_ => IsLocked = !IsLocked);
-        CloseTabCommand = new DelegateCommand(_ => CloseTab(), _ => !IsLocked);
+        CloseTabCommand = new DelegateCommand(_ => ConfirmAndCloseTab(), _ => !IsLocked);
         
         IpListViewModel.DataGridViewModel.Items = data.CreateIpListDataTable();
         
@@ -123,7 +121,7 @@ public class MainTabViewModel : ViewModelBase, IDisposable
         TabablzControl.SelectItem(newItem);
     }
     
-    private async Task RenameTab()
+    private async void RenameTab()
     {
         var viewModel =  new NameDialogViewModel()
         {
@@ -141,8 +139,19 @@ public class MainTabViewModel : ViewModelBase, IDisposable
         UpdateHeader();
     }
     
-    private void CloseTab()
+    private async void ConfirmAndCloseTab()
     {
+        var viewModel = new NameDialogViewModel()
+        {
+            Title = "Close Tab",
+            OkButtonContent = "Close",
+            Name = Header,
+            IsEnabled = false
+        };
+        var (success, _) = await NameDialogService.ShowDialog(viewModel);
+        if (!success) return;
+
+        
         TabablzControl.CloseItem(this);
         Dispose();
     }
