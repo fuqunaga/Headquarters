@@ -53,11 +53,7 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
             _ => !_scriptChainPageViewModel.IsLocked && HeaderViewModels.IndexOf(this) < HeaderViewModels.Count - 1);
 
         CloseCommand = new DelegateCommand(
-            _ =>
-            {
-                HeaderViewModels.Remove(this);
-                Dispose();
-            },
+            _ => ConfirmAndCloseScriptPage(),
             _ => !_scriptChainPageViewModel.IsLocked && HeaderViewModels.Count > 1);
 
         
@@ -68,6 +64,22 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
     {
         HeaderViewModels.CollectionChanged -= OnHeaderViewModelsChanged;
         ScriptPageViewModel.Dispose();
+    }
+    
+    private async void ConfirmAndCloseScriptPage()
+    {
+        var viewModel = new NameDialogViewModel()
+        {
+            Title = "Close",
+            OkButtonContent = "Close",
+            Name = ScriptPageViewModel.HeaderText,
+            IsEnabled = false
+        };
+        var (success, _) = await NameDialogService.ShowDialog(viewModel);
+        if (!success) return;
+        
+        HeaderViewModels.Remove(this);
+        Dispose();
     }
 
     private void OnHeaderViewModelsChanged(object sender, NotifyCollectionChangedEventArgs args)
