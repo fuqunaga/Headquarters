@@ -37,11 +37,19 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
         _scriptChainPageViewModel = scriptChainPageViewModel;
         
         NewRightCommand = new DelegateCommand(
-            _ => _scriptChainPageViewModel.InsertScriptPage(new ScriptChainData.ScriptData(), HeaderViewModels.IndexOf(this) + 1),
+            _ =>
+            {
+                var headerViewModel = _scriptChainPageViewModel.InsertScriptPage(new ScriptChainData.ScriptData(), HeaderViewModels.IndexOf(this) + 1);
+                _scriptChainPageViewModel.CurrentHeaderViewModel = headerViewModel;
+            },
             _ => !_scriptChainPageViewModel.IsLocked);
         
         DuplicateCommand = new DelegateCommand(
-            _ => _scriptChainPageViewModel.InsertScriptPage(ScriptPageViewModel.GenerateScriptData(), HeaderViewModels.IndexOf(this) + 1),
+            _ =>
+            {
+                var headerViewModel = _scriptChainPageViewModel.InsertScriptPage(ScriptPageViewModel.GenerateScriptData(), HeaderViewModels.IndexOf(this) + 1);
+                _scriptChainPageViewModel.CurrentHeaderViewModel = headerViewModel;
+            },
             _ => !_scriptChainPageViewModel.IsLocked);
         
         MoveLeftCommand = new DelegateCommand(
@@ -78,7 +86,12 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
         var (success, _) = await NameDialogService.ShowDialog(viewModel);
         if (!success) return;
         
+        var index = HeaderViewModels.IndexOf(this);
         HeaderViewModels.Remove(this);
+        
+        var selectIndex = Math.Min(index, HeaderViewModels.Count - 1);
+        _scriptChainPageViewModel.CurrentHeaderViewModel = HeaderViewModels[selectIndex];
+        
         Dispose();
     }
 

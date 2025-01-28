@@ -24,7 +24,7 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     public ScriptChainHeaderViewModel CurrentHeaderViewModel
     {
         get => _currentHeaderViewModel;
-        private set
+        set
         {
             var oldValue = _currentHeaderViewModel;
             if (SetProperty(ref _currentHeaderViewModel, value))
@@ -98,16 +98,18 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     }
 
 
-    private void AddScriptPage(ScriptChainData.ScriptData scriptData )
+    private ScriptChainHeaderViewModel AddScriptPage(ScriptChainData.ScriptData scriptData )
         => InsertScriptPage(scriptData, HeaderViewModels.Count);
     
-    public void InsertScriptPage(ScriptChainData.ScriptData scriptData, int index)
+    public ScriptChainHeaderViewModel InsertScriptPage(ScriptChainData.ScriptData scriptData, int index)
     {
         var headerViewModel = new ScriptChainHeaderViewModel(
             new ScriptPageViewModel(_ipListViewModel, scriptData),
             this
         );
         HeaderViewModels.Insert(index, headerViewModel);
+        
+        return headerViewModel;
     }
     
     public void Dispose()

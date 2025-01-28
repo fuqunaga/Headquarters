@@ -12,7 +12,7 @@
         <ContextMenu x:Key="ScriptChainButtonContextMenu"
                      DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                      d:DataContext="{d:DesignInstance local:ScriptChainHeaderViewModel}">
-            <MenuItem Header="New script to the right" Command="{Binding NewRightCommand}" />
+            <MenuItem Header="New script page to the right" Command="{Binding NewRightCommand}" />
             <MenuItem Header="Duplicate" Command="{Binding DuplicateCommand}" />
             <Separator />
             <MenuItem Header="Move left" Command="{Binding MoveLeftCommand}" />
@@ -82,14 +82,6 @@
                                     </Button.Style>
                                 </Button>
                             </StackPanel>
-
-                            <!-- Hide the separator icon if this is the first item in the list -->
-                            <!-- <DataTemplate.Triggers> -->
-                            <!--     <DataTrigger Binding="{Binding RelativeSource={RelativeSource PreviousData}}" -->
-                            <!--                  Value="{x:Null}"> -->
-                            <!--         <Setter TargetName="SeparatorIcon" Property="Visibility" Value="Collapsed" /> -->
-                            <!--     </DataTrigger> -->
-                            <!-- </DataTemplate.Triggers> -->
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
