@@ -130,7 +130,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     {
         Parameters.Clear();
         
-        
         foreach (var scriptParameter in _script.EditableScriptParameters)
         {
             Parameters.Add(new ScriptParameterInputFieldViewModel(
@@ -141,9 +140,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             );
         }
         
-        // IPListにスクリプトのパラメータ名を通知
-        _ipListViewModel.DataGridViewModel.SetScriptParameterNames(Parameters.Select(p => p.Name));
-
         ScriptName = _script.Name;
         Description = _script.Description;
 

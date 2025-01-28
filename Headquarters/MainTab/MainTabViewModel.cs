@@ -74,6 +74,8 @@ public class MainTabViewModel : ViewModelBase, IDisposable
             }
         };
         
+        IpListViewModel.DataGridViewModel.getScriptParameterNamesFunc = () => ScriptChainPageViewModel.CurrentScriptPageViewModel.ScriptParameterNames;
+        
         UpdateHeader();
         
         // ロックのセットはScriptPageの初期化後

@@ -29,11 +29,6 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         {
             if (SetProperty(ref _currentPage, value))
             {
-                if ( value == Page.SelectScript )
-                {
-                    _ipListViewModel?.DataGridViewModel.ClearScriptParameterNames();
-                }
-                
                 OnPropertyChanged(nameof(HeaderText));
             }
         }
@@ -67,6 +62,10 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
                 : scriptName;
         }
     } 
+    
+    public IEnumerable<string> ScriptParameterNames => _currentPage == Page.RunScript
+        ? CurrentScriptRunViewModel.Parameters.Select(parameterViewModel => parameterViewModel.Name)
+        : Array.Empty<string>();
     
     public ScriptPageViewModel(IpListViewModel ipListViewModel, ScriptChainData.ScriptData scriptData, string folderPath=@".\Scripts")
     {

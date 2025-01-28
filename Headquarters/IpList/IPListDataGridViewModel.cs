@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,8 +11,9 @@ namespace Headquarters;
 public class IpListDataGridViewModel : SelectableDataGridViewModel
 {
     private bool _isLocked;
-    private readonly List<string> _scriptParameterNames = [];
-    
+
+    public Func<IEnumerable<string>>? getScriptParameterNamesFunc;
+  
     public bool IsLocked
     {
         get => _isLocked;
@@ -35,17 +37,6 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
         RenameColumnCommand = new DelegateCommand(o => {var suppressWarning = RenameColumn(o); }, (obj) => !IsLocked && IsColumnNameEditable(obj));
         DeleteColumnCommand = new DelegateCommand(o => {var suppressWarning = DeleteColumn(o); }, (obj) => !IsLocked && IsColumnNameEditable(obj));
     }
-    
-    public void SetScriptParameterNames(IEnumerable<string> scriptParameterNames)
-    {
-        _scriptParameterNames.Clear();
-        _scriptParameterNames.AddRange(scriptParameterNames);
-    }
-    
-    public void ClearScriptParameterNames()
-    {
-        _scriptParameterNames.Clear();
-    }
 
     private static bool IsColumnNameEditable(object? obj)
     {
@@ -65,7 +56,8 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
 
     private IEnumerable<string> GetScriptParameterNamesWithoutColumnNames()
     {
-        return _scriptParameterNames.Except(Items.Columns.OfType<DataColumn>().Select(c => c.ColumnName));
+        return getScriptParameterNamesFunc?.Invoke().Except(Items.Columns.OfType<DataColumn>().Select(c => c.ColumnName))
+            ?? Array.Empty<string>();
     }
 
     private async Task AddColumn()
