@@ -56,10 +56,10 @@
                             <StackPanel Orientation="Horizontal">
                                 <!-- Separator icon -->
                                 <materialDesign:PackIcon x:Name="SeparatorIcon"
-                                                         Kind="ChevronRight" 
+                                                         Kind="ChevronRight"
                                                          VerticalAlignment="Center"
                                                          Visibility="{Binding IsMostLeft, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                                         />
+                                                         Opacity="0.8" />
 
                                 <!-- Button -->
                                 <!-- 選択中は濃くするがボタンは押せない -->
