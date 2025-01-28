@@ -37,11 +37,6 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     #region Binding Properties
     public ObservableCollection<ScriptChainHeaderViewModel> HeaderViewModels { get; }
     
-    public ICommand AddNewScriptPageCommand => new DelegateCommand(_ =>
-    {
-        AddScriptPage(new ScriptChainData.ScriptData());
-    });
-    
     public ICommand SelectScriptPageCommand { get; }
     
     public ScriptPageViewModel CurrentScriptPageViewModel => CurrentHeaderViewModel.ScriptPageViewModel;
@@ -104,18 +99,22 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
 
 
     private void AddScriptPage(ScriptChainData.ScriptData scriptData )
+        => InsertScriptPage(scriptData, HeaderViewModels.Count);
+    
+    public void InsertScriptPage(ScriptChainData.ScriptData scriptData, int index)
     {
         var headerViewModel = new ScriptChainHeaderViewModel(
-            new ScriptPageViewModel(_ipListViewModel, scriptData)
+            new ScriptPageViewModel(_ipListViewModel, scriptData),
+            this
         );
-        HeaderViewModels.Add(headerViewModel);
+        HeaderViewModels.Insert(index, headerViewModel);
     }
     
     public void Dispose()
     {
-        foreach (var scriptPageViewModel in HeaderViewModels.Select(header => header.ScriptPageViewModel))
+        foreach (var header in HeaderViewModels)
         {
-            scriptPageViewModel.Dispose();
+            header.Dispose();
         }
     }
 

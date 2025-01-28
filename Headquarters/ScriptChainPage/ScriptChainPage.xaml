@@ -8,6 +8,21 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:ScriptChainPageViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <ContextMenu x:Key="ScriptChainButtonContextMenu"
+                     DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                     d:DataContext="{d:DesignInstance local:ScriptChainHeaderViewModel}">
+            <MenuItem Header="New script to the right" Command="{Binding NewRightCommand}" />
+            <MenuItem Header="Duplicate" Command="{Binding DuplicateCommand}" />
+            <Separator />
+            <MenuItem Header="Move left" Command="{Binding MoveLeftCommand}" />
+            <MenuItem Header="Move right" Command="{Binding MoveRightCommand}" />
+            <Separator />
+            <MenuItem Header="Close" Command="{Binding CloseCommand}" />
+        </ContextMenu>
+            
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -43,6 +58,7 @@
                                 <materialDesign:PackIcon x:Name="SeparatorIcon"
                                                          Kind="ChevronRight" 
                                                          VerticalAlignment="Center"
+                                                         Visibility="{Binding IsMostLeft, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
                                                          />
 
                                 <!-- Button -->
@@ -50,8 +66,10 @@
                                 <Button Content="{Binding ScriptPageViewModel.HeaderText, Mode=OneWay}"
                                         Command="{Binding DataContext.SelectScriptPageCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                         CommandParameter="{Binding}"
+                                        ContextMenu="{StaticResource ScriptChainButtonContextMenu}"
+                                        ContextMenuService.ShowOnDisabled="True"
                                         Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
-                                        IsEnabled="{Binding IsSelected, Converter={StaticResource InvertBooleanConverter}}">
+                                        >
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
                                             <Setter Property="Opacity" Value="0.38" />
@@ -66,30 +84,16 @@
                             </StackPanel>
 
                             <!-- Hide the separator icon if this is the first item in the list -->
-                            <DataTemplate.Triggers>
-                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource PreviousData}}"
-                                             Value="{x:Null}">
-                                    <Setter TargetName="SeparatorIcon" Property="Visibility" Value="Collapsed" />
-                                </DataTrigger>
-                            </DataTemplate.Triggers>
+                            <!-- <DataTemplate.Triggers> -->
+                            <!--     <DataTrigger Binding="{Binding RelativeSource={RelativeSource PreviousData}}" -->
+                            <!--                  Value="{x:Null}"> -->
+                            <!--         <Setter TargetName="SeparatorIcon" Property="Visibility" Value="Collapsed" /> -->
+                            <!--     </DataTrigger> -->
+                            <!-- </DataTemplate.Triggers> -->
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-
-                <!-- Add new script button -->
-                <Button Style="{StaticResource MaterialDesignIconButton}"
-                        Command="{Binding AddNewScriptPageCommand}"
-                        Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
-                        Width="24"
-                        Height="24">
-
-                    <materialDesign:PackIcon Kind="Plus"
-                                             Width="18"
-                                             Height="18" />
-                </Button>
             </StackPanel>
-            
-            
         </materialDesign:ColorZone>
         
         <local:ScriptPage Grid.Row="1"
