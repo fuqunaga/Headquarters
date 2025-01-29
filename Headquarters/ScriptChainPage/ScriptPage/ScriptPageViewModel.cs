@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using ScriptParameterSetTable = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, string>>;
 
@@ -196,5 +197,35 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
             ScriptName = CurrentScriptName,
             ScriptToParameterSet = _scriptParameterSetTable
         };
+    }
+
+    public void OpenScriptFolder()
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = "explorer.exe",
+            Arguments = string.IsNullOrEmpty(CurrentScriptName)
+            ? @".\Scripts"
+            : $@"/select, .\Scripts\{CurrentScriptName}.ps1"
+        };
+        
+        Process.Start(psi);
+    }
+    
+    public void OpenScriptFile()
+    {
+        var scriptName = CurrentScriptName;
+        if (string.IsNullOrEmpty(scriptName))
+        {
+            return;
+        }
+        
+        var psi = new ProcessStartInfo
+        {
+            FileName = @".\Scripts\" + CurrentScriptName + ".ps1",
+            UseShellExecute = true // 既定のプログラムで開くために必要
+        };
+
+        Process.Start(psi);
     }
 }

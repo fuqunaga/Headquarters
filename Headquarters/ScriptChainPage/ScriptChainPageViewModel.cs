@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -11,6 +12,8 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
 {
     private bool _isLocked;
     private bool _isAnyIpSelected;
+    private int _maxTaskCount = 100;
+    private bool _isStopOnError = true;
     private bool _isRunning;
     private readonly IpListViewModel _ipListViewModel;
     private ScriptChainHeaderViewModel _currentHeaderViewModel = null!;
@@ -47,6 +50,18 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     public ObservableCollection<ScriptChainHeaderViewModel> HeaderViewModels { get; }
     public ScriptPageViewModel CurrentScriptPageViewModel => CurrentHeaderViewModel.ScriptPageViewModel;
 
+    public bool IsStopOnError
+    {
+        get => _isStopOnError;
+        set => SetProperty(ref _isStopOnError, value);
+    }
+
+    public int MaxTaskCount
+    {
+        get => _maxTaskCount;
+        set => SetProperty(ref _maxTaskCount, value);
+    }
+    
     public bool IsRunning
     {
         get => _isRunning;
@@ -56,6 +71,9 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     public ICommand SelectScriptPageCommand { get; }
     public ICommand RunCommand { get; }
     public ICommand StopCommand { get; }
+    
+    public ICommand OpenScriptFolderCommand { get; }
+    public ICommand OpenScriptFileCommand { get; }
 
     #endregion
     
@@ -81,6 +99,16 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         
         StopCommand = new DelegateCommand(
             _ => Stop()
+        );
+        
+        OpenScriptFolderCommand = new DelegateCommand(
+            _ => CurrentScriptPageViewModel.OpenScriptFolder()
+            
+        );
+        
+        OpenScriptFileCommand = new DelegateCommand(
+            _ => CurrentScriptPageViewModel.OpenScriptFile(),
+            _ => CurrentScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.RunScript
         );
         
         HeaderViewModels = [];
@@ -178,7 +206,9 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         }
         
         IsRunning = true;
-        await CurrentScriptPageViewModel.CurrentScriptRunViewModel.Run();
+        var runViewModel = CurrentScriptPageViewModel.CurrentScriptRunViewModel;
+        runViewModel.IsStopOnError = IsStopOnError;
+        await runViewModel.Run(MaxTaskCount);
         IsRunning = false;
     }
     

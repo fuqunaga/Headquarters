@@ -31,7 +31,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     private string _scriptName = "";
     private string _description = "";
     private bool _isLocked;
-    private bool _isRunning;
     private bool _isStopOnError = true;
     private readonly List<Task> _runningTasks = [];
     private CancellationTokenSource? _cancelTokenSource;
@@ -67,19 +66,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     }
 
     public ObservableCollection<ScriptParameterInputFieldViewModel> Parameters { get; } = [];
-        
-    public int MaxTaskCount
-    {
-        get => int.TryParse(_scriptParameterSet.Get(ReservedParameterName.MaxTaskCount), out var num) ? num : 100;
-        set
-        {
-            var num = value.ToString();
-            if( _scriptParameterSet.Set(ReservedParameterName.MaxTaskCount, num) )
-            {
-                OnPropertyChanged();
-            }
-        }
-    }
         
     public OutputFieldViewModel OutputFieldViewModel { get; } = new();
 
@@ -132,7 +118,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         OutputFieldViewModel.AddOutputUnit(new TextOutput(OutputIcon.Failure, "Script Parse Error", $"{string.Join("\n\n", _script.ParseErrorMessages)}"));
     }
 
-    public async Task Run()
+    public async Task Run(int maxTaskCount)
     {
         var ipAndParameterList = _ipListViewModel.DataGridViewModel.SelectedParams.SelectMany(ipParams =>
             {
@@ -194,10 +180,11 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         using var cancelTokenSource = new CancellationTokenSource();
         _cancelTokenSource = cancelTokenSource;
         
-        await RunScriptFunctions(ipAndParameterList, _cancelTokenSource.Token);
+        await RunScriptFunctions(ipAndParameterList, _cancelTokenSource.Token, maxTaskCount);
             
         _cancelTokenSource = null;
         
+        // TODO: いまはなくていいかも
         // IsRunningをすぐにfalseにするとUIが更新されないことがある
         var elapsed = stopwatch.Elapsed;
         var remaining = TimeSpan.FromMilliseconds(1000) - elapsed;
@@ -208,7 +195,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         }
     }
 
-    private async Task RunScriptFunctions(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken)
+    private async Task RunScriptFunctions(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken, int maxTaskCount)
     {
         // --------------------------------------------------------------------------------
         // BeginTask
@@ -224,7 +211,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         // --------------------------------------------------------------------------------
         if (_script.HasIpAddressTask)
         {
-            await RunIpAddressTasks(ipAndParameterList, cancellationToken);
+            await RunIpAddressTasks(ipAndParameterList, cancellationToken, maxTaskCount);
             if (cancellationToken.IsCancellationRequested) return;
         }
 
@@ -254,7 +241,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         CheckAndStopIfResultHasError(scriptExecInfo.Result);
     }
 
-    private async Task RunIpAddressTasks(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken)
+    private async Task RunIpAddressTasks(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken, int maxTaskCount)
     {
         var ipAddressTaskParameterList = ipAndParameterList.Select(ipAndParameter =>
             {
@@ -274,7 +261,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         
         // 自前のSemaphoreSlimで各Taskが実行可能になってから実行することでMaxTaskCount通りの同時実行数にする
         // RunspacePool任せの並列実行だとすべてRunning状態になってからRunspacePool待ちになる
-        using var semaphore = new SemaphoreSlim(MaxTaskCount);
+        using var semaphore = new SemaphoreSlim(maxTaskCount);
         
         // _runningTasksが空でない場合は別のタスクが実行中っぽそうでまずい
         if (_runningTasks.Count > 0)

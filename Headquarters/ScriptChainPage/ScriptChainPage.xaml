@@ -114,21 +114,54 @@
                         </Button>
 
                         <!-- Popup -->
-                        <materialDesign:PopupBox StaysOpen="False"
-                                                 IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
-                                                 Style="{StaticResource AddToolTipOfLockStyle}">
-                            <StackPanel>
-                                <Button Content="Hoge" />
+                        <materialDesign:PopupBox StaysOpen="True">
+                            
+                            <StackPanel Grid.IsSharedSizeScope="True"
+                                        Margin="0 8">
+                                
+                                <!-- IsStopOnError -->
+                                <!-- "HeaderGroup"はMenuItemのスタイルで使用しているShaderSizeGroupと同名 -->
+                                <Grid IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
+                                      Style="{StaticResource AddToolTipOfLockStyle}"
+                                      Margin="24 4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition SharedSizeGroup="HeaderGroup" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Label Grid.Column="0"
+                                           Content="エラー時にすべてのタスクを停止する"
+                                           Margin="0 0 16 0" />
+
+                                    <CheckBox Grid.Column="1"
+                                              IsChecked="{Binding IsStopOnError, Mode=TwoWay}" />
+                                </Grid>
+                                
+                                <!-- MaxTaskCount -->
+                                <Grid IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
+                                      Style="{StaticResource AddToolTipOfLockStyle}"
+                                      Margin="24 4" >
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition SharedSizeGroup="HeaderGroup" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <Label Grid.Column="0"
+                                           Content="並列実行するタスクの最大数" 
+                                           Margin="0 0 16 0" />
+
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding MaxTaskCount, Mode=TwoWay}"
+                                             MinWidth="50" />
+
+                                </Grid>
+
+                                <Separator />
+
+                                <MenuItem Header="スクリプトファイルのフォルダを開く" Command="{Binding OpenScriptFolderCommand}" />
+                                <MenuItem Header="スクリプトファイルを開く" Command="{Binding OpenScriptFileCommand}"/>
 
 
-                                <Button>
-                                    <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Kind="Export" />
-                                        <TextBlock Margin="8,0,0,0"
-                                                   VerticalAlignment="Center"
-                                                   Text="Export CSV" />
-                                    </StackPanel>
-                                </Button>
                             </StackPanel>
                         </materialDesign:PopupBox>
                     </StackPanel>
