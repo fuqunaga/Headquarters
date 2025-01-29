@@ -66,128 +66,12 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         
-        <materialDesign:ColorZone Grid.Row="0"
-                                  Mode="PrimaryDark"
-                                  Padding="8,0,0,0" >
-            <DockPanel>
-                <!-- Return Button -->
-                <Grid IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
-                      Style="{StaticResource AddToolTipOfLockStyle}">
-                    
-                    <Button
-                        Command="{x:Static materialDesign:Transitioner.MovePreviousCommand}"
-                        Content="{materialDesign:PackIcon Kind=ArrowLeft, Size=24}"
-                        Foreground="{Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}"
-                        Style="{StaticResource MaterialDesignToolButton}"
-                        HorizontalAlignment="Left" />
-                    
-                </Grid>
-
-                <materialDesign:PackIcon Kind="ScriptText" VerticalAlignment="Center" Margin="8,0,0,0" />
-                <Label Content="{Binding ScriptName}" VerticalAlignment="Center" />
-
-                <!-- Setting Area -->
-                <materialDesign:Transitioner Margin="16,0,8,0">
-                    <!-- <materialDesign:Transitioner.Style> -->
-                    <!--     <Style TargetType="materialDesign:Transitioner"> -->
-                    <!--         <Setter Property="SelectedIndex" Value="0" /> -->
-                    <!--         <Style.Triggers> -->
-                    <!--             <DataTrigger Binding="{Binding IsRunning}" Value="True"> -->
-                    <!--                 <Setter Property="SelectedIndex" Value="1" /> -->
-                    <!--             </DataTrigger> -->
-                    <!--         </Style.Triggers> -->
-                    <!--     </Style> -->
-                    <!-- </materialDesign:Transitioner.Style> -->
-
-
-                    <!-- Prepare Run -->
-                    <materialDesign:TransitionerSlide>
-                        <materialDesign:TransitionerSlide.BackwardWipe>
-                            <local:CustomFadeWipe />
-                        </materialDesign:TransitionerSlide.BackwardWipe>
-                        <materialDesign:TransitionerSlide.ForwardWipe>
-                            <local:CustomFadeWipe />
-                        </materialDesign:TransitionerSlide.ForwardWipe>
-
-                        <DockPanel>
-                            <!-- Run Button -->
-                            <Button Margin="8">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionSecondaryButton}">
-                                        <Setter Property="Content" Value="{materialDesign:PackIcon Kind=MenuRight, Size=32}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsAnyIpSelected}" Value="False" >
-                                                <Setter Property="Content" Value="Select IP" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-
-
-                            <DockPanel IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
-                                       Style="{StaticResource AddToolTipOfLockStyle}">
-                                <ToggleButton IsChecked="{Binding IsStopOnError, Mode=TwoWay}"
-                                              Margin="16 0 8 0"
-                                              />
-                                <Label Content="エラー時にすべてのタスクを停止する"
-                                       VerticalAlignment="Center" />
-                            </DockPanel>
-
-                            <DockPanel HorizontalAlignment="Right"
-                                       IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
-                                       Style="{StaticResource AddToolTipOfLockStyle}">
-                                <Label VerticalAlignment="Center" Margin="4"
-                                       Content="最大同時実行数"
-                                       ToolTipService.ShowDuration="10000">
-                                    <Label.ToolTip>
-                                        <TextBlock Text="並列実行する処理数を制限します" />
-                                    </Label.ToolTip>
-                                </Label>
-                                
-                                <TextBox Text="{Binding MaxTaskCount, Mode=TwoWay}"
-                                         Width="32"
-                                         VerticalAlignment="Center" />
-
-                           </DockPanel>
-                        </DockPanel>
-                    </materialDesign:TransitionerSlide>
-
-                    <!-- Running -->
-                    <materialDesign:TransitionerSlide>
-                        <materialDesign:TransitionerSlide.BackwardWipe>
-                            <local:CustomFadeWipe />
-                        </materialDesign:TransitionerSlide.BackwardWipe>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <ProgressBar Grid.Column="0" 
-                                         IsIndeterminate="True"
-                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
-                                         />
-                            
-                            <Button
-                                Grid.Column="1"
-                                Margin="16,0,8,0"
-                                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                                Command="{Binding StopCommand}"
-                                Content="{materialDesign:PackIcon Kind=Stop}" />
-                        </Grid>
-                    </materialDesign:TransitionerSlide>
-                </materialDesign:Transitioner>
-            </DockPanel>
-        </materialDesign:ColorZone>
-
 
         
-        <ScrollViewer  Grid.Row="1" 
+        <ScrollViewer  Grid.Row="0" 
                        VerticalScrollBarVisibility="Auto"
                        HorizontalScrollBarVisibility="Auto">
             <StackPanel>
@@ -226,13 +110,13 @@
             </StackPanel>
         </ScrollViewer>
 
-        <GridSplitter Grid.Row="2" 
+        <GridSplitter Grid.Row="1" 
                       HorizontalAlignment="Stretch"
                       Height="5" Cursor="SizeNS" 
                       />
         
         <!-- Output Field -->
-        <Border Grid.Row="3"
+        <Border Grid.Row="2"
                 DataContext="{Binding OutputFieldViewModel}"
                 BorderBrush="{DynamicResource MaterialDesign.Brush.TextBox.OutlineBorder}"
                 BorderThickness="{x:Static materialDesign:Constants.DefaultOutlinedBorderInactiveThickness}"

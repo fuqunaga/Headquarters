@@ -68,6 +68,8 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         set => SetProperty(ref _isRunning, value);
     }
     
+    
+    public ICommand ReturnPageCommand { get; }
     public ICommand SelectScriptPageCommand { get; }
     public ICommand RunCommand { get; }
     public ICommand StopCommand { get; }
@@ -92,6 +94,11 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
             header => header is ScriptChainHeaderViewModel scriptChainHeaderViewModel &&
                       scriptChainHeaderViewModel != CurrentHeaderViewModel);
 
+        ReturnPageCommand = new DelegateCommand(
+            _ => CurrentScriptPageViewModel.CurrentPage = ScriptPageViewModel.Page.SelectScript,
+            _ => CurrentScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.RunScript
+        );
+        
         RunCommand = new DelegateCommand(
             _ => Run(),
             _ => CanRun()
