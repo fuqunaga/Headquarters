@@ -92,16 +92,16 @@
 
                 <!-- Setting Area -->
                 <materialDesign:Transitioner Margin="16,0,8,0">
-                    <materialDesign:Transitioner.Style>
-                        <Style TargetType="materialDesign:Transitioner">
-                            <Setter Property="SelectedIndex" Value="0" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                    <Setter Property="SelectedIndex" Value="1" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </materialDesign:Transitioner.Style>
+                    <!-- <materialDesign:Transitioner.Style> -->
+                    <!--     <Style TargetType="materialDesign:Transitioner"> -->
+                    <!--         <Setter Property="SelectedIndex" Value="0" /> -->
+                    <!--         <Style.Triggers> -->
+                    <!--             <DataTrigger Binding="{Binding IsRunning}" Value="True"> -->
+                    <!--                 <Setter Property="SelectedIndex" Value="1" /> -->
+                    <!--             </DataTrigger> -->
+                    <!--         </Style.Triggers> -->
+                    <!--     </Style> -->
+                    <!-- </materialDesign:Transitioner.Style> -->
 
 
                     <!-- Prepare Run -->
@@ -115,10 +115,7 @@
 
                         <DockPanel>
                             <!-- Run Button -->
-                            <Button Command="{Binding RunCommand}"
-                                    IsEnabled="{Binding IsAnyIpSelected}"
-                                    Margin="8"
-                                     >
+                            <Button Margin="8">
                                 <Button.Style>
                                     <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFloatingActionSecondaryButton}">
                                         <Setter Property="Content" Value="{materialDesign:PackIcon Kind=MenuRight, Size=32}" />

@@ -20,75 +20,143 @@
             <Separator />
             <MenuItem Header="Close" Command="{Binding CloseCommand}" />
         </ContextMenu>
-            
+
     </UserControl.Resources>
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
+
         <materialDesign:ColorZone Grid.Row="0"
                                   Mode="PrimaryDark"
                                   Padding="8">
-            <StackPanel Orientation="Horizontal">
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
                 
-                <materialDesign:PackIcon Kind="ScriptText" 
-                                         Margin="4 0 8 0"
-                                         VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="0"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal">
 
-                <!-- Script chain list -->
-                <!-- ListBoxだとアイテム選択の機能があるのがよいが、アイテム間にマージンを設けてそこにアイコンを表示するのがむずかしい -->
-                <!-- ItemsControlでボタンを並べる形式にする -->
-                <ItemsControl
-                    ItemsSource="{Binding HeaderViewModels}">
+                    <materialDesign:PackIcon Kind="ScriptText"
+                                             Margin="4 0 0 0"
+                                             VerticalAlignment="Center" />
 
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
+                    <!-- Script chain list -->
+                    <!-- ListBoxだとアイテム選択の機能があるのがよいが、アイテム間にマージンを設けてそこにアイコンを表示するのがむずかしい -->
+                    <!-- ItemsControlでボタンを並べる形式にする -->
+                    <ItemsControl
+                        ItemsSource="{Binding HeaderViewModels}">
+
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
 
 
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type local:ScriptChainHeaderViewModel}">
-                            <StackPanel Orientation="Horizontal">
-                                <!-- Separator icon -->
-                                <materialDesign:PackIcon x:Name="SeparatorIcon"
-                                                         Kind="ChevronRight"
-                                                         VerticalAlignment="Center"
-                                                         Visibility="{Binding IsMostLeft, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                                         Opacity="0.8" />
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:ScriptChainHeaderViewModel}">
+                                <StackPanel Orientation="Horizontal">
+                                    <!-- Separator icon -->
+                                    <materialDesign:PackIcon x:Name="SeparatorIcon"
+                                                             Kind="ChevronRight"
+                                                             VerticalAlignment="Center"
+                                                             Visibility="{Binding IsMostLeft, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                             Opacity="0.8" />
 
-                                <!-- Button -->
-                                <!-- 選択中は濃くするがボタンは押せない -->
-                                <Button Content="{Binding ScriptPageViewModel.HeaderText, Mode=OneWay}"
-                                        Command="{Binding DataContext.SelectScriptPageCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                        CommandParameter="{Binding}"
-                                        ContextMenu="{StaticResource ScriptChainButtonContextMenu}"
-                                        ContextMenuService.ShowOnDisabled="True"
-                                        Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
-                                        >
-                                    <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
-                                            <Setter Property="Opacity" Value="0.38" />
-                                            <Style.Triggers>
-                                                <Trigger Property="IsEnabled" Value="False">
-                                                    <Setter Property="Opacity" Value="1" />
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
+                                    <!-- Button -->
+                                    <!-- 選択中は濃くするがボタンは押せない -->
+                                    <Button Content="{Binding ScriptPageViewModel.HeaderText, Mode=OneWay}"
+                                            Command="{Binding DataContext.SelectScriptPageCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            ContextMenu="{StaticResource ScriptChainButtonContextMenu}"
+                                            ContextMenuService.ShowOnDisabled="True"
+                                            Foreground="{DynamicResource MaterialDesign.Brush.Foreground}">
+                                        <Button.Style>
+                                            <Style TargetType="Button"
+                                                   BasedOn="{StaticResource MaterialDesignFlatButton}">
+                                                <Setter Property="Opacity" Value="0.38" />
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter Property="Opacity" Value="1" />
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <!-- Right side -->
+                <Grid Grid.Column="1" >
+                    
+                    <!-- Prepare Running -->
+                    <StackPanel HorizontalAlignment="Right" 
+                                Orientation="Horizontal"
+                                Visibility="{Binding IsRunning, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                        <!-- <ComboBox> -->
+                        <!--     <ComboBoxItem Content="スクリプトを順番に実行" /> -->
+                        <!--     <ComboBoxItem Content="選択中のスクリプトのみ実行" /> -->
+                        <!-- </ComboBox> -->
+                        <Button Command="{Binding RunCommand}"
+                                Content="{materialDesign:PackIcon Kind=Play}"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}"
+                                Margin="8 0">
+                        </Button>
+
+                        <!-- Popup -->
+                        <materialDesign:PopupBox StaysOpen="False"
+                                                 IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
+                                                 Style="{StaticResource AddToolTipOfLockStyle}">
+                            <StackPanel>
+                                <Button Content="Hoge" />
+
+
+                                <Button>
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Export" />
+                                        <TextBlock Margin="8,0,0,0"
+                                                   VerticalAlignment="Center"
+                                                   Text="Export CSV" />
+                                    </StackPanel>
                                 </Button>
                             </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
+                        </materialDesign:PopupBox>
+                    </StackPanel>
+                    
+                    
+                    <!-- Running -->
+                    <Grid Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ProgressBar Grid.Column="0"
+                                     IsIndeterminate="True"
+                                     Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
+
+                        <Button
+                            Grid.Column="1"
+                            Margin="16,0,8,0"
+                            Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                            Command="{Binding StopCommand}"
+                            Content="{materialDesign:PackIcon Kind=Stop}" />
+                    </Grid>
+                </Grid>
+            </Grid>
         </materialDesign:ColorZone>
-        
+
         <local:ScriptPage Grid.Row="1"
-                           DataContext="{Binding CurrentScriptPageViewModel}" />
+                          DataContext="{Binding CurrentScriptPageViewModel}" />
     </Grid>
 </UserControl>

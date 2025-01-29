@@ -32,7 +32,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     private string _description = "";
     private bool _isLocked;
     private bool _isRunning;
-    private bool _isAnyIpSelected;
     private bool _isStopOnError = true;
     private readonly List<Task> _runningTasks = [];
     private CancellationTokenSource? _cancelTokenSource;
@@ -58,21 +57,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         get => _isLocked;
         set => SetProperty(ref _isLocked, value);
     }
-
-    public bool IsRunning
-    {
-        get => _isRunning;
-        private set => SetProperty(ref _isRunning, value);
-    }
-
-    public bool IsAnyIpSelected
-    {
-        get => _isAnyIpSelected;
-        private set => SetProperty(ref _isAnyIpSelected, value);
-    }
     
-        
-    public ICommand RunCommand { get; }
     public ICommand StopCommand { get; }
 
     public bool IsStopOnError
@@ -107,7 +92,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
 
     public ScriptRunViewModel(Script script, IpListViewModel ipListViewModel, ParameterSet scriptParameterSet)
     {
-        RunCommand = new DelegateCommand(RunCommandExecute);
         StopCommand = new DelegateCommand(_ => Stop());
             
         _script = script;
@@ -117,7 +101,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         _ipListViewModel = ipListViewModel;
             
         OnUpdateScript();
-        SubscribeIpListViewModel();
     }
     
     public void Dispose()
@@ -148,41 +131,10 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         
         OutputFieldViewModel.AddOutputUnit(new TextOutput(OutputIcon.Failure, "Script Parse Error", $"{string.Join("\n\n", _script.ParseErrorMessages)}"));
     }
-        
-    private void SubscribeIpListViewModel()
+
+    public async Task Run()
     {
-        _ipListViewModel.DataGridViewModel.PropertyChanged += (_, args) =>
-        {
-            if (args.PropertyName == nameof(IpListDataGridViewModel.IsAllItemSelected))
-            {
-                UpdateIsAnyIpSelected();
-            }
-        };
-
-        UpdateIsAnyIpSelected();
-        return;
-        
-        void UpdateIsAnyIpSelected()
-        {
-            IsAnyIpSelected = _ipListViewModel.DataGridViewModel.IsAllItemSelected ?? true;
-        }
-    }
-
-      
-
-    private void RunCommandExecute(object? _)
-    {
-        var task = Run(_ipListViewModel.DataGridViewModel.SelectedParams.ToList());
-    }
-
-    private async Task Run(IEnumerable<IpParameterSet> ipParamsList)
-    {
-        if ( IsRunning)
-        {
-            return;
-        }
-        
-        var ipAndParameterList = ipParamsList.SelectMany(ipParams =>
+        var ipAndParameterList = _ipListViewModel.DataGridViewModel.SelectedParams.SelectMany(ipParams =>
             {
                 var ipParamsTable = Parameters
                     .ToDictionary(
@@ -236,8 +188,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             
             
         OutputFieldViewModel.Clear();
-
-        IsRunning = true;
+        
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
         using var cancelTokenSource = new CancellationTokenSource();
@@ -255,8 +206,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             // ReSharper disable once MethodSupportsCancellation
             await Task.Delay(remaining);
         }
-        
-        IsRunning = false;
     }
 
     private async Task RunScriptFunctions(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken)
@@ -389,7 +338,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         }
     }
 
-    private void Stop()
+    public void Stop()
     {
         if (_cancelTokenSource == null) return;
         
