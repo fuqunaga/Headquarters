@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -10,8 +11,15 @@ namespace Headquarters;
 
 public class ScriptChainPageViewModel : ViewModelBase, IDisposable
 {
+    public enum ScriptRunMode
+    {
+        SingleScript,
+        ScriptChain
+    }
+    
     private bool _isLocked;
     private bool _isAnyIpSelected;
+    private ScriptRunMode _runMode;
     private int _maxTaskCount = 100;
     private bool _isStopOnError = true;
     private bool _isRunning;
@@ -50,6 +58,14 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     public ObservableCollection<ScriptChainHeaderViewModel> HeaderViewModels { get; }
     public ScriptPageViewModel CurrentScriptPageViewModel => CurrentHeaderViewModel.ScriptPageViewModel;
 
+    public bool HasScriptChain => HeaderViewModels.Count > 1;
+    
+    public ScriptRunMode RunMode
+    {
+        get => _runMode;
+        set => SetProperty(ref _runMode, value);
+    }
+    
     public bool IsStopOnError
     {
         get => _isStopOnError;
@@ -130,6 +146,23 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         
         CurrentHeaderViewModel = HeaderViewModels[0];
         
+        HeaderViewModels.CollectionChanged += (_, args) =>
+        {
+            var needNotify = args.Action switch
+            {
+                NotifyCollectionChangedAction.Add => HeaderViewModels.Count == 2,
+                NotifyCollectionChangedAction.Remove => HeaderViewModels.Count == 1,
+                NotifyCollectionChangedAction.Reset => true,
+                NotifyCollectionChangedAction.Replace => false,
+                NotifyCollectionChangedAction.Move => false,
+                _ => false
+            };
+            
+            if (needNotify)
+            {
+                OnPropertyChanged(nameof(HasScriptChain));
+            }
+        };
         SubscribeIpListViewModel();
     }
 
@@ -164,6 +197,7 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         {
             header.Dispose();
         }
+        HeaderViewModels.Clear();
     }
 
     private void AddScriptPage(ScriptChainData.ScriptData scriptData) => InsertScriptPage(scriptData, HeaderViewModels.Count);

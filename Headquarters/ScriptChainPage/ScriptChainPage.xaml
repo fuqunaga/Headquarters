@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:Headquarters"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:ScriptChainPageViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
@@ -21,6 +22,13 @@
             <MenuItem Header="Close" Command="{Binding CloseCommand}" />
         </ContextMenu>
 
+        <ObjectDataProvider x:Key="ScriptRunModeDataProvider"
+                            ObjectType="{x:Type system:Enum}"
+                            MethodName="GetValues">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:ScriptChainPageViewModel+ScriptRunMode" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
     </UserControl.Resources>
 
     <Grid>
@@ -42,6 +50,7 @@
                 <StackPanel Grid.Column="0"
                             Orientation="Horizontal">
                     
+                    <!-- Return button -->
                     <Button
                         Command="{Binding ReturnPageCommand}"
                         Content="{materialDesign:PackIcon Kind=ArrowLeft, Size=20}"
@@ -49,6 +58,7 @@
                         Style="{StaticResource MaterialDesignToolButton}" />
 
 
+                    <!-- Script icon -->
                     <materialDesign:PackIcon Kind="ScriptText"
                                              Margin="8 0 0 0"
                                              VerticalAlignment="Center" />
@@ -56,16 +66,13 @@
                     <!-- Script chain list -->
                     <!-- ListBoxだとアイテム選択の機能があるのがよいが、アイテム間にマージンを設けてそこにアイコンを表示するのがむずかしい -->
                     <!-- ItemsControlでボタンを並べる形式にする -->
-                    <ItemsControl
-                        ItemsSource="{Binding HeaderViewModels}">
-
+                    <ItemsControl ItemsSource="{Binding HeaderViewModels}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Horizontal" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
-
-
+                        
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type local:ScriptChainHeaderViewModel}">
                                 <StackPanel Orientation="Horizontal">
@@ -104,6 +111,7 @@
                     </ItemsControl>
                 </StackPanel>
 
+                
                 <!-- Right side -->
                 <Grid Grid.Column="1" >
                     
@@ -111,10 +119,12 @@
                     <StackPanel HorizontalAlignment="Right" 
                                 Orientation="Horizontal"
                                 Visibility="{Binding IsRunning, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                        <!-- <ComboBox> -->
-                        <!--     <ComboBoxItem Content="スクリプトを順番に実行" /> -->
-                        <!--     <ComboBoxItem Content="選択中のスクリプトのみ実行" /> -->
-                        <!-- </ComboBox> -->
+                        
+                        <!-- Run mode -->
+                        <ComboBox ItemsSource="{Binding Source = {StaticResource ScriptRunModeDataProvider}}"
+                                  SelectedValue="{Binding RunMode, Mode=TwoWay}"
+                                  Visibility="{Binding HasScriptChain, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            
                         <Button Command="{Binding RunCommand}"
                                 Content="{materialDesign:PackIcon Kind=Play}"
                                 Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}"
