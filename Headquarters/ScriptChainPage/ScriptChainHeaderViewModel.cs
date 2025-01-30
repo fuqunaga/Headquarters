@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Headquarters;
@@ -9,6 +10,7 @@ namespace Headquarters;
 public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
 {
     private bool _isSelected;
+    private bool _isRunning;
     private readonly ScriptChainPageViewModel _scriptChainPageViewModel;  
 
     public bool IsSelected
@@ -17,8 +19,13 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
         set => SetProperty(ref _isSelected, value);
     }
     
+    public bool IsRunning
+    {
+        get => _isRunning;
+        set => SetProperty(ref _isRunning, value);
+    }
+    
     public bool IsMostLeft => _scriptChainPageViewModel.HeaderViewModels.IndexOf(this) == 0;
-
     
     public ICommand NewRightCommand { get; }
     public ICommand DuplicateCommand { get; }
@@ -98,5 +105,24 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
     private void OnHeaderViewModelsChanged(object sender, NotifyCollectionChangedEventArgs args)
     {
         OnPropertyChanged(nameof(IsMostLeft));
+    }
+    
+    
+    public async Task Run(int maxTaskCount, bool isStopOnError)
+    {
+        if (IsRunning) return;
+        if (ScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.SelectScript) return;
+
+        try
+        {
+            IsRunning = true;
+            var runViewModel = ScriptPageViewModel.CurrentScriptRunViewModel;
+            runViewModel.IsStopOnError = isStopOnError;
+            await runViewModel.Run(maxTaskCount);
+        }
+        finally
+        {
+            IsRunning = false;
+        }
     }
 }

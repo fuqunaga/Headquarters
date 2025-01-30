@@ -82,9 +82,10 @@
                                             CommandParameter="{Binding}"
                                             ContextMenu="{StaticResource ScriptChainButtonContextMenu}"
                                             ContextMenuService.ShowOnDisabled="True"
+                                            materialDesign:ButtonProgressAssist.IsIndicatorVisible="{Binding IsRunning}"
+                                            materialDesign:ButtonProgressAssist.IsIndeterminate="True"
                                             Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
-                                            Padding="8 4"
-                                            >
+                                            Padding="8 4">
                                         <Button.Style>
                                             <Style TargetType="Button"
                                                    BasedOn="{StaticResource MaterialDesignFlatButton}">
@@ -106,11 +107,9 @@
                 
                 <!-- Right side -->
                 <Grid Grid.Column="1" >
-                    
                     <!-- Prepare Running -->
                     <StackPanel HorizontalAlignment="Right" 
-                                Orientation="Horizontal"
-                                Visibility="{Binding IsRunning, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                Orientation="Horizontal">
 
                         <materialDesign:ColorZone  CornerRadius="5"
                                                    Padding="8 0"
@@ -133,12 +132,13 @@
 
                                 <!-- Run button -->
                                 <Button Command="{Binding RunCommand}"
+                                        Visibility="{Binding IsRunning, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
                                         Style="{StaticResource MaterialDesignIconButton}"
                                         Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"
                                         Width="32"
                                         Height="32">
                                     
-                                    <materialDesign:PackIcon>
+                                    <materialDesign:PackIcon Width="24" Height="24">
                                         <materialDesign:PackIcon.Style>
                                             <Style TargetType="materialDesign:PackIcon">
                                                 <Setter Property="Kind" Value="Play" />
@@ -155,7 +155,16 @@
                                         </materialDesign:PackIcon.Style>
                                     </materialDesign:PackIcon>
                                 </Button>
-
+                                
+                                <!-- Stop button -->
+                                <Button Command="{Binding StopCommand}"
+                                        Content="{materialDesign:PackIcon Kind=Stop}"
+                                        Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                        Style="{StaticResource MaterialDesignIconButton}"
+                                        Foreground="#b54747"
+                                        Width="32"
+                                        Height="32" />
+                                    
                             </StackPanel>
                         </materialDesign:ColorZone>
 
@@ -213,24 +222,6 @@
                     </StackPanel>
                     
                     
-                    <!-- Running -->
-                    <Grid Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <ProgressBar Grid.Column="0"
-                                     IsIndeterminate="True"
-                                     Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
-
-                        <Button
-                            Grid.Column="1"
-                            Margin="16,0,8,0"
-                            Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                            Command="{Binding StopCommand}"
-                            Content="{materialDesign:PackIcon Kind=Stop}" />
-                    </Grid>
                 </Grid>
             </Grid>
         </materialDesign:ColorZone>

@@ -137,7 +137,7 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
 
         ReturnPageCommand = new DelegateCommand(
             _ => CurrentScriptPageViewModel.CurrentPage = ScriptPageViewModel.Page.SelectScript,
-            _ => CurrentScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.RunScript
+            _ => !IsLocked && !IsRunning && CurrentScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.RunScript
         );
         
         RunCommand = new DelegateCommand(
@@ -261,11 +261,19 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
             return;
         }
         
-        IsRunning = true;
-        var runViewModel = CurrentScriptPageViewModel.CurrentScriptRunViewModel;
-        runViewModel.IsStopOnError = IsStopOnError;
-        await runViewModel.Run(MaxTaskCount);
-        IsRunning = false;
+        try
+        {
+            IsRunning = true;
+            await CurrentHeaderViewModel.Run(MaxTaskCount, IsStopOnError);
+        }
+        finally
+        {
+            IsRunning = false;
+            
+            // Returnボタンが更新されないので強制的に更新
+            // https://stackoverflow.com/questions/1340302/wpf-how-to-force-a-command-to-re-evaluate-canexecute-via-its-commandbindings
+            CommandManager.InvalidateRequerySuggested();
+        }
     }
     
     private void Stop()
