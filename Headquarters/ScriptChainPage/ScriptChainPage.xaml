@@ -21,14 +21,6 @@
             <Separator />
             <MenuItem Header="Close" Command="{Binding CloseCommand}" />
         </ContextMenu>
-
-        <ObjectDataProvider x:Key="ScriptRunModeDataProvider"
-                            ObjectType="{x:Type system:Enum}"
-                            MethodName="GetValues">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="local:ScriptChainPageViewModel+ScriptRunMode" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
     </UserControl.Resources>
 
     <Grid>
@@ -119,17 +111,53 @@
                     <StackPanel HorizontalAlignment="Right" 
                                 Orientation="Horizontal"
                                 Visibility="{Binding IsRunning, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                        
-                        <!-- Run mode -->
-                        <ComboBox ItemsSource="{Binding Source = {StaticResource ScriptRunModeDataProvider}}"
-                                  SelectedValue="{Binding RunMode, Mode=TwoWay}"
-                                  Visibility="{Binding HasScriptChain, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                        <materialDesign:ColorZone  CornerRadius="5"
+                                                   Padding="8 0"
+                                                   Margin="8 0"
+                                                   >
                             
-                        <Button Command="{Binding RunCommand}"
-                                Content="{materialDesign:PackIcon Kind=Play}"
-                                Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}"
-                                Margin="8 0">
-                        </Button>
+                            <StackPanel Orientation="Horizontal">
+
+                                <!-- Select Run mode -->
+                                <ComboBox
+                                    ItemsSource="{Binding Source={x:Static local:ScriptChainPageViewModel.RunModeAndDescriptions}}"
+                                    SelectedValue="{Binding RunMode, Mode=TwoWay}"
+                                    SelectedValuePath="RunMode"
+                                    DisplayMemberPath="Description"
+                                    Visibility="{Binding CanRunScriptChain, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"
+                                    BorderThickness="0"
+                                    Margin="0 0 8 0"
+                                    />
+
+                                <!-- Run button -->
+                                <Button Command="{Binding RunCommand}"
+                                        Style="{StaticResource MaterialDesignIconButton}"
+                                        Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"
+                                        Width="32"
+                                        Height="32">
+                                    
+                                    <materialDesign:PackIcon>
+                                        <materialDesign:PackIcon.Style>
+                                            <Style TargetType="materialDesign:PackIcon">
+                                                <Setter Property="Kind" Value="Play" />
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding CanRunScriptChain}" Value="True" />
+                                                            <Condition Binding="{Binding RunMode}" Value="ScriptChain" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Kind" Value="FastForward" />
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </materialDesign:PackIcon.Style>
+                                    </materialDesign:PackIcon>
+                                </Button>
+
+                            </StackPanel>
+                        </materialDesign:ColorZone>
 
                         <!-- Popup -->
                         <materialDesign:PopupBox StaysOpen="True">

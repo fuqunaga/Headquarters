@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -11,11 +12,33 @@ namespace Headquarters;
 
 public class ScriptChainPageViewModel : ViewModelBase, IDisposable
 {
+    #region Type Definitions
+    
     public enum ScriptRunMode
     {
         SingleScript,
         ScriptChain
     }
+    
+    public class ScriptRunModeAndDescription(ScriptRunMode runMode, string description)
+    {
+        public ScriptRunMode RunMode { get; } = runMode;
+        public string Description { get; } = description;
+    }
+    
+    #endregion
+    
+    
+    #region Static
+    
+    public static readonly IReadOnlyList<ScriptRunModeAndDescription> RunModeAndDescriptions =
+    [
+        new(ScriptRunMode.ScriptChain, "すべてのスクリプトを連続して実行"),
+        new(ScriptRunMode.SingleScript, "選択中のスクリプトのみ実行")
+    ];
+    
+    #endregion
+    
     
     private bool _isLocked;
     private bool _isAnyIpSelected;
@@ -53,12 +76,14 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
             }
         }
     }
-    
+
     #region Binding Properties
     public ObservableCollection<ScriptChainHeaderViewModel> HeaderViewModels { get; }
     public ScriptPageViewModel CurrentScriptPageViewModel => CurrentHeaderViewModel.ScriptPageViewModel;
 
-    public bool HasScriptChain => HeaderViewModels.Count > 1;
+    public bool CanRunScriptChain => HeaderViewModels.Count >= 2
+                                     && HeaderViewModels.All(header => header.ScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.RunScript);
+                                         
     
     public ScriptRunMode RunMode
     {
@@ -145,24 +170,8 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         }
         
         CurrentHeaderViewModel = HeaderViewModels[0];
-        
-        HeaderViewModels.CollectionChanged += (_, args) =>
-        {
-            var needNotify = args.Action switch
-            {
-                NotifyCollectionChangedAction.Add => HeaderViewModels.Count == 2,
-                NotifyCollectionChangedAction.Remove => HeaderViewModels.Count == 1,
-                NotifyCollectionChangedAction.Reset => true,
-                NotifyCollectionChangedAction.Replace => false,
-                NotifyCollectionChangedAction.Move => false,
-                _ => false
-            };
-            
-            if (needNotify)
-            {
-                OnPropertyChanged(nameof(HasScriptChain));
-            }
-        };
+
+        HeaderViewModels.CollectionChanged += (_, _) => OnPropertyChanged(nameof(CanRunScriptChain));
         SubscribeIpListViewModel();
     }
 
@@ -179,14 +188,20 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         
         OnPropertyChanged(nameof(CurrentScriptPageViewModel));
         OnPropertyChanged(nameof(HeaderText));
+        OnPropertyChanged(nameof(CanRunScriptChain));
         return;
         
         
         void OnScriptPageViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(ScriptPageViewModel.HeaderText))
+            switch (e.PropertyName)
             {
-                OnPropertyChanged(nameof(HeaderText));
+                case nameof(ScriptPageViewModel.HeaderText):
+                    OnPropertyChanged(nameof(HeaderText));
+                    break;
+                case nameof(ScriptPageViewModel.CurrentPage):
+                    OnPropertyChanged(nameof(CanRunScriptChain));
+                    break;
             }
         }
     }
