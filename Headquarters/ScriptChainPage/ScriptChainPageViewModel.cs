@@ -190,6 +190,9 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         OnPropertyChanged(nameof(CurrentScriptPageViewModel));
         OnPropertyChanged(nameof(HeaderText));
         OnPropertyChanged(nameof(CanRunScriptChain));
+        
+        // 連続実行中にSelectScriptPageCommandが更新されないので強制的に更新
+        CommandManager.InvalidateRequerySuggested();
         return;
         
         
@@ -267,13 +270,31 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
             IsRunning = true;
             if(RunMode == ScriptRunMode.ScriptChain && CanRunScriptChain)
             {
+                var stopWatch = Stopwatch.StartNew();
+                
+                var scriptCount = HeaderViewModels.Count;
+                var scriptIndex = 0;
                 foreach(var header in HeaderViewModels)
                 {
-                    // Stopが押された
+                    // Stopが押されてたら中断
                     if (!IsRunning) break;
-                    await header.Run(MaxTaskCount, IsStopOnError);
-                    // TODO: エラーしてたら中断
+                    
+                    CurrentHeaderViewModel = header;
+                    var result = await header.Run(MaxTaskCount, IsStopOnError, $"({(1 + scriptIndex++)}/{scriptCount})");
+
+                    // 異常終了なら中断
+                    if (!result.IsSucceed)
+                    {
+                        break;
+                    }
                 }
+
+                var isCancelled = scriptIndex < scriptCount;
+                var outputHeader = isCancelled
+                    ? "スクリプトの連続実行がキャンセルされました"
+                    : "スクリプトの連続実行が完了しました";
+
+                AddOutputInformationToCurrent(outputHeader, $"実行時間 {stopWatch.Elapsed:hh\\:mm\\:ss\\.ff}");
             }
             else
             {
@@ -287,6 +308,13 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
             // Returnボタンが更新されないので強制的に更新
             // https://stackoverflow.com/questions/1340302/wpf-how-to-force-a-command-to-re-evaluate-canexecute-via-its-commandbindings
             CommandManager.InvalidateRequerySuggested();
+        }
+
+        return;
+        
+        void AddOutputInformationToCurrent(string header, string message　= "")
+        {
+            CurrentHeaderViewModel.ScriptPageViewModel.CurrentScriptRunViewModel.AddOutputInformationWithTime(header, message);
         }
     }
     

@@ -49,7 +49,7 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
                 var headerViewModel = _scriptChainPageViewModel.InsertScriptPage(new ScriptChainData.ScriptData(), HeaderViewModels.IndexOf(this) + 1);
                 _scriptChainPageViewModel.CurrentHeaderViewModel = headerViewModel;
             },
-            _ => !_scriptChainPageViewModel.IsLocked);
+            _ => IsScriptChainEditable());
         
         DuplicateCommand = new DelegateCommand(
             _ =>
@@ -57,7 +57,7 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
                 var headerViewModel = _scriptChainPageViewModel.InsertScriptPage(ScriptPageViewModel.GenerateScriptData(), HeaderViewModels.IndexOf(this) + 1);
                 _scriptChainPageViewModel.CurrentHeaderViewModel = headerViewModel;
             },
-            _ => !_scriptChainPageViewModel.IsLocked);
+            _ => IsScriptChainEditable());
         
         MoveLeftCommand = new DelegateCommand(
             _ => HeaderViewModels.Move(HeaderViewModels.IndexOf(this), HeaderViewModels.IndexOf(this) - 1),
@@ -65,14 +65,19 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
         
         MoveRightCommand = new DelegateCommand(
             _ => HeaderViewModels.Move(HeaderViewModels.IndexOf(this), HeaderViewModels.IndexOf(this) + 1),
-            _ => !_scriptChainPageViewModel.IsLocked && HeaderViewModels.IndexOf(this) < HeaderViewModels.Count - 1);
+            _ => IsScriptChainEditable() && HeaderViewModels.IndexOf(this) < HeaderViewModels.Count - 1);
 
         CloseCommand = new DelegateCommand(
             _ => ConfirmAndCloseScriptPage(),
-            _ => !_scriptChainPageViewModel.IsLocked && HeaderViewModels.Count > 1);
+            _ => IsScriptChainEditable() && HeaderViewModels.Count > 1);
 
         
         HeaderViewModels.CollectionChanged += OnHeaderViewModelsChanged;
+
+        return;
+        
+        
+        bool IsScriptChainEditable() => _scriptChainPageViewModel is { IsLocked: false, IsRunning: false };
     }
     
     public void Dispose()
@@ -108,15 +113,18 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
     }
     
     
-    public async Task Run(int maxTaskCount, bool isStopOnError)
+    public async Task<PowerShellRunner.Result> Run(int maxTaskCount, bool isStopOnError, string additionalStartMessage = "")
     {
-        if (IsRunning) return;
-        if (ScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.SelectScript) return;
+        if (IsRunning
+            || ScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.SelectScript)
+        {
+            return PowerShellRunner.Result.Canceled;
+        }
 
         try
         {
             IsRunning = true;
-            await ScriptPageViewModel.CurrentScriptRunViewModel.Run(maxTaskCount, isStopOnError);
+            return await ScriptPageViewModel.CurrentScriptRunViewModel.Run(maxTaskCount, isStopOnError, additionalStartMessage);
         }
         finally
         {

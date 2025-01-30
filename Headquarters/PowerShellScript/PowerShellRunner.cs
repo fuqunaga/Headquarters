@@ -50,6 +50,8 @@ namespace Headquarters
 
         public class Result
         {
+            public static Result Canceled { get; } = new() { canceled = true };
+            
             public bool canceled;
             public bool hasError;
             public Collection<PSObject>? objs;
