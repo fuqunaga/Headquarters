@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Input;
 
@@ -33,7 +34,7 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     
     public static readonly IReadOnlyList<ScriptRunModeAndDescription> RunModeAndDescriptions =
     [
-        new(ScriptRunMode.ScriptChain, "すべてのスクリプトを連続して実行"),
+        new(ScriptRunMode.ScriptChain, "スクリプトを連続して実行"),
         new(ScriptRunMode.SingleScript, "選択中のスクリプトのみ実行")
     ];
     
@@ -139,9 +140,9 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
             _ => CurrentScriptPageViewModel.CurrentPage = ScriptPageViewModel.Page.SelectScript,
             _ => !IsLocked && !IsRunning && CurrentScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.RunScript
         );
-        
+
         RunCommand = new DelegateCommand(
-            _ => Run(),
+            _ =>  Run(),
             _ => CanRun()
         );
         
@@ -264,7 +265,20 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         try
         {
             IsRunning = true;
-            await CurrentHeaderViewModel.Run(MaxTaskCount, IsStopOnError);
+            if(RunMode == ScriptRunMode.ScriptChain && CanRunScriptChain)
+            {
+                foreach(var header in HeaderViewModels)
+                {
+                    // Stopが押された
+                    if (!IsRunning) break;
+                    await header.Run(MaxTaskCount, IsStopOnError);
+                    // TODO: エラーしてたら中断
+                }
+            }
+            else
+            {
+                await CurrentHeaderViewModel.Run(MaxTaskCount, IsStopOnError);
+            }
         }
         finally
         {
@@ -279,6 +293,7 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     private void Stop()
     {
         CurrentScriptPageViewModel.CurrentScriptRunViewModel.Stop();
+        IsRunning = false;
     }
     
 

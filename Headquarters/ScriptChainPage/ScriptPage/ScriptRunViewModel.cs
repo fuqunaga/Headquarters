@@ -31,10 +31,9 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     private string _scriptName = "";
     private string _description = "";
     private bool _isLocked;
-    private bool _isStopOnError = true;
     private readonly List<Task> _runningTasks = [];
     private CancellationTokenSource? _cancelTokenSource;
-    private ConcurrentDictionary<string, object> _sharedDictionary = [];
+    private readonly ConcurrentDictionary<string, object> _sharedDictionary = [];
 
 
     #region Binding Properties
@@ -59,12 +58,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     
     public ICommand StopCommand { get; }
 
-    public bool IsStopOnError
-    {
-        get => _isStopOnError;
-        set => SetProperty(ref _isStopOnError, value);
-    }
-
     public ObservableCollection<ScriptParameterInputFieldViewModel> Parameters { get; } = [];
         
     public OutputFieldViewModel OutputFieldViewModel { get; } = new();
@@ -86,7 +79,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         _scriptParameterSet = scriptParameterSet;
         _ipListViewModel = ipListViewModel;
             
-        OnUpdateScript();
+        OnUpdateScript(false);
     }
     
     public void Dispose()
@@ -94,8 +87,9 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         _script.onUpdate -= OnUpdateScript;
     }
 
+    private void OnUpdateScript() => OnUpdateScript(true);
 
-    private void OnUpdateScript()
+    private void OnUpdateScript(bool outputInformation)
     {
         Parameters.Clear();
         
@@ -112,13 +106,18 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         ScriptName = _script.Name;
         Description = _script.Description;
 
-        OutputFieldViewModel.Clear();
-        if (!_script.HasParseError) return;
-        
-        OutputFieldViewModel.AddOutputUnit(new TextOutput(OutputIcon.Failure, "Script Parse Error", $"{string.Join("\n\n", _script.ParseErrorMessages)}"));
+        if (outputInformation)
+        {
+            AddOutputInformationWithTime("スクリプトファイルを読み込みました");
+        }
+
+        if (_script.HasParseError)
+        {
+            AddOutput(OutputIcon.Failure, "Script Parse Error", $"{string.Join("\n\n", _script.ParseErrorMessages)}");
+        }
     }
 
-    public async Task Run(int maxTaskCount)
+    public async Task Run(int maxTaskCount, bool isStopOnError)
     {
         var ipAndParameterList = _ipListViewModel.DataGridViewModel.SelectedParams.SelectMany(ipParams =>
             {
@@ -175,34 +174,32 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             
         OutputFieldViewModel.Clear();
         
+        AddOutputInformationWithTime("スクリプトの実行を開始します");
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
         using var cancelTokenSource = new CancellationTokenSource();
         _cancelTokenSource = cancelTokenSource;
-        
-        await RunScriptFunctions(ipAndParameterList, _cancelTokenSource.Token, maxTaskCount);
-            
-        _cancelTokenSource = null;
-        
-        // TODO: いまはなくていいかも
-        // IsRunningをすぐにfalseにするとUIが更新されないことがある
-        var elapsed = stopwatch.Elapsed;
-        var remaining = TimeSpan.FromMilliseconds(1000) - elapsed;
-        if (remaining > TimeSpan.Zero)
+
+        try
         {
-            // ReSharper disable once MethodSupportsCancellation
-            await Task.Delay(remaining);
+            await RunScriptFunctions(ipAndParameterList, _cancelTokenSource.Token, maxTaskCount, isStopOnError);
+        }
+        finally
+        {
+            _cancelTokenSource = null;
+            
+            AddOutputInformationWithTime("スクリプトの実行が完了しました", $"実行時間 {stopwatch.Elapsed:hh\\:mm\\:ss\\.ff}");
         }
     }
 
-    private async Task RunScriptFunctions(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken, int maxTaskCount)
+    private async Task RunScriptFunctions(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken, int maxTaskCount, bool isStopOnError)
     {
         // --------------------------------------------------------------------------------
         // BeginTask
         // --------------------------------------------------------------------------------
         if (_script.HasBeginTask)
         {
-            await RunScriptFunction(_script.BeginTask, cancellationToken);
+            await RunScriptFunction(_script.BeginTask, cancellationToken, isStopOnError);
             if (cancellationToken.IsCancellationRequested) return;
         }
 
@@ -211,7 +208,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         // --------------------------------------------------------------------------------
         if (_script.HasIpAddressTask)
         {
-            await RunIpAddressTasks(ipAndParameterList, cancellationToken, maxTaskCount);
+            await RunIpAddressTasks(ipAndParameterList, cancellationToken, maxTaskCount, isStopOnError);
             if (cancellationToken.IsCancellationRequested) return;
         }
 
@@ -220,11 +217,11 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         // --------------------------------------------------------------------------------
         if (_script.HasEndTask)
         {
-            await RunScriptFunction(_script.EndTask, cancellationToken);
+            await RunScriptFunction(_script.EndTask, cancellationToken, isStopOnError);
         }
     }
 
-    private async Task RunScriptFunction(ScriptFunction scriptFunction, CancellationToken cancellationToken)
+    private async Task RunScriptFunction(ScriptFunction scriptFunction, CancellationToken cancellationToken, bool isStopOnError)
     {
         var scriptExecInfo = new ScriptExecutionInfo(scriptFunction.Name);
         
@@ -238,10 +235,13 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         );
                 
         scriptExecInfo.Result = await scriptFunction.Run(invokeParameter);
-        CheckAndStopIfResultHasError(scriptExecInfo.Result);
+        if (isStopOnError)
+        {
+            StopIfResultHasError(scriptExecInfo.Result);
+        }
     }
 
-    private async Task RunIpAddressTasks(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken, int maxTaskCount)
+    private async Task RunIpAddressTasks(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken, int maxTaskCount, bool isStopOnError)
     {
         var ipAddressTaskParameterList = ipAndParameterList.Select(ipAndParameter =>
             {
@@ -279,7 +279,8 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
                         paramSet.ipAndParameter.parameters,
                         paramSet.scriptResult,
                         cancellationToken,
-                        _sharedDictionary
+                        _sharedDictionary,
+                        isStopOnError
                     ).ContinueWith(_ => semaphore.Release(), cancellationToken);
                 
                 _runningTasks.Add(task);
@@ -304,8 +305,13 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         }
     }
         
-    private async Task RunProcess(string ip, Dictionary<string, object> parameters,
-        ScriptExecutionInfo scriptExecutionInfo, CancellationToken cancelToken, ConcurrentDictionary<string, object> sharedDictionary)
+    private async Task RunProcess(
+        string ip, 
+        Dictionary<string, object> parameters,
+        ScriptExecutionInfo scriptExecutionInfo, 
+        CancellationToken cancelToken, 
+        ConcurrentDictionary<string, object> sharedDictionary,
+        bool isStopOnError)
     {
         var param = new PowerShellRunner.InvokeParameter(
             parameters: parameters,
@@ -314,12 +320,15 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         );
 
         scriptExecutionInfo.Result = await _script.IpAddressTask.Run(ip, param, sharedDictionary);
-        CheckAndStopIfResultHasError(scriptExecutionInfo.Result);
+        if (isStopOnError)
+        {
+            StopIfResultHasError(scriptExecutionInfo.Result);
+        }
     }
 
-    private void CheckAndStopIfResultHasError(PowerShellRunner.Result? result)
+    private void StopIfResultHasError(PowerShellRunner.Result? result)
     {
-        if (IsStopOnError && (result is { hasError: true }))
+        if (result is { hasError: true })
         {
             Stop();
         }
@@ -336,4 +345,12 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             tmp?.Cancel();
         });
     }
+
+    public void AddOutput(OutputIcon icon, string header, string message)
+    {
+        OutputFieldViewModel.AddOutputUnit(new TextOutput(icon, header, message));
+    }
+    
+    public void AddOutputInformationWithTime(string header, string message = "")
+        => AddOutput(OutputIcon.Information, $"[{DateTime.Now:HH:mm:ss}] {header}", message);
 }

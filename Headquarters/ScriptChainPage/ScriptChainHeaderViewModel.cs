@@ -116,9 +116,7 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
         try
         {
             IsRunning = true;
-            var runViewModel = ScriptPageViewModel.CurrentScriptRunViewModel;
-            runViewModel.IsStopOnError = isStopOnError;
-            await runViewModel.Run(maxTaskCount);
+            await ScriptPageViewModel.CurrentScriptRunViewModel.Run(maxTaskCount, isStopOnError);
         }
         finally
         {
