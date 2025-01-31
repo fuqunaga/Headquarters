@@ -22,6 +22,7 @@
             
             <local:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
             <local:EnumToIntConverter x:Key="EnumToIntConverter" />
+            <local:NullToDependencyPropertyUnsetConverter x:Key="NullToDependencyPropertyUnsetConverter" />
             <materialDesign:BooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" TrueValue="Collapsed" FalseValue="Visible" />
 
             <system:String x:Key="LockedControlToolTip">操作するにはタブのロックを解除してください</system:String>

@@ -37,7 +37,7 @@ public static class OutputIconDescription
     {
         return icon switch
         {
-            OutputIcon.Information => "インフォメーション",
+            OutputIcon.Information => "スクリプト外のHeadquartersからの情報",
             OutputIcon.NotStarted => "実行前",
             OutputIcon.Running => "実行中",
             OutputIcon.Success => "正常終了",

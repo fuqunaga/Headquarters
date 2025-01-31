@@ -29,6 +29,8 @@ public class OutputUnitViewModel : ViewModelBase
         get => _text;
         private set => SetProperty(ref _text, value);
     }
+
+    public string? TextColor { get; private set; }
     
     public OutputUnitViewModel(IOutputUnit outputUnit)
     {
@@ -39,6 +41,7 @@ public class OutputUnitViewModel : ViewModelBase
         }
         
         UpdateProperties();
+        TextColor = _outputUnit.TextColor;
     }
     
     private void UpdateProperties()

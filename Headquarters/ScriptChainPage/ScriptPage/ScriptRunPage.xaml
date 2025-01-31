@@ -234,6 +234,7 @@
                                                      Text="{Binding IconEmoji}"
                                                      FontSize="12" />
 
+                                    
                                     <TextBox Grid.Column="1"
                                              Text="{Binding Text, Mode=OneWay}"
                                              Style="{StaticResource MaterialDesignTextBoxBase}"
@@ -242,7 +243,17 @@
                                              VerticalScrollBarVisibility="Disabled"
                                              TextWrapping="Wrap"
                                              BorderThickness="0"
-                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed" />
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed">
+                                        
+                                        <!-- ForegroundとBindingで設定するが、nullの場合はデフォルト値を使用する -->
+                                        <!-- Foregroundはスタイルで定義されているでnullのときはMaterialDesignTextBoxBaseの定義をBind -->
+                                        <TextBox.Foreground>
+                                            <PriorityBinding>
+                                                <Binding Path="TextColor" Converter="{StaticResource NullToDependencyPropertyUnsetConverter}" />
+                                                <Binding Path="(TextElement.Foreground)" RelativeSource="{RelativeSource AncestorType={x:Type FrameworkElement}}" />
+                                            </PriorityBinding>
+                                        </TextBox.Foreground>
+                                    </TextBox>
                                 </Grid>
                             </DataTemplate>
 

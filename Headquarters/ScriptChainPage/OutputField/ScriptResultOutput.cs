@@ -18,6 +18,7 @@ public class ScriptResultOutput: IOutputUnit
 
     public string Label => _executionInfo.Label;
     public string Text => _executionInfo.GetResultString();
+    public string? TextColor => null;
     
 
     public ScriptResultOutput(ScriptExecutionInfo executionInfo)
