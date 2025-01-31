@@ -108,7 +108,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
 
         if (outputInformation)
         {
-            AddOutputInformationWithTime("スクリプトファイルを読み込みました");
+            AddOutputInformation("スクリプトファイルを読み込みました");
         }
 
         if (_script.HasParseError)
@@ -117,7 +117,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         }
     }
 
-    public async Task<PowerShellRunner.Result> Run(int maxTaskCount, bool isStopOnError, string additionalStartMessage = "")
+    public async Task<PowerShellRunner.Result> Run(int maxTaskCount, bool isStopOnError)
     {
         var ipAndParameterList = _ipListViewModel.DataGridViewModel.SelectedParams.SelectMany(ipParams =>
             {
@@ -172,9 +172,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         }
             
             
-        OutputFieldViewModel.Clear();
-        
-        AddOutputInformationWithTime($"スクリプトの実行を開始します {additionalStartMessage}");;
+        AddOutputInformation($"スクリプトを開始します");;
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
         using var cancelTokenSource = new CancellationTokenSource();
@@ -183,9 +181,18 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         try
         {
             var result = await RunScriptFunctions(ipAndParameterList, _cancelTokenSource.Token, maxTaskCount, isStopOnError);
+
+            var message = $"実行時間 {stopwatch.Elapsed:hh\\:mm\\:ss\\.ff}";
+            if(result.IsSucceed)
+            {
+                AddOutputInformationSuccessColor($"スクリプトが完了しました - {message}");
+            }
+            else
+            {
+                var header = result.canceled ? "スクリプトがキャンセルされました" : "スクリプトがエラーで停止しました";
+                AddOutputInformationFailureColor($"{header} - {message}");
+            }
             
-            var header = result.canceled ? "スクリプトの実行がキャンセルされました" : "スクリプトの実行が完了しました";
-            AddOutputInformationWithTime(header, $"実行時間 {stopwatch.Elapsed:hh\\:mm\\:ss\\.ff}");
             
             return result;
         }
@@ -373,11 +380,22 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         });
     }
 
-    public void AddOutput(OutputIcon icon, string label, string message)
+    public void AddOutput(OutputIcon icon, string label, string message, string? textColor = null)
     {
-        OutputFieldViewModel.AddOutputUnit(new TextOutput(icon, label, message));
+        OutputFieldViewModel.AddOutputUnit(new TextOutput(icon, label, message, textColor));
     }
-    
-    public void AddOutputInformationWithTime(string label, string message = "")
-        => AddOutput(OutputIcon.Information, $"[{DateTime.Now:HH:mm:ss}] {label}", message);
+
+    public void AddOutputInformation(string label, string message = "", string? textColor = null)
+        => AddOutput(OutputIcon.Information, $"[{DateTime.Now:HH:mm:ss}] {label}", message, textColor ?? "#BBBBBB");
+
+    public void AddOutputInformationSuccessColor(string label, string message = "")
+        => AddOutputInformation(label, message, "#AAEEAA");
+
+    public void AddOutputInformationFailureColor(string label, string message = "")
+        => AddOutputInformation(label, message, "#FF8888");
+
+    public void ClearOutput()
+    {
+        OutputFieldViewModel.Clear();
+    }
 }

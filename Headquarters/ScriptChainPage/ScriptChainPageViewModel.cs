@@ -44,7 +44,7 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     private bool _isLocked;
     private bool _isAnyIpSelected;
     private ScriptRunMode _runMode;
-    private string _runButtonToolTip;
+    private string _runButtonToolTip = "";
     private int _maxTaskCount = 100;
     private bool _isStopOnError = true;
     private bool _isRunning;
@@ -280,23 +280,32 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
             IsRunning = true;
             if(RunMode == ScriptRunMode.ScriptChain && CanRunScriptChain)
             {
-                var stopWatch = Stopwatch.StartNew();
-
                 var cancelled = false;
+                var stopWatch = Stopwatch.StartNew();
                 var lastHeader = HeaderViewModels.First();
+                
                 for (var i = 0; i < HeaderViewModels.Count; i++)
                 {
-                    lastHeader = HeaderViewModels[i];
-                    
+                    var runViewModel = HeaderViewModels[i].ScriptPageViewModel.CurrentScriptRunViewModel;
+                    runViewModel.ClearOutput();
+                    runViewModel.AddOutputInformation($"スクリプト連続実行 ({(i + 1)}/{HeaderViewModels.Count})");
+                }
+
+                var headerIndex = 0;
+                for (; headerIndex < HeaderViewModels.Count; headerIndex++)
+                {
+                    var headerViewModel = HeaderViewModels[headerIndex];
+                    lastHeader = headerViewModel;
+
                     // Stopが押されてたら中断
                     if (!IsRunning)
                     {
                         cancelled = true;
                         break;
                     }
-                    
+
                     CurrentHeaderViewModel = lastHeader;
-                    var result = await lastHeader.Run(MaxTaskCount, IsStopOnError, $"({(i + 1)}/{HeaderViewModels.Count})");
+                    var result = await lastHeader.Run(MaxTaskCount, IsStopOnError);
 
                     // 異常終了なら中断
                     if (!result.IsSucceed)
@@ -305,17 +314,29 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
                         break;
                     }
                 }
-                
-                var label = cancelled
-                    ? "スクリプトの連続実行がキャンセルされました"
-                    : "スクリプトの連続実行が完了しました";
 
                 // 実行中に手動でCurrentHeaderViewModelが変更される場合もあるので
                 // CurrentHeaderViewModelではなくlastHeaderにメッセージを追加
-                AddOutputInformationToCurrent(lastHeader, label, $"実行時間 {stopWatch.Elapsed:hh\\:mm\\:ss\\.ff}");
+                var targetRunViewModel = lastHeader.ScriptPageViewModel.CurrentScriptRunViewModel;
+                
+                var durationMessage = $"実行時間 {stopWatch.Elapsed:hh\\:mm\\:ss\\.ff}";
+                if ( cancelled )
+                {
+                    // キャンセル時は連続実行を待機している全てのスクリプトにメッセージを追加
+                    for (var i = headerIndex; i < HeaderViewModels.Count; i++)
+                    {
+                        HeaderViewModels[i].ScriptPageViewModel.CurrentScriptRunViewModel
+                            .AddOutputInformationFailureColor($"スクリプト連続実行がキャンセルされました - {durationMessage}");
+                    }
+                }
+                else
+                {
+                    targetRunViewModel.AddOutputInformationSuccessColor($"スクリプト連続実行が完了しました - {durationMessage}");
+                }
             }
             else
             {
+                CurrentHeaderViewModel.ScriptPageViewModel.CurrentScriptRunViewModel.ClearOutput();
                 await CurrentHeaderViewModel.Run(MaxTaskCount, IsStopOnError);
             }
         }
@@ -332,7 +353,7 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         
         void AddOutputInformationToCurrent(ScriptChainHeaderViewModel header, 　string label, string message　= "")
         {
-            header.ScriptPageViewModel.CurrentScriptRunViewModel.AddOutputInformationWithTime(label, message);
+            header.ScriptPageViewModel.CurrentScriptRunViewModel.AddOutputInformation(label, message);
         }
     }
     

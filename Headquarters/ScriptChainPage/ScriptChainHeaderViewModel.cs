@@ -113,7 +113,7 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
     }
     
     
-    public async Task<PowerShellRunner.Result> Run(int maxTaskCount, bool isStopOnError, string additionalStartMessage = "")
+    public async Task<PowerShellRunner.Result> Run(int maxTaskCount, bool isStopOnError)
     {
         if (IsRunning
             || ScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.SelectScript)
@@ -124,7 +124,7 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
         try
         {
             IsRunning = true;
-            return await ScriptPageViewModel.CurrentScriptRunViewModel.Run(maxTaskCount, isStopOnError, additionalStartMessage);
+            return await ScriptPageViewModel.CurrentScriptRunViewModel.Run(maxTaskCount, isStopOnError);
         }
         finally
         {
