@@ -10,10 +10,19 @@ namespace Headquarters;
 
 public class IpListDataGridViewModel : SelectableDataGridViewModel
 {
+    private bool _isEnabled = true;
     private bool _isLocked;
 
     public Func<IEnumerable<string>>? getScriptParameterNamesFunc;
   
+    // スクリプト連続実行中はチェックも編集もロックする
+    public bool IsEnabled
+    {
+        get => _isEnabled;
+        set => SetProperty(ref _isEnabled, value);
+    }
+    
+    // タブロック中は編集のみロックする。チェックは変更可
     public bool IsLocked
     {
         get => _isLocked;

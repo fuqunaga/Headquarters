@@ -278,84 +278,92 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         try
         {
             IsRunning = true;
-            if(RunMode == ScriptRunMode.ScriptChain && CanRunScriptChain)
+            if (RunMode == ScriptRunMode.ScriptChain && CanRunScriptChain)
             {
-                var cancelled = false;
-                var stopWatch = Stopwatch.StartNew();
-                var lastHeader = HeaderViewModels.First();
+                // 連続実行中はIPListのチェックも含めた編集を禁止
+                _ipListViewModel.DataGridViewModel.IsEnabled = false;
                 
-                for (var i = 0; i < HeaderViewModels.Count; i++)
-                {
-                    var runViewModel = HeaderViewModels[i].ScriptPageViewModel.CurrentScriptRunViewModel;
-                    runViewModel.ClearOutput();
-                    runViewModel.AddOutputInformation($"スクリプト連続実行 ({(i + 1)}/{HeaderViewModels.Count})");
-                }
-
-                var headerIndex = 0;
-                for (; headerIndex < HeaderViewModels.Count; headerIndex++)
-                {
-                    var headerViewModel = HeaderViewModels[headerIndex];
-                    lastHeader = headerViewModel;
-
-                    // Stopが押されてたら中断
-                    if (!IsRunning)
-                    {
-                        cancelled = true;
-                        break;
-                    }
-
-                    CurrentHeaderViewModel = lastHeader;
-                    var result = await lastHeader.Run(MaxTaskCount, IsStopOnError);
-
-                    // 異常終了なら中断
-                    if (!result.IsSucceed)
-                    {
-                        cancelled = true;
-                        break;
-                    }
-                }
-
-                // 実行中に手動でCurrentHeaderViewModelが変更される場合もあるので
-                // CurrentHeaderViewModelではなくlastHeaderにメッセージを追加
-                var targetRunViewModel = lastHeader.ScriptPageViewModel.CurrentScriptRunViewModel;
-                
-                var durationMessage = $"実行時間 {stopWatch.Elapsed:hh\\:mm\\:ss\\.ff}";
-                if ( cancelled )
-                {
-                    // キャンセル時は連続実行を待機している全てのスクリプトにメッセージを追加
-                    for (var i = headerIndex; i < HeaderViewModels.Count; i++)
-                    {
-                        HeaderViewModels[i].ScriptPageViewModel.CurrentScriptRunViewModel
-                            .AddOutputInformationFailureColor($"スクリプト連続実行がキャンセルされました - {durationMessage}");
-                    }
-                }
-                else
-                {
-                    targetRunViewModel.AddOutputInformationSuccessColor($"スクリプト連続実行が完了しました - {durationMessage}");
-                }
+                await RunScriptChain();
             }
             else
             {
-                CurrentHeaderViewModel.ScriptPageViewModel.CurrentScriptRunViewModel.ClearOutput();
-                await CurrentHeaderViewModel.Run(MaxTaskCount, IsStopOnError);
+                await RunSingleScript();
             }
         }
         finally
         {
             IsRunning = false;
+            _ipListViewModel.DataGridViewModel.IsEnabled = true;
             
             // Returnボタンが更新されないので強制的に更新
             // https://stackoverflow.com/questions/1340302/wpf-how-to-force-a-command-to-re-evaluate-canexecute-via-its-commandbindings
             CommandManager.InvalidateRequerySuggested();
         }
+    }
 
-        return;
-        
-        void AddOutputInformationToCurrent(ScriptChainHeaderViewModel header, 　string label, string message　= "")
+    private async Task RunScriptChain()
+    {
+        var cancelled = false;
+        var stopWatch = Stopwatch.StartNew();
+        var lastHeader = HeaderViewModels.First();
+
+        for (var i = 0; i < HeaderViewModels.Count; i++)
         {
-            header.ScriptPageViewModel.CurrentScriptRunViewModel.AddOutputInformation(label, message);
+            var runViewModel = HeaderViewModels[i].ScriptPageViewModel.CurrentScriptRunViewModel;
+            runViewModel.ClearOutput();
+            runViewModel.AddOutputInformation($"スクリプト連続実行 ({(i + 1)}/{HeaderViewModels.Count})");
+        }
+
+        var headerIndex = 0;
+        for (; headerIndex < HeaderViewModels.Count; headerIndex++)
+        {
+            var headerViewModel = HeaderViewModels[headerIndex];
+            lastHeader = headerViewModel;
+
+            // Stopが押されてたら中断
+            if (!IsRunning)
+            {
+                cancelled = true;
+                break;
+            }
+
+            CurrentHeaderViewModel = lastHeader;
+            var result = await lastHeader.Run(MaxTaskCount, IsStopOnError);
+
+            // 異常終了なら中断
+            if (!result.IsSucceed)
+            {
+                cancelled = true;
+                break;
+            }
+        }
+
+        // 実行中に手動でCurrentHeaderViewModelが変更される場合もあるので
+        // CurrentHeaderViewModelではなくlastHeaderにメッセージを追加
+        var targetRunViewModel = lastHeader.ScriptPageViewModel.CurrentScriptRunViewModel;
+
+        var durationMessage = $"実行時間 {stopWatch.Elapsed:hh\\:mm\\:ss\\.ff}";
+        if (cancelled)
+        {
+            // キャンセル時は連続実行を待機している全てのスクリプトにメッセージを追加
+            for (var i = headerIndex; i < HeaderViewModels.Count; i++)
+            {
+                HeaderViewModels[i].ScriptPageViewModel.CurrentScriptRunViewModel
+                    .AddOutputInformationFailureColor($"スクリプト連続実行がキャンセルされました - {durationMessage}");
+            }
+        }
+        else
+        {
+            targetRunViewModel.AddOutputInformationSuccessColor($"スクリプト連続実行が完了しました - {durationMessage}");
         }
     }
+    
+    private async Task RunSingleScript()
+    {
+        CurrentHeaderViewModel.ScriptPageViewModel.CurrentScriptRunViewModel.ClearOutput();
+        await CurrentHeaderViewModel.Run(MaxTaskCount, IsStopOnError);
+    }
+    
     
     private void Stop()
     {
