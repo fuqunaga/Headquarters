@@ -127,12 +127,14 @@
                                     Visibility="{Binding CanRunScriptChain, Converter={StaticResource BooleanToVisibilityConverter}}"
                                     materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"
                                     BorderThickness="0"
-                                    Margin="0 0 8 0"
-                                    />
+                                    Margin="0 0 8 0" />
 
                                 <!-- Run button -->
                                 <Button Command="{Binding RunCommand}"
                                         Visibility="{Binding IsRunning, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                        ToolTip="{Binding RunButtonToolTip}"
+                                        ToolTipService.IsEnabled="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InvertBooleanConverter}}"
+                                        ToolTipService.ShowOnDisabled="True"
                                         Style="{StaticResource MaterialDesignIconButton}"
                                         Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"
                                         Width="32"

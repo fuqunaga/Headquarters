@@ -44,6 +44,7 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     private bool _isLocked;
     private bool _isAnyIpSelected;
     private ScriptRunMode _runMode;
+    private string _runButtonToolTip;
     private int _maxTaskCount = 100;
     private bool _isStopOnError = true;
     private bool _isRunning;
@@ -90,6 +91,12 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     {
         get => _runMode;
         set => SetProperty(ref _runMode, value);
+    }
+    
+    public string RunButtonToolTip
+    {
+        get => _runButtonToolTip;
+        private set => SetProperty(ref _runButtonToolTip, value);
     }
     
     public bool IsStopOnError
@@ -143,7 +150,7 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
 
         RunCommand = new DelegateCommand(
             _ =>  Run(),
-            _ => CanRun()
+            _ => CheckCanRunAndSetRunButtonToolTip()
         );
         
         StopCommand = new DelegateCommand(
@@ -244,10 +251,21 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         }
     }
     
-    private bool CanRun()
+    private bool CheckCanRunAndSetRunButtonToolTip()
     {
-        return IsAnyIpSelected
-               && (CurrentScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.RunScript);
+        if (!IsAnyIpSelected)
+        {
+            RunButtonToolTip = "IPアドレスが選択されていません";
+            return false;
+        }
+        
+        if (CurrentScriptPageViewModel.CurrentPage != ScriptPageViewModel.Page.RunScript)
+        {
+            RunButtonToolTip = "スクリプトが選択されていません";
+            return false;
+        }
+
+        return true;
     }
 
     private async void Run()
