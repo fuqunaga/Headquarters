@@ -161,16 +161,8 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         );
         
         HeaderViewModels = [];
-        foreach (var scriptData in scriptChainData.ScriptDataList)
-        {
-            AddScriptPage(scriptData);
-        }
-        if (HeaderViewModels.Count == 0)
-        {
-            AddScriptPage(new ScriptChainData.ScriptData());
-        }
+        ApplyScriptChainData(scriptChainData);
         
-        CurrentHeaderViewModel = HeaderViewModels[0];
 
         HeaderViewModels.CollectionChanged += (_, _) => OnPropertyChanged(nameof(CanRunScriptChain));
         SubscribeIpListViewModel();
@@ -271,30 +263,38 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
             if(RunMode == ScriptRunMode.ScriptChain && CanRunScriptChain)
             {
                 var stopWatch = Stopwatch.StartNew();
-                
-                var scriptCount = HeaderViewModels.Count;
-                var scriptIndex = 0;
-                foreach(var header in HeaderViewModels)
+
+                var cancelled = false;
+                var lastHeader = HeaderViewModels.First();
+                for (var i = 0; i < HeaderViewModels.Count; i++)
                 {
-                    // Stopが押されてたら中断
-                    if (!IsRunning) break;
+                    lastHeader = HeaderViewModels[i];
                     
-                    CurrentHeaderViewModel = header;
-                    var result = await header.Run(MaxTaskCount, IsStopOnError, $"({(1 + scriptIndex++)}/{scriptCount})");
+                    // Stopが押されてたら中断
+                    if (!IsRunning)
+                    {
+                        cancelled = true;
+                        break;
+                    }
+                    
+                    CurrentHeaderViewModel = lastHeader;
+                    var result = await lastHeader.Run(MaxTaskCount, IsStopOnError, $"({(i + 1)}/{HeaderViewModels.Count})");
 
                     // 異常終了なら中断
                     if (!result.IsSucceed)
                     {
+                        cancelled = true;
                         break;
                     }
                 }
-
-                var isCancelled = scriptIndex < scriptCount;
-                var outputHeader = isCancelled
+                
+                var label = cancelled
                     ? "スクリプトの連続実行がキャンセルされました"
                     : "スクリプトの連続実行が完了しました";
 
-                AddOutputInformationToCurrent(outputHeader, $"実行時間 {stopWatch.Elapsed:hh\\:mm\\:ss\\.ff}");
+                // 実行中に手動でCurrentHeaderViewModelが変更される場合もあるので
+                // CurrentHeaderViewModelではなくlastHeaderにメッセージを追加
+                AddOutputInformationToCurrent(lastHeader, label, $"実行時間 {stopWatch.Elapsed:hh\\:mm\\:ss\\.ff}");
             }
             else
             {
@@ -312,9 +312,9 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
 
         return;
         
-        void AddOutputInformationToCurrent(string header, string message　= "")
+        void AddOutputInformationToCurrent(ScriptChainHeaderViewModel header, 　string label, string message　= "")
         {
-            CurrentHeaderViewModel.ScriptPageViewModel.CurrentScriptRunViewModel.AddOutputInformationWithTime(header, message);
+            header.ScriptPageViewModel.CurrentScriptRunViewModel.AddOutputInformationWithTime(label, message);
         }
     }
     
@@ -323,12 +323,39 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         CurrentScriptPageViewModel.CurrentScriptRunViewModel.Stop();
         IsRunning = false;
     }
+
     
+    private void ApplyScriptChainData(ScriptChainData scriptChainData)
+    {
+        RunMode = scriptChainData.ScriptRunMode;
+        MaxTaskCount =  Math.Max(1, scriptChainData.MaxTaskCount);
+        IsStopOnError = scriptChainData.IsStopOnError;
+        
+        foreach (var scriptData in scriptChainData.ScriptDataList)
+        {
+            AddScriptPage(scriptData);
+        }
+        if (HeaderViewModels.Count == 0)
+        {
+            AddScriptPage(new ScriptChainData.ScriptData());
+        }
+        
+        var selectedIndex = (scriptChainData.SelectedScriptIndex < HeaderViewModels.Count)
+            ? scriptChainData.SelectedScriptIndex
+            : 0;       
+        
+        CurrentHeaderViewModel = HeaderViewModels[selectedIndex];
+    }
 
     public ScriptChainData GenerateScriptChainData()
     {
         return new ScriptChainData()
         {
+            SelectedScriptIndex = HeaderViewModels.IndexOf(CurrentHeaderViewModel),
+            ScriptRunMode = RunMode,
+            MaxTaskCount = MaxTaskCount,
+            IsStopOnError = IsStopOnError,
+            
             ScriptDataList = HeaderViewModels.Select(header => header.ScriptPageViewModel.GenerateScriptData()).ToList()
         };
     }

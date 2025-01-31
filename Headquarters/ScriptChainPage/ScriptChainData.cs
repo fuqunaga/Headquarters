@@ -7,6 +7,11 @@ namespace Headquarters;
 /// </summary>
 public class ScriptChainData
 {
+    public int SelectedScriptIndex { get; set; }
+    public ScriptChainPageViewModel.ScriptRunMode ScriptRunMode { get; set; }
+    public int MaxTaskCount { get; set; } = 100;
+    public bool IsStopOnError { get; set; } = true;
+    
     /// <summary>
     /// ScriptsPageに相当するデータクラス
     /// 選択中のスクリプトと入力済みの各スクリプトのパラメータも保存しておく

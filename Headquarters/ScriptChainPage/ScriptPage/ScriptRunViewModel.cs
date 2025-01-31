@@ -373,11 +373,11 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         });
     }
 
-    public void AddOutput(OutputIcon icon, string header, string message)
+    public void AddOutput(OutputIcon icon, string label, string message)
     {
-        OutputFieldViewModel.AddOutputUnit(new TextOutput(icon, header, message));
+        OutputFieldViewModel.AddOutputUnit(new TextOutput(icon, label, message));
     }
     
-    public void AddOutputInformationWithTime(string header, string message = "")
-        => AddOutput(OutputIcon.Information, $"[{DateTime.Now:HH:mm:ss}] {header}", message);
+    public void AddOutputInformationWithTime(string label, string message = "")
+        => AddOutput(OutputIcon.Information, $"[{DateTime.Now:HH:mm:ss}] {label}", message);
 }
