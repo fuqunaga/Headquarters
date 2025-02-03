@@ -1,6 +1,6 @@
 ﻿namespace Headquarters;
 
-public enum ScriptParameterInputFieldType
+public enum ParameterInputFieldType
 {
     UseIpList,
     TextBox,

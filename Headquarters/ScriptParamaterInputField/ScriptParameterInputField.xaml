@@ -7,7 +7,7 @@
              xmlns:materialDesignInternal="clr-namespace:MaterialDesignThemes.Wpf.Internal;assembly=MaterialDesignThemes.Wpf"
              xmlns:local="clr-namespace:Headquarters"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance local:ScriptParameterInputFieldViewModel}"
+             d:DataContext="{d:DesignInstance local:ParameterInputFieldViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
     
     <UserControl.Resources>
@@ -29,14 +29,14 @@
 
         
         <!-- ScriptParameterInputFieldType別コンテンツ -->
-        <DataTemplate x:Key="Field-UseIpList" DataType="{x:Type local:ScriptParameterInputFieldViewModel}">
+        <DataTemplate x:Key="Field-UseIpList" DataType="{x:Type local:ParameterInputFieldViewModel}">
             <TextBox IsEnabled="False"
                      Text="IP Listの値を仕様します"
                      Padding="0"
                      />
         </DataTemplate>
 
-        <DataTemplate x:Key="Field-TextBox" DataType="{x:Type local:ScriptParameterInputFieldViewModel}">
+        <DataTemplate x:Key="Field-TextBox" DataType="{x:Type local:ParameterInputFieldViewModel}">
             <Grid>
                 <TextBox x:Name="PART_TextBox"
                          VerticalAlignment="Center"
@@ -69,7 +69,7 @@
             </Grid>
         </DataTemplate>
         
-        <DataTemplate x:Key="Field-ComboBox" DataType="{x:Type local:ScriptParameterInputFieldViewModel}">
+        <DataTemplate x:Key="Field-ComboBox" DataType="{x:Type local:ParameterInputFieldViewModel}">
             <ComboBox  ItemsSource="{Binding ComboBoxItems}"
                        SelectedValue="{Binding Value}"
                        VerticalAlignment="Center"
@@ -79,7 +79,7 @@
                        IsTabStop="True" />
         </DataTemplate>
 
-        <DataTemplate x:Key="Field-ToggleButton" DataType="{x:Type local:ScriptParameterInputFieldViewModel}">
+        <DataTemplate x:Key="Field-ToggleButton" DataType="{x:Type local:ParameterInputFieldViewModel}">
             <StackPanel Orientation="Horizontal">
                 <ToggleButton IsChecked="{Binding Value}"
                               HorizontalAlignment="Left" />
@@ -101,15 +101,15 @@
                 </DataTrigger>
 
                 <DataTrigger Binding="{Binding FieldType}"
-                             Value="{x:Static local:ScriptParameterInputFieldType.TextBox}">
+                             Value="{x:Static local:ParameterInputFieldType.TextBox}">
                     <Setter Property="ContentTemplate" Value="{StaticResource Field-TextBox}" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding FieldType}"
-                             Value="{x:Static local:ScriptParameterInputFieldType.ComboBox}">
+                             Value="{x:Static local:ParameterInputFieldType.ComboBox}">
                     <Setter Property="ContentTemplate" Value="{StaticResource Field-ComboBox}" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding FieldType}"
-                             Value="{x:Static local:ScriptParameterInputFieldType.ToggleButton}">
+                             Value="{x:Static local:ParameterInputFieldType.ToggleButton}">
                     <Setter Property="ContentTemplate" Value="{StaticResource Field-ToggleButton}" />
                 </DataTrigger>
             </Style.Triggers>

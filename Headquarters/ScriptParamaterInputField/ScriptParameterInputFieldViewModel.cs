@@ -12,88 +12,50 @@ namespace Headquarters
     /// スクリプトのパラメータを表すViewModel
     /// ParameterSetとIPListを参照し適切な値を取得・設定する
     /// </summary>
-    public class ScriptParameterInputFieldViewModel : ViewModelBase
+    public class ScriptParameterInputFieldViewModel : ParameterInputFieldViewModel
     {
-        private static readonly IReadOnlyList<Type> SupportedExpectedTypes = new List<Type>
-        {
-            typeof(bool),
-            typeof(SwitchParameter)
-        };
-        
         private readonly IpListViewModel _ipListViewModel;
-        private readonly ParameterSet _scriptParameterSet;
-        private readonly ScriptParameterInputFieldType _baseFieldType;
-        
-        public string Name { get; }
-        public string Value
+
+        public override string Value
         {
-            get => _scriptParameterSet.Get(Name);
+            get => base.Value;
             set
             {
                 if (IsUseIpListParameter) return;
-                if (_scriptParameterSet.Set(Name, value))
-                {
-                    OnPropertyChanged();
-                }
+                base.Value = value;
             }
         }
         
-        public string HelpFirstLine { get; }
-        public string HelpDetail { get;  }
-        public ScriptParameterInputFieldType FieldType => IsUseIpListParameter ? ScriptParameterInputFieldType.UseIpList : _baseFieldType; 
-        
-        public bool IsUseIpListParameter => _ipListViewModel.DataGridViewModel.Contains(Name);
-        public bool ShowOpenFileButton { get; }
+        public override ParameterInputFieldType FieldType => IsUseIpListParameter 
+            ? ParameterInputFieldType.UseIpList 
+            : base.FieldType;
 
-        public ICommand OpenFileCommand { get; } 
-        
-        private Type? ExpectedType { get; set; }
-        public IReadOnlyList<string> ComboBoxItems { get; }
+        private bool IsUseIpListParameter => _ipListViewModel.DataGridViewModel.Contains(Name);
 
-        public ScriptParameterInputFieldViewModel(ScriptParameter scriptParameter, string help, IpListViewModel ipListViewModel, ParameterSet scriptParameterSet)
+        public ScriptParameterInputFieldViewModel(ScriptParameterDefinition parameterDefinition, string help, IpListViewModel ipListViewModel, ParameterSet scriptParameterSet)
+            : base(parameterDefinition, help, scriptParameterSet)
         {
-            using var reader = new StringReader(help);
-            
-            Name = scriptParameter.Name;
-            HelpFirstLine = reader.ReadLine() ?? "";
-            HelpDetail = reader.ReadToEnd() ?? "";
-
-            ExpectedType = GetExpectedType(scriptParameter);
-            ShowOpenFileButton = scriptParameter.AttributeNames.Contains(CustomAttributeName.WithNamespace(CustomAttributeName.Path));
-            OpenFileCommand = new DelegateCommand(_ => OnOpenFile(), _ => ShowOpenFileButton);
-            
-            ComboBoxItems = scriptParameter.ValidateSetValues.ToList();
-            _baseFieldType = ComboBoxItems.Any() switch
-            {
-                true => ScriptParameterInputFieldType.ComboBox,
-                false when ExpectedType == typeof(bool) => ScriptParameterInputFieldType.ToggleButton,
-                _ => ScriptParameterInputFieldType.TextBox
-            };
-           
             _ipListViewModel = ipListViewModel;
-            _scriptParameterSet = scriptParameterSet;
-            
             _ipListViewModel.DataGridViewModel.PropertyChanged += (_, args) =>
             {
                 if (args.PropertyName == nameof(IpListDataGridViewModel.Items))
                 {
-                    OnPropertyChanged(nameof(IsUseIpListParameter));
                     OnPropertyChanged(nameof(FieldType));
                 }
             };
-            
-            
-            // Valueが無かったらデフォルト値を入れる
+        }
+        
+        public ScriptParameterInputFieldViewModel InitializeValueIfEmpty()
+        {
             if (string.IsNullOrEmpty(Value))
             {
-                Value = scriptParameter.DefaultValue?.ToString() ?? "";
+                Value = parameterDefinition.DefaultValue?.ToString() 
+                        ?? (ComboBoxItems.FirstOrDefault()
+                            ?? ""
+                        );
             }
-            
-            // Valueが無くComboBoxなら値を入れる
-            if (FieldType == ScriptParameterInputFieldType.ComboBox && string.IsNullOrEmpty(Value))
-            {
-                Value = ComboBoxItems.FirstOrDefault() ?? "";
-            }
+
+            return this;
         }
 
         // スクリプト実行用のパラメータを取得する
@@ -102,7 +64,7 @@ namespace Headquarters
         {
             var stringValue = ipListParameter ?? Value;
             
-            if (ExpectedType == typeof(bool))
+            if (parameterDefinition.IsBool)
             {
                 if ( bool.TryParse(stringValue, out var boolValue))
                 {
@@ -111,28 +73,6 @@ namespace Headquarters
             }
 
             return stringValue;
-        }
-
-        private static Type? GetExpectedType(ScriptParameter scriptParameter)
-        {
-            var type = scriptParameter.AttributeTypes.FirstOrDefault(attr => SupportedExpectedTypes.Contains(attr));
-            if ( type == typeof(SwitchParameter))
-            {
-                type = typeof(bool);
-            }
-
-            return type;
-        }
- 
-        
-        private void OnOpenFile()
-        {
-            var dialog = new OpenFileOrFolderDialog();
-       
-            if (dialog.ShowDialog())
-            {
-                Value = dialog.FileOrFolderName;
-            }
         }
     }
 }

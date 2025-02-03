@@ -57,7 +57,7 @@ namespace Headquarters
         // 変更可能なパラメータ
         // 複数の関数に同じパラメータがあった場合とりあえず最初のものを採用
         // HelpInfoがある場合のその順番にする
-        public IEnumerable<ScriptParameter> EditableScriptParameters
+        public IEnumerable<ScriptParameterDefinition> EditableScriptParameterDefinitions
         {
             get
             {

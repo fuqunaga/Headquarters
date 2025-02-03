@@ -98,10 +98,15 @@
                             <!-- Setting button -->
                             <Button HorizontalAlignment="Right"
                                     Content="{materialDesign:PackIcon Kind=Settings}"
-                                    Command="{Binding OpenSettingPageCommand}"
+                                    Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
+                                    DataContext="{Binding SettingPageViewModel}"
                                     Style="{StaticResource MaterialDesignIconForegroundButton}"
                                     Width="32"
-                                    Height="32" />
+                                    Height="32" >
+                                <Button.CommandParameter>
+                                    <local:SettingPage />
+                                </Button.CommandParameter>
+                            </Button>
                         </Grid>
                     </dragablz:TabablzControl.HeaderSuffixContent>
 

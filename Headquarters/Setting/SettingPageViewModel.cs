@@ -12,7 +12,7 @@ public class SettingPageViewModel : ViewModelBase
     
     public ICommand CloseCommand { get; }
     
-    
+    public string Hoge {get => "Hoge";}
     
     public SettingPageViewModel()
     {

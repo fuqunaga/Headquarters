@@ -93,13 +93,13 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     {
         Parameters.Clear();
         
-        foreach (var scriptParameter in _script.EditableScriptParameters)
+        foreach (var scriptParameter in _script.EditableScriptParameterDefinitions)
         {
             Parameters.Add(new ScriptParameterInputFieldViewModel(
-                scriptParameter,
-                _script.GetParameterHelp(scriptParameter.Name),
-                _ipListViewModel,
-                _scriptParameterSet)
+                    scriptParameter,
+                    _script.GetParameterHelp(scriptParameter.Name),
+                    _ipListViewModel,
+                    _scriptParameterSet).InitializeValueIfEmpty()
             );
         }
         

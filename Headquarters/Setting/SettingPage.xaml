@@ -10,32 +10,34 @@
              d:DesignHeight="300" d:DesignWidth="300">
 
     <StackPanel>
-        <Grid>
+        <DockPanel>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <materialDesign:PackIcon Kind="Settings" Width="24" Height="24" />
                 <TextBlock Text="Settings" FontSize="22" />
             </StackPanel>
 
             <Button HorizontalAlignment="Right"
-                    Command="{Binding CloseCommand}"
-                    Style="{StaticResource MaterialDesignIconButton}">
+                    Content="{materialDesign:PackIcon Kind=WindowClose}"
+                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                    Style="{StaticResource MaterialDesignIconButton}" />
+        </DockPanel>
 
-                <materialDesign:PackIcon Kind="WindowClose" />
-            </Button>
-        </Grid>
+        <Separator />
 
-        <Rectangle Height="1"
-                   Margin="0,24,0,0"
-                   Fill="{DynamicResource MaterialDesignDivider}" />
-
-        <ListBox ItemsSource="{Binding ParameterSetViewModels}"
-                 materialDesign:ListBoxItemAssist.ShowSelection="False">
-            <ListBox.ItemTemplate>
-                <DataTemplate DataType="{x:Type local:ParameterSetViewModel}">
-                    <local:ParameterSetView />
+        <ItemsControl ItemsSource="{Binding ParameterSetViewModels}">
+            <!-- <ListBox.ItemTemplate> -->
+            <!--     <DataTemplate DataType="{x:Type local:ParameterSetViewModel}"> -->
+            <!--         <local:ParameterSetView /> -->
+            <!--     </DataTemplate> -->
+            <!-- </ListBox.ItemTemplate> -->
+            
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <local:ScriptParameterInputField />
                 </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+            </ItemsControl.ItemTemplate>
+
+        </ItemsControl>
         
     </StackPanel>
 </UserControl>

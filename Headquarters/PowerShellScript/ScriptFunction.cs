@@ -15,7 +15,7 @@ public class ScriptFunction
     
     public string Name { get; }
     
-    public IReadOnlyList<ScriptParameter> Parameters { get; }
+    public IReadOnlyList<ScriptParameterDefinition> Parameters { get; }
     
     public IEnumerable<string> ParameterNames => Parameters.Select(p => p.Name); 
     
@@ -52,7 +52,7 @@ public class ScriptFunction
         _helpInfo = functionDefinitionAst.GetHelpContent();
     }
     
-    private static IEnumerable<ScriptParameter> GetScriptBlockParameterNames(ScriptBlockAst ast)
+    private static IEnumerable<ScriptParameterDefinition> GetScriptBlockParameterNames(ScriptBlockAst ast)
     {
         var paramBlock = ast.ParamBlock;
         return paramBlock == null ? [] : GetParameterNames(paramBlock.Parameters);
@@ -68,9 +68,9 @@ public class ScriptFunction
         return ast;
     }
     
-    private static IEnumerable<ScriptParameter> GetParameterNames(IEnumerable<ParameterAst> parameterAstEnumerable)
+    private static IEnumerable<ScriptParameterDefinition> GetParameterNames(IEnumerable<ParameterAst> parameterAstEnumerable)
     {
-        return parameterAstEnumerable.Select(p => new ScriptParameter(p));
+        return parameterAstEnumerable.Select(p => new ScriptParameterDefinition(p));
     }
 
     public async Task<PowerShellRunner.Result> Run(string ipAddress, PowerShellRunner.InvokeParameter param, ConcurrentDictionary<string, object> sharedDictionary)
