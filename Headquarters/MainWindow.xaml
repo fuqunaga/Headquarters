@@ -97,12 +97,11 @@
 
                             <!-- Setting button -->
                             <Button HorizontalAlignment="Right"
+                                    Content="{materialDesign:PackIcon Kind=Settings}"
                                     Command="{Binding OpenSettingPageCommand}"
                                     Style="{StaticResource MaterialDesignIconForegroundButton}"
                                     Width="32"
-                                    Height="32">
-                                <materialDesign:PackIcon Kind="Settings" />
-                            </Button>
+                                    Height="32" />
                         </Grid>
                     </dragablz:TabablzControl.HeaderSuffixContent>
 
