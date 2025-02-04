@@ -52,69 +52,56 @@
 
         </ResourceDictionary>
     </Window.Resources>
-    
+
     <materialDesign:DialogHost Identifier="RootDialog">
+        <Grid>
+            <dragablz:TabablzControl x:Name="MainTabControl"
+                                     ItemsSource="{Binding TabItems, Mode=OneWay}"
+                                     NewItemFactory="{x:Static local:MainTabViewModel.Factory}"
+                                     ItemContainerStyle="{StaticResource  TabItemStyle}"
+                                     SelectedIndex="0">
 
-        <materialDesign:DrawerHost
-            IsTopDrawerOpen="{Binding IsSettingPageOpen, Mode=TwoWay}"
-            TopDrawerCornerRadius="0 20 20 0"
-            OpenMode="Modal">
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <local:MainTab />
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
 
-            <materialDesign:DrawerHost.TopDrawerContent>
-                <local:SettingPage DataContext="{Binding SettingPageViewModel}"/>
-            </materialDesign:DrawerHost.TopDrawerContent>
-            
-                
-            <Grid>
-                <dragablz:TabablzControl x:Name="MainTabControl"
-                    ItemsSource="{Binding TabItems, Mode=OneWay}"
-                    NewItemFactory="{x:Static local:MainTabViewModel.Factory}"
-                    ItemContainerStyle="{StaticResource  TabItemStyle}"
-                    SelectedIndex="0">
-   
-                    <TabControl.ContentTemplate>
-                        <DataTemplate>
-                            <local:MainTab />
-                        </DataTemplate>
-                    </TabControl.ContentTemplate>
+                <dragablz:TabablzControl.HeaderSuffixContent>
+                    <Grid MinWidth="64">
+                        <!-- Add new tab button -->
+                        <!-- RippleAssist.IsDisabledをいれておくとタブを追加したときに表示が荒ぶる軽減する -->
+                        <Button HorizontalAlignment="Left"
+                                Command="{x:Static dragablz:TabablzControl.AddItemCommand}"
+                                Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                materialDesign:RippleAssist.IsDisabled="True"
+                                Width="24"
+                                Height="24">
 
-                    <dragablz:TabablzControl.HeaderSuffixContent>
-                        <Grid MinWidth="64">
-                            <!-- Add new tab button -->
-                            <!-- RippleAssist.IsDisabledをいれておくとタブを追加したときに表示が荒ぶる軽減する -->
-                            <Button HorizontalAlignment="Left"
-                                    Command="{x:Static dragablz:TabablzControl.AddItemCommand}"
-                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
-                                    materialDesign:RippleAssist.IsDisabled="True"
-                                    Width="24"
-                                    Height="24">
-                                
-                                <materialDesign:PackIcon Kind="Plus"
-                                                         Width="18"
-                                                         Height="18" />
-                                
-                            </Button>
+                            <materialDesign:PackIcon Kind="Plus"
+                                                     Width="18"
+                                                     Height="18" />
 
-                            <!-- Setting button -->
-                            <Button HorizontalAlignment="Right"
-                                    Content="{materialDesign:PackIcon Kind=Settings}"
-                                    Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
-                                    DataContext="{Binding SettingPageViewModel}"
-                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
-                                    Width="32"
-                                    Height="32" >
-                                <Button.CommandParameter>
-                                    <local:SettingPage />
-                                </Button.CommandParameter>
-                            </Button>
-                        </Grid>
-                    </dragablz:TabablzControl.HeaderSuffixContent>
+                        </Button>
 
-                </dragablz:TabablzControl>
+                        <!-- Setting button -->
+                        <Button HorizontalAlignment="Right"
+                                Content="{materialDesign:PackIcon Kind=Settings}"
+                                Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
+                                DataContext="{Binding SettingPageViewModel}"
+                                Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                Width="32"
+                                Height="32">
+                            <Button.CommandParameter>
+                                <local:SettingPage />
+                            </Button.CommandParameter>
+                        </Button>
+                    </Grid>
+                </dragablz:TabablzControl.HeaderSuffixContent>
 
-            </Grid>
-                
-            <!-- </StackPanel> -->
-        </materialDesign:DrawerHost>
+            </dragablz:TabablzControl>
+
+        </Grid>
+
     </materialDesign:DialogHost>
 </Window>

@@ -102,7 +102,7 @@
 
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <local:ScriptParameterInputField />
+                            <local:ParameterInputField />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
 

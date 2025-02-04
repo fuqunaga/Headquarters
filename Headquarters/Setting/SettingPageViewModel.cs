@@ -1,29 +1,17 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Windows.Input;
+﻿using System.Collections.ObjectModel;
 
 namespace Headquarters;
 
 public class SettingPageViewModel : ViewModelBase
 {
-    public event Action? closeRequested;
+    public ObservableCollection<object> Fields { get; } = [];
     
-    public ObservableCollection<ParameterSetViewModel> ParameterSetViewModels { get; } = [];
-    
-    public ICommand CloseCommand { get; }
-    
-    public string Hoge {get => "Hoge";}
-    
-    public SettingPageViewModel()
+    public void InitializeWithGlobalParameter()
     {
-        CloseCommand = new DelegateCommand(_ => closeRequested?.Invoke());
-    }
-
-    public void AddGlobalParameterViewModel()
-    {
-        foreach (var parameterSetViewModel in GlobalParameter.CreateParameterSetViewModels())
-        {
-            ParameterSetViewModels.Add(parameterSetViewModel);
-        }
+        Fields.Add(new HelpTextBlockViewModel(GlobalParameter.UserNameAndPasswordDescription));
+        Fields.Add(GlobalParameter.CreateParameterInputFieldViewModel(GlobalParameter.UserNameParameterName));
+        Fields.Add(GlobalParameter.CreateParameterInputFieldViewModel(GlobalParameter.UserPasswordParameterName));
+        Fields.Add(Separator.Instance);
+        Fields.Add(GlobalParameter.CreateParameterInputFieldViewModel(GlobalParameter.ShowConfirmationDialogOnExecuteParameterName));
     }
 }

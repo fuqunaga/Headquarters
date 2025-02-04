@@ -2,9 +2,9 @@
 
 namespace Headquarters;
 
-public partial class ParameterSetView : UserControl
+public partial class HelpTextBlock : UserControl
 {
-    public ParameterSetView()
+    public HelpTextBlock()
     {
         InitializeComponent();
     }

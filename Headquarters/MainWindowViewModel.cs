@@ -9,25 +9,12 @@ namespace Headquarters;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    private bool _isSettingPageOpen;
-    
     public Func<IEnumerable<MainTabViewModel>>? GetOrderedTabsFunc { get; set; }
-    
     public SettingPageViewModel SettingPageViewModel { get; } = new();
     public ObservableCollection<MainTabViewModel> TabItems { get;  } = [];
-    public ICommand OpenSettingPageCommand { get; }
-
-    public bool IsSettingPageOpen
-    {
-        get => _isSettingPageOpen;
-        set => SetProperty(ref _isSettingPageOpen, value);
-    }
-
     
     public MainWindowViewModel()
     {
-        OpenSettingPageCommand = new DelegateCommand(_ => IsSettingPageOpen = true);
-        SettingPageViewModel.closeRequested += () => IsSettingPageOpen = false;
         LoadSettings();
     }
 
@@ -43,7 +30,7 @@ public class MainWindowViewModel : ViewModelBase
                           ?? SettingManager.SettingData.Default;
         
         GlobalParameter.ParameterSet = new ParameterSet(settingData.GlobalParameterSet);
-        SettingPageViewModel.AddGlobalParameterViewModel();
+        SettingPageViewModel.InitializeWithGlobalParameter();
 
         foreach (var data in settingData.MainTabDataList)
         {

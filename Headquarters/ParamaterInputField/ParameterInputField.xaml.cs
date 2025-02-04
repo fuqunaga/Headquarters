@@ -2,9 +2,9 @@
 
 namespace Headquarters;
 
-public partial class ScriptParameterInputField : UserControl
+public partial class ParameterInputField : UserControl
 {
-    public ScriptParameterInputField()
+    public ParameterInputField()
     {
         InitializeComponent();
     }

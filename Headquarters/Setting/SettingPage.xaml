@@ -12,8 +12,13 @@
     <StackPanel>
         <DockPanel>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <materialDesign:PackIcon Kind="Settings" Width="24" Height="24" />
-                <TextBlock Text="Settings" FontSize="22" />
+                <materialDesign:PackIcon Kind="Settings" 
+                                         Margin="8"
+                                         Width="24" 
+                                         Height="24" />
+                <TextBlock VerticalAlignment="Center"
+                           Text="Settings" 
+                           FontSize="22" />
             </StackPanel>
 
             <Button HorizontalAlignment="Right"
@@ -24,18 +29,19 @@
 
         <Separator />
 
-        <ItemsControl ItemsSource="{Binding ParameterSetViewModels}">
-            <!-- <ListBox.ItemTemplate> -->
-            <!--     <DataTemplate DataType="{x:Type local:ParameterSetViewModel}"> -->
-            <!--         <local:ParameterSetView /> -->
-            <!--     </DataTemplate> -->
-            <!-- </ListBox.ItemTemplate> -->
-            
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <local:ScriptParameterInputField />
+        <ItemsControl  Grid.IsSharedSizeScope="True" 
+                       ItemsSource="{Binding Fields}">
+            <ItemsControl.Resources>
+                <DataTemplate DataType="{x:Type local:HelpTextBlockViewModel}">
+                    <local:HelpTextBlock Margin="32 12"/>
                 </DataTemplate>
-            </ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type local:ParameterInputFieldViewModel}">
+                    <local:ParameterInputField />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type local:Separator}">
+                    <Separator Margin="0 12"/>
+                </DataTemplate>
+            </ItemsControl.Resources>
 
         </ItemsControl>
         

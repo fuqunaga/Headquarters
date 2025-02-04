@@ -11,7 +11,7 @@ namespace Headquarters
     /// <summary>
     /// パラメータを表すViewModel
     /// </summary>
-    public class ParameterInputFieldViewModel : ViewModelBase
+    public class ParameterInputFieldViewModel : ViewModelBase, IHelpTextBlockViewModel
     {
         protected readonly IParameterDefinition parameterDefinition;
         private readonly ParameterSet _scriptParameterSet;
@@ -29,6 +29,7 @@ namespace Headquarters
             }
         }
         
+        public bool HasHelp { get; }
         public string HelpFirstLine { get; }
         public string HelpDetail { get;  }
         public virtual ParameterInputFieldType FieldType { get; }
@@ -45,8 +46,9 @@ namespace Headquarters
             _scriptParameterSet = scriptParameterSet;
             
             using var reader = new StringReader(help);
-            HelpFirstLine = reader.ReadLine() ?? "";
+            HelpFirstLine = reader.ReadLine() ?? Name;
             HelpDetail = reader.ReadToEnd() ?? "";
+            HasHelp = !string.IsNullOrEmpty(help);
             
             ComboBoxItems = parameterDefinition.ValidateSetValues.ToList();
             FieldType = ComboBoxItems.Any() switch
