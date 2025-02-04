@@ -91,7 +91,8 @@
                                 DataContext="{Binding SettingPageViewModel}"
                                 Style="{StaticResource MaterialDesignIconForegroundButton}"
                                 Width="32"
-                                Height="32">
+                                Height="32"
+                                Margin="8 0">
                             <Button.CommandParameter>
                                 <local:SettingPage />
                             </Button.CommandParameter>
