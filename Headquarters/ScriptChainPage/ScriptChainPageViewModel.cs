@@ -274,6 +274,14 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         {
             return;
         }
+
+        if (GlobalParameter.ShowConfirmationDialogOnExecute)
+        {
+            if (!ShowConfirmationDialog())
+            {
+                return;
+            }
+        }
         
         try
         {
@@ -299,6 +307,11 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
             // https://stackoverflow.com/questions/1340302/wpf-how-to-force-a-command-to-re-evaluate-canexecute-via-its-commandbindings
             CommandManager.InvalidateRequerySuggested();
         }
+    }
+
+    private bool ShowConfirmationDialog()
+    {
+        return true;
     }
 
     private async Task RunScriptChain()

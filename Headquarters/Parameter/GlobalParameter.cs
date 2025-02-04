@@ -57,6 +57,7 @@ public static class GlobalParameter
 
     public static string UserName => ParameterSet?.Get(UserNameParameterName) ?? "";
     public static string UserPassword => ParameterSet?.Get(UserPasswordParameterName) ?? "";
+    public static bool ShowConfirmationDialogOnExecute => bool.Parse(ParameterSet?.Get(ShowConfirmationDialogOnExecuteParameterName) ?? "true");
     public static int ConfirmationProcessCount => int.Parse(ParameterSet?.Get(ConfirmationProcessCountParameterName) ?? "100");
     public static ParameterSet? ParameterSet { get; set; }
 
