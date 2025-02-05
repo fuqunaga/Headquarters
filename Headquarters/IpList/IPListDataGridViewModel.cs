@@ -71,13 +71,17 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
 
     private async Task AddColumn()
     {
-        var viewModel = new NameDialogViewModel()
+        var viewModel = new TextDialogViewModel()
         {
             Title = "Add Column",
             OkButtonContent = "Add",
             Suggestions = GetScriptParameterNamesWithoutColumnNames(),
         };
-        var (success, name) = await ShowColumnNameDialog(viewModel);
+        viewModel.AddValidator(
+            new NotContainDataColumnCollectionValidator(Items.Columns, "Column already exists.")
+        );
+        
+        var (success, name) = await DialogService.ShowDialog(viewModel);
         if (!success) return;
         if (Items.Columns.Contains(name)) return;
             
@@ -89,14 +93,18 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
     {
         var name = GetColumnNameFromMenuItem(obj);
         
-        var viewModel = new NameDialogViewModel()
+        var viewModel = new TextDialogViewModel()
         {
             Title = "Rename Column",
             OkButtonContent = "Rename",
-            Name = name,
+            Text = name,
             Suggestions = GetScriptParameterNamesWithoutColumnNames(),
         };
-        var (success, newName) = await ShowColumnNameDialog(viewModel);
+        viewModel.AddValidator(
+            new NotContainDataColumnCollectionValidator(Items.Columns, "Column already exists.")
+        );
+        
+        var (success, newName) = await DialogService.ShowDialog(viewModel);
         if (!success) return;
         if (Items.Columns.Contains(newName)) return;
 
@@ -112,14 +120,14 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
     {
         var name = GetColumnNameFromMenuItem(obj);
 
-        var viewModel = new NameDialogViewModel()
+        var viewModel = new TextDialogViewModel()
         {
             Title = "Delete Column",
             OkButtonContent = "Delete",
-            Name = name,
-            IsEnabled = false
+            Text = name,
+            IsEditable = false
         };
-        var (success, _) = await ShowColumnNameDialog(viewModel);
+        var (success, _) = await DialogService.ShowDialog(viewModel);
         if (!success) return;
         
         if (Items.Columns.Contains(name))
@@ -127,11 +135,5 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
             Items.Columns.Remove(name);
             RefreshDataGrid();
         }
-    }
-
-    private async Task<(bool success, string)> ShowColumnNameDialog(NameDialogViewModel viewModel)
-    {
-        var validationRule = new NotContainDataColumnCollectionValidationRule(Items.Columns, "Column already exists.");
-        return await NameDialogService.ShowDialog(viewModel, validationRule);
     }
 }

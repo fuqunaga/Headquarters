@@ -5,9 +5,9 @@ namespace Headquarters
     /// <summary>
     /// AddColumnDialog.xaml の相互作用ロジック
     /// </summary>
-    public partial class NameDialog : UserControl
+    public partial class Dialog : UserControl
     {
-        public NameDialog()
+        public Dialog()
         {
             InitializeComponent();
         }

@@ -125,14 +125,14 @@ public class MainTabViewModel : ViewModelBase, IDisposable
     
     private async void RenameTab()
     {
-        var viewModel =  new NameDialogViewModel()
+        var viewModel =  new TextDialogViewModel()
         {
             Title = "Rename Tab",
             OkButtonContent = "Rename",
-            Name = Name
+            Text = Header
         };
         
-        var (success, newName) = await NameDialogService.ShowDialog(viewModel, allowEmpty: true);
+        var (success, newName) = await DialogService.ShowDialog(viewModel);
         if (success)
         {
             Name = newName;
@@ -143,14 +143,14 @@ public class MainTabViewModel : ViewModelBase, IDisposable
     
     private async void ConfirmAndCloseTab()
     {
-        var viewModel = new NameDialogViewModel()
+        var viewModel = new TextDialogViewModel()
         {
             Title = "Close Tab",
             OkButtonContent = "Close",
-            Name = Header,
-            IsEnabled = false
+            Text = Header,
+            IsEditable = false
         };
-        var (success, _) = await NameDialogService.ShowDialog(viewModel);
+        var (success, _) = await DialogService.ShowDialog(viewModel);
         if (!success) return;
 
         

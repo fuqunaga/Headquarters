@@ -88,14 +88,14 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
     
     private async void ConfirmAndCloseScriptPage()
     {
-        var viewModel = new NameDialogViewModel()
+        var viewModel = new TextDialogViewModel()
         {
             Title = "Close",
             OkButtonContent = "Close",
-            Name = ScriptPageViewModel.HeaderText,
-            IsEnabled = false
+            Text = ScriptPageViewModel.HeaderText,
+            IsEditable = false
         };
-        var (success, _) = await NameDialogService.ShowDialog(viewModel);
+        var (success, _) = await DialogService.ShowDialog(viewModel);
         if (!success) return;
         
         var index = HeaderViewModels.IndexOf(this);
