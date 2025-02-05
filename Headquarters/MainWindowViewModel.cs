@@ -29,7 +29,7 @@ public class MainWindowViewModel : ViewModelBase
         var settingData = SettingManager.Load(".\\setting.json")
                           ?? SettingManager.SettingData.Default;
         
-        GlobalParameter.ParameterSet = new ParameterSet(settingData.GlobalParameterSet);
+        GlobalParameter.SetParameterSet(settingData.GlobalParameterSet);
         SettingPageViewModel.InitializeWithGlobalParameter();
 
         foreach (var data in settingData.MainTabDataList)

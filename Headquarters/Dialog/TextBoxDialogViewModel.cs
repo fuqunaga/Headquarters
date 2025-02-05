@@ -6,30 +6,25 @@ using System.Linq;
 
 namespace Headquarters;
 
-public class TextDialogViewModel : DialogViewModelBase, INotifyDataErrorInfo
+public class TextBoxDialogViewModel : LabelDialogViewModel, INotifyDataErrorInfo
 {
     public static readonly NotEmptyValidator NotEmptyValidator = new ("Field is required.");
     
-    private string _text = "";
     private readonly Dictionary<string, string> _errors = new();
     private readonly List<Validator<string>> _validators = [NotEmptyValidator];
-    
-    public string Text 
+
+    public override bool IsOkButtonEnabled => !HasErrors;
+
+    public TextBoxDialogViewModel()
     {
-        get => _text;
-        set
+        PropertyChanged += (_, args) =>
         {
-            if (SetProperty(ref _text, value))
+            if (args.PropertyName == nameof(Text))
             {
                 ValidateText();
             }
-        }
-    }
-
-    public IEnumerable<string> Suggestions { get; set; } = [];
-
-    public TextDialogViewModel()
-    {
+        };
+        
         ValidateText();
     }
 
@@ -59,14 +54,14 @@ public class TextDialogViewModel : DialogViewModelBase, INotifyDataErrorInfo
     {
         _errors.Remove(propertyName);
         ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
-        OnPropertyChanged(nameof(HasErrors));
+        OnPropertyChanged(nameof(IsOkButtonEnabled));
     }
 
     private void AddError(string nameName, string nameIsRequired)
     {
         _errors[nameName] = nameIsRequired;
         ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(nameName));
-        OnPropertyChanged(nameof(HasErrors));
+        OnPropertyChanged(nameof(IsOkButtonEnabled));
     }
 
 

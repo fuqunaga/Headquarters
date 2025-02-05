@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
@@ -88,14 +87,13 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
     
     private async void ConfirmAndCloseScriptPage()
     {
-        var viewModel = new TextDialogViewModel()
+        var viewModel = new LabelDialogViewModel()
         {
             Title = "Close",
             OkButtonContent = "Close",
             Text = ScriptPageViewModel.HeaderText,
-            IsEditable = false
         };
-        var (success, _) = await DialogService.ShowDialog(viewModel);
+        var success = await DialogService.ShowDialog(viewModel);
         if (!success) return;
         
         var index = HeaderViewModels.IndexOf(this);

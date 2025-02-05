@@ -3,38 +3,53 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:Headquarters"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance local:TextDialogViewModel}"
+             d:DataContext="{d:DesignInstance local:DialogViewModelBase}"
              d:DesignHeight="300" d:DesignWidth="350">
     
     <UserControl.Resources>
-        <DataTemplate x:Key="TextBoxTemplate" DataType="{x:Type local:TextDialogViewModel}">
-            <TextBox Text = "{Binding Text, UpdateSourceTrigger=PropertyChanged}"
-                     Margin="0 14"
-                     FontSize="18" />
+        <DataTemplate x:Key="TextBoxTemplate" DataType="{x:Type local:TextBoxDialogViewModel}">
+            <TextBox Text = "{Binding Text, UpdateSourceTrigger=PropertyChanged}" />
         </DataTemplate>
         
-        <DataTemplate x:Key="ComboBoxTemplate" DataType="{x:Type local:TextDialogViewModel}">
+        <DataTemplate x:Key="ComboBoxTemplate" DataType="{x:Type local:ComboBoxDialogViewModel}">
             <ComboBox Text = "{Binding Text, UpdateSourceTrigger=PropertyChanged}"
-                      Margin="0 14"
-                      FontSize="18" 
-                      IsEditable="True"
                       ItemsSource="{Binding Suggestions}" />
         </DataTemplate>
         
-        <DataTemplate x:Key="LabelTemplate" DataType="{x:Type local:TextDialogViewModel}">
-            <Label  Content = "{Binding Text}"
-                    Margin="0 14"
-                    FontSize="18" />
+        <DataTemplate x:Key="LabelTemplate" DataType="{x:Type local:TextBoxDialogViewModel}">
+            <Label  Content = "{Binding Text}" />
+        </DataTemplate>
+        
+        <DataTemplate x:Key="ListTemplate" DataType="{x:Type local:ListDialogViewModel}">
+            <StackPanel>
+                <Label Content="{Binding Message}" />
+
+                <Border BorderBrush="{DynamicResource MaterialDesign.Brush.TextBox.OutlineBorder}"
+                        BorderThickness="{x:Static materialDesign:Constants.DefaultOutlinedBorderInactiveThickness}"
+                        CornerRadius="4"
+                        Margin="0 16 0 0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  Padding="8 4"
+                                  MaxWidth="500"
+                                  MaxHeight="500">
+                        <ItemsControl ItemsSource="{Binding Items}" />
+                    </ScrollViewer>
+                </Border>
+
+            </StackPanel>
         </DataTemplate>
         
         <local:DialogContentSelector x:Key="DialogContentSelector"
                                      TextBoxTemplate="{StaticResource TextBoxTemplate}"
                                      ComboBoxTemplate="{StaticResource ComboBoxTemplate}"
-                                     LabelTemplate="{StaticResource LabelTemplate}" />
+                                     LabelTemplate="{StaticResource LabelTemplate}"
+                                     ListTemplate="{StaticResource ListTemplate}" />
     </UserControl.Resources>
 
     
@@ -44,7 +59,9 @@
   
         <!-- Content -->
         <ContentControl Content="{Binding .}"
-                        ContentTemplateSelector="{StaticResource DialogContentSelector}" />
+                        ContentTemplateSelector="{StaticResource DialogContentSelector}"
+                        Margin="0 14"
+                        FontSize="18" />
         
         <!-- Buttons -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -62,7 +79,7 @@
             
             <Button IsDefault="True"
                     Content="{Binding OkButtonContent}"
-                    IsEnabled="{Binding HasErrors, Converter={StaticResource InvertBooleanConverter}}"
+                    IsEnabled="{Binding IsOkButtonEnabled}"
                     Style="{DynamicResource MaterialDesignFlatDarkBgButton}"
                     Width="100"
                     Margin="0,8,8,0"

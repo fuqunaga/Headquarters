@@ -10,14 +10,11 @@ public static class DialogService
 {
     private static readonly Dialog Dialog = new();
 
-    public static async Task<(bool success, string)> ShowDialog(TextDialogViewModel viewModel)
+    public static async Task<bool> ShowDialog(DialogViewModelBase viewModel)
     {
         Dialog.DataContext = viewModel;
         var result = await DialogHost.Show(Dialog, "RootDialog");
 
-        return (
-            result != null && (bool)result,
-            viewModel.Text
-        );
+        return result != null && (bool)result;
     }
 }

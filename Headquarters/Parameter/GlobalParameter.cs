@@ -51,16 +51,35 @@ public static class GlobalParameter
                 )
             }
         };
-    
-    public const string ConfirmationProcessCountParameterName = "ConfirmationProcessCount";
-
 
     public static string UserName => ParameterSet?.Get(UserNameParameterName) ?? "";
     public static string UserPassword => ParameterSet?.Get(UserPasswordParameterName) ?? "";
-    public static bool ShowConfirmationDialogOnExecute => bool.Parse(ParameterSet?.Get(ShowConfirmationDialogOnExecuteParameterName) ?? "true");
-    public static int ConfirmationProcessCount => int.Parse(ParameterSet?.Get(ConfirmationProcessCountParameterName) ?? "100");
-    public static ParameterSet? ParameterSet { get; set; }
+    public static bool ShowConfirmationDialogOnExecute
+    {
+        get
+        {
+            // パラメータが存在しない場合はtrueを返す
+            var stringValue = ParameterSet?.Get(ShowConfirmationDialogOnExecuteParameterName);
+            if(stringValue is null || !bool.TryParse(stringValue, out var result))
+            {
+                return true;
+            }
+            
+            return  result;
+        }
+    }
+    
+    public static ParameterSet? ParameterSet { get; private set; }
 
+    public static void SetParameterSet(Dictionary<string, string>  parameterTable)
+    {
+        if (!parameterTable.ContainsKey(ShowConfirmationDialogOnExecuteParameterName))
+        {
+            parameterTable[ShowConfirmationDialogOnExecuteParameterName] = "true";
+        }
+        
+        ParameterSet = new ParameterSet(parameterTable);
+    }
 
     public static ParameterInputFieldViewModel CreateParameterInputFieldViewModel(string parameterName)
     {

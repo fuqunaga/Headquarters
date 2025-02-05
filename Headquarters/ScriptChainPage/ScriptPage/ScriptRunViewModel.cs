@@ -153,24 +153,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
                 });
             })
             .ToList();
-
-        if (ipAndParameterList.Count >= GlobalParameter.ConfirmationProcessCount)
-        {
-            var ip = string.Join(", ", ipAndParameterList.Select(data => data.ipString));
-                
-            var result = MessageBox.Show(
-                $"{ipAndParameterList.Count}個のIPアドレスへ実行します\n\n{ip}\n\nよろしいですか？",
-                "確認",
-                MessageBoxButton.OKCancel,
-                MessageBoxImage.Warning
-            );
-                
-            if (result != MessageBoxResult.OK)
-            {
-                return PowerShellRunner.Result.Canceled;
-            }
-        }
-            
             
         AddOutputInformation($"スクリプトを開始します");;
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();

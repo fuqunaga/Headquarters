@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Input;
+using NetTools;
 
 namespace Headquarters;
 
@@ -277,7 +278,8 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
 
         if (GlobalParameter.ShowConfirmationDialogOnExecute)
         {
-            if (!ShowConfirmationDialog())
+            var ok = await ShowConfirmationDialog();
+            if (!ok)
             {
                 return;
             }
@@ -309,9 +311,22 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         }
     }
 
-    private bool ShowConfirmationDialog()
+    private async Task<bool> ShowConfirmationDialog()
     {
-        return true;
+        var checkedIpList = _ipListViewModel.DataGridViewModel.SelectedParams.SelectMany(ipParams =>
+                IPAddressRange.TryParse(ipParams.IpString, out var range)
+                    ? range.AsEnumerable().Select(ip => ip.ToString())
+                    : [ipParams.IpString])
+            .ToList();
+        
+        var viewModel = new ListDialogViewModel()
+        {
+            Title = "Confirm",
+            Message = $"{checkedIpList.Count} 件のIPに対してスクリプトを実行します",
+            Items = checkedIpList
+        };
+        
+        return await DialogService.ShowDialog(viewModel);
     }
 
     private async Task RunScriptChain()

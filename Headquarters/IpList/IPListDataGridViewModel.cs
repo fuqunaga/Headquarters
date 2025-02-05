@@ -71,7 +71,7 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
 
     private async Task AddColumn()
     {
-        var viewModel = new TextDialogViewModel()
+        var viewModel = new ComboBoxDialogViewModel()
         {
             Title = "Add Column",
             OkButtonContent = "Add",
@@ -81,8 +81,10 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
             new NotContainDataColumnCollectionValidator(Items.Columns, "Column already exists.")
         );
         
-        var (success, name) = await DialogService.ShowDialog(viewModel);
+        var success = await DialogService.ShowDialog(viewModel);
         if (!success) return;
+        
+        var name = viewModel.Text;
         if (Items.Columns.Contains(name)) return;
             
         Items.Columns.Add(name);
@@ -93,7 +95,7 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
     {
         var name = GetColumnNameFromMenuItem(obj);
         
-        var viewModel = new TextDialogViewModel()
+        var viewModel = new ComboBoxDialogViewModel()
         {
             Title = "Rename Column",
             OkButtonContent = "Rename",
@@ -104,8 +106,10 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
             new NotContainDataColumnCollectionValidator(Items.Columns, "Column already exists.")
         );
         
-        var (success, newName) = await DialogService.ShowDialog(viewModel);
+        var success = await DialogService.ShowDialog(viewModel);
         if (!success) return;
+        
+        var newName = viewModel.Text;
         if (Items.Columns.Contains(newName)) return;
 
         var column = Items.Columns[name];
@@ -120,14 +124,13 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
     {
         var name = GetColumnNameFromMenuItem(obj);
 
-        var viewModel = new TextDialogViewModel()
+        var viewModel = new LabelDialogViewModel()
         {
             Title = "Delete Column",
             OkButtonContent = "Delete",
             Text = name,
-            IsEditable = false
         };
-        var (success, _) = await DialogService.ShowDialog(viewModel);
+        var success = await DialogService.ShowDialog(viewModel);
         if (!success) return;
         
         if (Items.Columns.Contains(name))

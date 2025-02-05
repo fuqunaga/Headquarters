@@ -16,7 +16,7 @@ public class SettingManager
         {
             GlobalParameterSet = new Dictionary<string, string>
             {
-                [GlobalParameter.ConfirmationProcessCountParameterName] = "10"
+                [GlobalParameter.ShowConfirmationDialogOnExecuteParameterName] = "true",
             },
             MainTabDataList =
             [
