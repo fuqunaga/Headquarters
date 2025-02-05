@@ -31,7 +31,7 @@
         <!-- ScriptParameterInputFieldType別コンテンツ -->
         <DataTemplate x:Key="Field-UseIpList" DataType="{x:Type local:ParameterInputFieldViewModel}">
             <TextBox IsEnabled="False"
-                     Text="IP Listの値を仕様します"
+                     Text="IP Listの値を参照します"
                      Padding="0"
                      />
         </DataTemplate>
