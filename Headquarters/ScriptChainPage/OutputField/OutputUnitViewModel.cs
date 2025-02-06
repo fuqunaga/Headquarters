@@ -14,7 +14,7 @@ public class OutputUnitViewModel : ViewModelBase
         {
             if ( SetProperty(ref _icon, value) )
             {
-                IconEmoji = value.GetEmoji();
+                IconEmoji = _icon.GetEmoji();
             }
         }
     }
@@ -24,6 +24,7 @@ public class OutputUnitViewModel : ViewModelBase
         get => _iconEmoji;
         private set => SetProperty(ref _iconEmoji, value);
     }
+    
     public string Text
     {
         get => _text;

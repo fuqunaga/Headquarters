@@ -359,7 +359,7 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
             var result = await lastHeader.Run(MaxTaskCount, IsStopOnError);
 
             // 異常終了なら中断
-            if (!result.IsSucceed)
+            if (result != ScriptRunResult.Success)
             {
                 cancelled = true;
                 break;

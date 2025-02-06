@@ -111,12 +111,12 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
     }
     
     
-    public async Task<PowerShellRunner.Result> Run(int maxTaskCount, bool isStopOnError)
+    public async Task<ScriptRunResult> Run(int maxTaskCount, bool isStopOnError)
     {
         if (IsRunning
             || ScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.SelectScript)
         {
-            return PowerShellRunner.Result.Canceled;
+            return ScriptRunResult.None;
         }
 
         try

@@ -54,8 +54,6 @@ namespace Headquarters
 
         public class Result
         {
-            public static Result Canceled { get; } = new() { canceled = true };
-            
             public bool canceled;
             public bool hasError;
             public Collection<PSObject>? objs;
@@ -63,11 +61,7 @@ namespace Headquarters
             public bool IsSucceed => !canceled && !hasError;
         }
         
-        public static async Task<Result> InvokeAsync(string scriptString, InvokeParameter param)
-            => await InvokeAsync(scriptString, null, param);
-
-        
-        public static async Task<Result> InvokeAsync(string scriptString, string? commandName, InvokeParameter param)
+        public static async Task<Result> InvokeAsync(string scriptString, InvokeParameter param, string? commandName = null)
         {
             using var powerShell = PowerShell.Create();
             
@@ -103,31 +97,33 @@ namespace Headquarters
             };
             
             param.EventSubscriber.Subscribe(powerShell, output);
+            
+            using var _ = param.CancellationToken.Register(
+                state => {
+                    if (state is PowerShell ps)
+                    {
+                        ps.Stop();
+                    }
+
+                    result.canceled = true;
+                },
+                powerShell
+            );
 
             try
             {
                 await Task.Run(() =>
                 {  
-                    using var _ = param.CancellationToken.Register(
-                        state => {
-                            if (state is PowerShell ps)
-                            {
-                                ps.Stop();
-                            }
-
-                            result.canceled = true;
-                        },
-                        powerShell
-                    );
-                    
                     powerShell.Invoke<PSObject, PSObject>(null, output, null);
-                    
                 }, param.CancellationToken);
             }
             catch (Exception e)
             {
-                // キャンセルの例外は無視
-                if (e is not OperationCanceledException)
+                if (e is OperationCanceledException)
+                {
+                    // result.canceled = true;
+                }
+                else
                 {
                     powerShell.Streams.Error.Add(new ErrorRecord(e, "Invoke", ErrorCategory.NotSpecified, null));
                     result.hasError = true;

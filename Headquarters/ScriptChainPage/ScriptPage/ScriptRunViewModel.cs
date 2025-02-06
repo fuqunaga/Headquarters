@@ -2,11 +2,10 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
 using NetTools;
 using IpAndParameterList = System.Collections.Generic.List<(string ipString, System.Collections.Generic.Dictionary<string, object> parameters)>;
 
@@ -14,16 +13,6 @@ namespace Headquarters;
 
 public class ScriptRunViewModel : ViewModelBase, IDisposable
 {
-    #region Type Define
-
-    public static class ReservedParameterName
-    {
-        public const string MaxTaskCount = "MaxTaskCount";
-    }
-
-    #endregion
-
-
     private readonly IpListViewModel _ipListViewModel;
     private readonly Script _script;
     private readonly ParameterSet _scriptParameterSet;
@@ -56,8 +45,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         set => SetProperty(ref _isLocked, value);
     }
     
-    public ICommand StopCommand { get; }
-
     public ObservableCollection<ScriptParameterInputFieldViewModel> Parameters { get; } = [];
         
     public OutputFieldViewModel OutputFieldViewModel { get; } = new();
@@ -71,8 +58,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
 
     public ScriptRunViewModel(Script script, IpListViewModel ipListViewModel, ParameterSet scriptParameterSet)
     {
-        StopCommand = new DelegateCommand(_ => Stop());
-            
         _script = script;
         _script.onUpdate += OnUpdateScript;
         
@@ -117,7 +102,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         }
     }
 
-    public async Task<PowerShellRunner.Result> Run(int maxTaskCount, bool isStopOnError)
+    public async Task<ScriptRunResult> Run(int maxTaskCount, bool isStopOnError)
     {
         var ipAndParameterList = _ipListViewModel.DataGridViewModel.SelectedParams.SelectMany(ipParams =>
             {
@@ -154,8 +139,8 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             })
             .ToList();
             
-        AddOutputInformation($"スクリプトを開始します");;
-        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        AddOutputInformation("スクリプトを開始します");
+        var stopwatch = Stopwatch.StartNew();
 
         using var cancelTokenSource = new CancellationTokenSource();
         _cancelTokenSource = cancelTokenSource;
@@ -165,16 +150,26 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             var result = await RunScriptFunctions(ipAndParameterList, _cancelTokenSource.Token, maxTaskCount, isStopOnError);
 
             var message = $"実行時間 {stopwatch.Elapsed:hh\\:mm\\:ss\\.ff}";
-            if(result.IsSucceed)
+            switch (result)
             {
-                AddOutputInformationSuccessColor($"スクリプトが完了しました - {message}");
+                case ScriptRunResult.None:
+                    break;
+                case ScriptRunResult.Success:
+                    AddOutputInformationSuccessColor($"スクリプトが完了しました - {message}");
+                    break;
+                case ScriptRunResult.Error:
+                    AddOutputInformationFailureColor($"スクリプトがエラーで停止しました - {message}");
+                    break;
+                case ScriptRunResult.Stop:
+                    AddOutputInformationFailureColor($"スクリプトがキャンセルされました - {message}");
+                    break;
+                case ScriptRunResult.StopDueToTaskError:
+                    AddOutputInformationFailureColor($"一部のタスクでエラーが発生したためすべてのタスクをキャンセルしました - {message}");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-            else
-            {
-                var header = result.canceled ? "スクリプトがキャンセルされました" : "スクリプトがエラーで停止しました";
-                AddOutputInformationFailureColor($"{header} - {message}");
-            }
-            
+    
             
             return result;
         }
@@ -184,18 +179,17 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         }
     }
 
-    private async Task<PowerShellRunner.Result> RunScriptFunctions(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken, int maxTaskCount, bool isStopOnError)
+    private async Task<ScriptRunResult> RunScriptFunctions(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken, int maxTaskCount, bool isStopOnError)
     {
-        var result = new PowerShellRunner.Result();
         // --------------------------------------------------------------------------------
         // BeginTask
         // --------------------------------------------------------------------------------
         if (_script.HasBeginTask)
         {
-            result = await RunScriptFunction(_script.BeginTask, cancellationToken);
-            if (ShouldReturn(cancellationToken, result, isStopOnError))
+            var result = await RunScriptFunction(_script.BeginTask, cancellationToken);
+            if(ShouldReturn(cancellationToken, result, isStopOnError, out var runResult))
             {
-                return result;
+                return runResult;
             }
         }
 
@@ -204,10 +198,10 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         // --------------------------------------------------------------------------------
         if (_script.HasIpAddressTask)
         {
-            result = await RunIpAddressTasks(ipAndParameterList, cancellationToken, maxTaskCount, isStopOnError);
-            if (ShouldReturn(cancellationToken, result, isStopOnError))
+            var runResult = await RunIpAddressTasks(ipAndParameterList, cancellationToken, maxTaskCount, isStopOnError);
+            if(runResult != ScriptRunResult.Success)
             {
-                return result;
+                return runResult;
             }
         }
 
@@ -216,21 +210,36 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         // --------------------------------------------------------------------------------
         if (_script.HasEndTask)
         {
-            result = await RunScriptFunction(_script.EndTask, cancellationToken);
+            var result = await RunScriptFunction(_script.EndTask, cancellationToken);
+            if( result.canceled)
+            {
+                return ScriptRunResult.Stop;
+            }
+            if( result.hasError)
+            {
+                return ScriptRunResult.Error;
+            }
         }
 
-        return result;
+        return ScriptRunResult.Success;
         
         
-        static bool ShouldReturn(CancellationToken cancellationToken, PowerShellRunner.Result result, bool isStopOnError)
+        static bool ShouldReturn(CancellationToken cancellationToken, PowerShellRunner.Result result, bool isStopOnError, out ScriptRunResult runResult)
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                result.canceled = true;
+                runResult = ScriptRunResult.Stop;
                 return true;
             }
 
-            return isStopOnError && result.hasError;
+            if( isStopOnError && result.hasError)
+            {
+                runResult = ScriptRunResult.Error;
+                return true;
+            }
+            
+            runResult = ScriptRunResult.None;
+            return false;
         }
     }
 
@@ -250,7 +259,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         return result;
     }
 
-    private async Task<PowerShellRunner.Result> RunIpAddressTasks(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken, int maxTaskCount, bool isStopOnError)
+    private async Task<ScriptRunResult> RunIpAddressTasks(IpAndParameterList ipAndParameterList, CancellationToken cancellationToken, int maxTaskCount, bool isStopOnError)
     {
         var ipAddressTaskParameterList = ipAndParameterList.Select(ipAndParameter =>
             {
@@ -269,7 +278,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         
         // 自前のSemaphoreSlimで各Taskが実行可能になってから実行することでMaxTaskCount通りの同時実行数にする
         // RunspacePool任せの並列実行だとすべてRunning状態になってからRunspacePool待ちになる
-        using var semaphore = new SemaphoreSlim(maxTaskCount);
+        var semaphore = new SemaphoreSlim(maxTaskCount);
         
         // _runningTasksが空でない場合は別のタスクが実行中っぽそうでまずい
         if (_runningTasks.Count > 0)
@@ -277,25 +286,41 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             throw new InvalidOperationException("RunningTasks is not empty");
         }
         
+        var isStoppedByTaskError = false;
+        
         try
         {
             foreach (var paramSet in ipAddressTaskParameterList)
             {
                  await semaphore.WaitAsync(cancellationToken);
-                 var task = RunProcess(
-                        paramSet.ipAndParameter.ipString,
-                        paramSet.ipAndParameter.parameters,
-                        paramSet.ScriptExecutionInfo,
-                        cancellationToken,
-                        _sharedDictionary,
-                        isStopOnError
-                    ).ContinueWith(_ => semaphore.Release(), cancellationToken);
+
+                 var task = Task.Run(async () =>
+                 {
+                     var result = await RunIpAddressTask(
+                         paramSet.ipAndParameter.ipString,
+                         paramSet.ipAndParameter.parameters,
+                         paramSet.ScriptExecutionInfo,
+                         cancellationToken,
+                         _sharedDictionary
+                     );
+
+                     if (isStopOnError
+                         && result.hasError
+                         && !cancellationToken.IsCancellationRequested
+                        )
+                     {
+                         Stop();
+                         isStoppedByTaskError = true;
+                     }
+
+                     semaphore.Release();
+                 }, cancellationToken);
                 
                 _runningTasks.Add(task);
                 
                 // 同時実行だと幅優先的な挙動になりなかなか最初のタスクが終わらない
                 // 少し待ってから次のタスクを実行することで深さ優先っぽい挙動になる
-                await Task.Delay(1, cancellationToken);
+                await Task.Delay(10, cancellationToken);
             }
             
             await Task.WhenAll(_runningTasks);
@@ -312,22 +337,31 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             _runningTasks.Clear();
         }
 
-        var result = new PowerShellRunner.Result
+        
+        if (ipAddressTaskParameterList.Select(paramSet => paramSet.ScriptExecutionInfo.Result).All(result => result?.IsSucceed ?? false))
         {
-            canceled = ipAddressTaskParameterList.Select(paramSet => paramSet.ScriptExecutionInfo.Result).Any(result => result == null || result.canceled),
-            hasError = ipAddressTaskParameterList.Select(paramSet => paramSet.ScriptExecutionInfo.Result).Any(result => result?.hasError == true)
-        };
+            return ScriptRunResult.Success;
+        }
 
-        return result;
+        if (isStoppedByTaskError)
+        {
+            return ScriptRunResult.StopDueToTaskError;
+        }
+
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return ScriptRunResult.Stop;
+        }
+        
+        return ScriptRunResult.Error;
     }
         
-    private async Task RunProcess(
+    private async Task<PowerShellRunner.Result> RunIpAddressTask(
         string ip, 
         Dictionary<string, object> parameters,
         ScriptExecutionInfo scriptExecutionInfo, 
         CancellationToken cancelToken, 
-        ConcurrentDictionary<string, object> sharedDictionary,
-        bool isStopOnError)
+        ConcurrentDictionary<string, object> sharedDictionary)
     {
         var param = new PowerShellRunner.InvokeParameter(
             parameters: parameters,
@@ -336,18 +370,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         );
 
         scriptExecutionInfo.Result = await _script.IpAddressTask.Run(ip, param, sharedDictionary);
-        if (isStopOnError)
-        {
-            StopIfResultHasError(scriptExecutionInfo.Result);
-        }
-    }
-
-    private void StopIfResultHasError(PowerShellRunner.Result? result)
-    {
-        if (result is { hasError: true })
-        {
-            Stop();
-        }
+        return scriptExecutionInfo.Result;
     }
 
     public void Stop()
