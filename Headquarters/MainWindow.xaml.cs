@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using System.Windows;
 
 namespace Headquarters
@@ -11,6 +13,9 @@ namespace Headquarters
         public MainWindow()
         {
             InitializeComponent();
+            var version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
+            Title = $"Headquarters {version}";
+            
             var viewModel = new MainWindowViewModel();
             DataContext = viewModel;
             Closing += viewModel.OnClosing;
