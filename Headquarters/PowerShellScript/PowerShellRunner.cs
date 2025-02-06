@@ -38,7 +38,7 @@ namespace Headquarters
                                                     $WarningPreference = $tmpWarningPreference 
                                                     """;
             
-        public readonly struct InvokeParameter(
+        public struct InvokeParameter(
             Dictionary<string, object> parameters,
             CancellationToken cancellationToken,
             PowerShellEventSubscriber eventSubscriber)
@@ -46,6 +46,10 @@ namespace Headquarters
             public Dictionary<string, object> Parameters => parameters;
             public CancellationToken CancellationToken => cancellationToken;
             public PowerShellEventSubscriber EventSubscriber => eventSubscriber;
+            
+            // Sessionを使用する場合、作成したRunspace内のみで有効っぽいので
+            // Session使用時のみあらかじめRunspaceを作成しスクリプト実行時に再利用する
+            public Runspace? Runspace { get; set; }
         }
 
         public class Result
@@ -62,9 +66,19 @@ namespace Headquarters
         public static async Task<Result> InvokeAsync(string scriptString, InvokeParameter param)
             => await InvokeAsync(scriptString, null, param);
 
+        
         public static async Task<Result> InvokeAsync(string scriptString, string? commandName, InvokeParameter param)
         {
             using var powerShell = PowerShell.Create();
+            
+            // 事前にPSSessionを作成してスクリプトに渡す場合はRunspaceを共有していないと使えないっぽいので
+            // PSSessionがある場合のみRunspaceを事前に作成して再利用する
+            if(param.Runspace != null)
+            {
+                // ReSharper disable once MethodHasAsyncOverload
+                param.Runspace.Open();
+                powerShell.Runspace = param.Runspace;
+            }
             
             powerShell.AddScript(AddModulePathString);
             powerShell.AddScript(AddAttributeString);

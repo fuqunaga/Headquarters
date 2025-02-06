@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation.Language;
+using System.Management.Automation.Runspaces;
 using System.Threading.Tasks;
 
 namespace Headquarters;
@@ -81,6 +82,12 @@ public class ScriptFunction
         if (IsSessionRequired)
         {
             taskContext ??= CreateTaskContext();
+            if(param.Runspace == null)
+            {
+                var runspace = RunspaceFactory.CreateRunspace();
+                param.Runspace = runspace;
+            }
+            
             var sessionResult = await SessionManager.CreateSession(ipAddress, taskContext.Credential, param);
             var session = sessionResult.objs?.FirstOrDefault()?.BaseObject;
             if (session == null)
