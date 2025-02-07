@@ -68,7 +68,7 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         ? CurrentScriptRunViewModel.Parameters.Select(parameterViewModel => parameterViewModel.Name)
         : Array.Empty<string>();
     
-    public ScriptPageViewModel(IpListViewModel ipListViewModel, ScriptChainData.ScriptData scriptData, string folderPath=@".\Scripts")
+    public ScriptPageViewModel(IpListViewModel ipListViewModel, ScriptChainData.ScriptData scriptData, string folderPath=$@"{Profile.DefaultPath}Scripts")
     {
         _watcher = ScriptDirectoryWatcher.GetOrCreate(folderPath);
         _watcher.Scripts.CollectionChanged += OnScriptsChanged;

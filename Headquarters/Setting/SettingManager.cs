@@ -5,8 +5,10 @@ using Newtonsoft.Json;
 
 namespace Headquarters;
 
-public class SettingManager
+public static class SettingManager
 {
+    private const string DefaultSettingFilePath = $"{Profile.DefaultPath}.\\Setting.json";
+    
     /// <summary>
     /// Jsonによる設定データ
     /// </summary>
@@ -31,25 +33,24 @@ public class SettingManager
         public List<MainTabData> MainTabDataList { get; set; }
     }
 
-    
-    #region Static
-    
-    public static SettingManager Instance { get; } = new();
-    
-    #endregion
-    
-    private SettingManager()
+    public static void Save(SettingData settingData)
     {
+        Save(DefaultSettingFilePath, settingData);
     }
-    
-    
-    public static void Save(string filepath, SettingData settingData)
+
+    private static void Save(string filepath, SettingData settingData)
     {
         var str = JsonConvert.SerializeObject(settingData, Formatting.Indented);
         File.WriteAllText(filepath, str);
     }
 
-    public static SettingData? Load(string filepath)
+    
+    public static SettingData? Load()
+    {
+        return Load(DefaultSettingFilePath);
+    }
+
+    private static SettingData? Load(string filepath)
     {
         if (!File.Exists(filepath))
         {

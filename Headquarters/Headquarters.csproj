@@ -80,6 +80,6 @@
     </Page>
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy $(ProjectDir)Scripts $(TargetDir)Scripts /D/E/C/I/H/Y" />
+    <Exec Command="robocopy &quot;$(ProjectDir)Scripts&quot; &quot;$(TargetDir)Data\Profile\Scripts&quot; /E /XD &quot;$(ProjectDir)Scripts\.idea&quot; /NJH /NJS /NP&#xA;IF %ERRORLEVEL% LSS 8 EXIT 0" />
   </Target>
 </Project>

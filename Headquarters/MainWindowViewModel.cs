@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows.Input;
 
 namespace Headquarters;
 
@@ -26,8 +25,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private void LoadSettings()
     {
-        var settingData = SettingManager.Load(".\\setting.json")
-                          ?? SettingManager.SettingData.Default;
+        var settingData = SettingManager.Load() ?? SettingManager.SettingData.Default;
         
         GlobalParameter.SetParameterSet(settingData.GlobalParameterSet);
         SettingPageViewModel.InitializeWithGlobalParameter();
@@ -46,6 +44,6 @@ public class MainWindowViewModel : ViewModelBase
             MainTabDataList = GetOrderedTabsFunc?.Invoke().Select(vm => vm.CreateMainTabData()).ToList() ?? []
         };
             
-        SettingManager.Save(".\\setting.json", settingData);
+        SettingManager.Save(settingData);
     }
 }
