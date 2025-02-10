@@ -32,6 +32,16 @@ public class ScriptDirectoryWatcher : IDisposable
         return watcher;
     }
     
+    public static void DisposeAll()
+    {
+        foreach (var watcher in Watchers.Values)
+        {
+            watcher.Dispose();
+        }
+        
+        Watchers.Clear();
+    }
+    
     #endregion
     
     
