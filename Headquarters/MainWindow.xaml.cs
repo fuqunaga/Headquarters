@@ -15,13 +15,14 @@ namespace Headquarters
             InitializeComponent();
             var version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
             Title = $"Headquarters {version}";
-            
-            var viewModel = new MainWindowViewModel();
-            DataContext = viewModel;
-            Closing += viewModel.OnClosing;
 
-            viewModel.GetOrderedTabsFunc = () => MainTabControl.GetOrderedHeaders()
-                .Select(item => item.DataContext).OfType<MainTabViewModel>();
+            var viewModel = new MainWindowViewModel(this)
+            {
+                GetOrderedTabsFunc = () => MainTabControl.GetOrderedHeaders()
+                    .Select(item => item.DataContext).OfType<MainTabViewModel>()
+            };
+
+            DataContext = viewModel;
         }
     }
 }

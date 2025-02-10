@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Headquarters;
 
@@ -13,8 +15,8 @@ namespace Headquarters;
 /// </summary>
 public static class Profile
 {
-    public const string DefaultPath = ".\\HeadquartersData\\Profile";
-    private const string TempPath = ".\\HeadquartersData\\Temp";
+    public const string DefaultPath =  $"{PathSetting.DataPath}\\Profile";
+    private const string TempPath = $"{PathSetting.DataPath}\\Temp";
     private const string DefaultScriptsFolder = $"{DefaultPath}\\Scripts";
     
 
@@ -23,7 +25,7 @@ public static class Profile
         var folderPath = GetTemporallyPath();
         try
         {
-            var (success, subfolder) = DownloadProfile(url, folderPath, addMessage);
+            var (success, subfolder) = await DownloadProfile(url, folderPath, addMessage);
             if (!success)
             {
                 return false;
@@ -41,7 +43,12 @@ public static class Profile
                 return false;
             }
 
-            ScriptDirectoryWatcher.DisposeAll();
+            // MainWindowを閉じる
+            // このときsetting.jsonが保存される
+            // MainWindow.CloseCurrentWindow();
+            MainWindowViewModel.Instance.SaveAndHideWindow();
+            
+            // 現在のProfileをBackupフォルダに移動する
             MoveCurrentProfileToBackup();
 
             // Profileフォルダを作成し、新しいProfileを移動する
@@ -56,16 +63,24 @@ public static class Profile
         }
         finally
         {
+            // MainWindowを表示する
+            if (!MainWindowViewModel.Instance.IsWindowVisible)
+            {
+                MainWindowViewModel.Instance.LoadAndShowWindow();
+                var profileWindow = Application.Current.Windows.OfType<ProfileWindow>().FirstOrDefault();
+                profileWindow?.Focus();
+            }
+            
+            // Tempフォルダを削除する
             DeleteReadOnlyDirectory(folderPath);
         }
-
+        
         return true;
     }
 
-
     // UrlはUnityのGit URL拡張構文を使用する
     // https://docs.unity3d.com/ja/2022.3/Manual/upm-git.html#syntax
-    private static (bool success, string subfolder) DownloadProfile(string url, string tempPath, Action<string>? addMessage = null)
+    private static async Task<(bool success, string subfolder)> DownloadProfile(string url, string tempPath, Action<string>? addMessage = null)
     {
         var uri = new Uri(url);
         var branchOrCommit = uri.Fragment.Replace("#", "");
@@ -80,7 +95,7 @@ public static class Profile
                        $"git sparse-checkout set --no-cone {subfolder} && " +
                        $"git checkout {branchOrCommit}";
         
-        var success = RunCommand(commands, addMessage);
+        var success = await RunCommand(commands, addMessage);
         
         return (success, subfolder);
     }
@@ -101,7 +116,7 @@ public static class Profile
     }
 
 
-    private static bool RunCommand(string command, Action<string>? addMessage = null)
+    private static async Task<bool> RunCommand(string command, Action<string>? addMessage = null)
     {
         var processInfo = new ProcessStartInfo("cmd.exe", $"/c {command}")
         {
@@ -132,12 +147,13 @@ public static class Profile
         process.Start();
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
-        process.WaitForExit();
+        
+        await Task.Run(() => process.WaitForExit());
 
         return process.ExitCode == 0;
     }
     
-    private static void MoveCurrentProfileToBackup()
+    private static void MoveCurrentProfileToBackup(Action<string>? addMessage = null)
     {
         if(!Directory.Exists(DefaultPath))
         {
@@ -149,6 +165,8 @@ public static class Profile
         
         var backupPath = Path.Combine(backupParentPath, $"Profile_{DateTime.Now:yyyyMMddHHmmss}");
         Directory.Move(DefaultPath, backupPath);
+        
+        addMessage?.Invoke($"Profileを {backupPath} にバックアップしました");
     }
     
     /// <summary>
@@ -157,7 +175,7 @@ public static class Profile
     /// <param name="directory">The name of the directory to remove.</param>
     /// 
     /// https://stackoverflow.com/a/26372070/2015881
-    public static void DeleteReadOnlyDirectory(string directory)
+    private static void DeleteReadOnlyDirectory(string directory)
     {
         foreach (var subdirectory in Directory.EnumerateDirectories(directory)) 
         {

@@ -45,5 +45,10 @@
 
         </ItemsControl>
         
+        <Separator />
+        
+        <Button Content="Profile" 
+                Command="{Binding OpenProfileWindowCommand}" 
+                Margin="8" />
     </StackPanel>
 </UserControl>

@@ -3,25 +3,34 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows;
 
 namespace Headquarters;
 
 public class MainWindowViewModel : ViewModelBase
 {
+    public static MainWindowViewModel Instance { get; private set; } = null!;
+    
+    private readonly Window _targetWindow;
+    
     public Func<IEnumerable<MainTabViewModel>>? GetOrderedTabsFunc { get; set; }
     public SettingPageViewModel SettingPageViewModel { get; } = new();
     public ObservableCollection<MainTabViewModel> TabItems { get;  } = [];
+
     
-    public MainWindowViewModel()
+    public MainWindowViewModel(Window window)
     {
+        Instance = this;
+        _targetWindow = window;
+        _targetWindow.Closing += OnClosing;
+        
         LoadSettings();
     }
 
-    public void OnClosing(object? sender, CancelEventArgs e)
+    private void OnClosing(object? sender, CancelEventArgs e)
     {
         SaveSettings();
     }
-
 
     private void LoadSettings()
     {
@@ -30,6 +39,7 @@ public class MainWindowViewModel : ViewModelBase
         GlobalParameter.SetParameterSet(settingData.GlobalParameterSet);
         SettingPageViewModel.InitializeWithGlobalParameter();
 
+        TabItems.Clear();
         foreach (var data in settingData.MainTabDataList)
         {
             TabItems.Add(new MainTabViewModel(data));
@@ -46,4 +56,19 @@ public class MainWindowViewModel : ViewModelBase
             
         SettingManager.Save(settingData);
     }
+    
+    public void SaveAndHideWindow()
+    {
+        ScriptDirectoryWatcher.DisposeAll();
+        SaveSettings();
+        _targetWindow.Hide();
+    }
+    
+    public void LoadAndShowWindow()
+    {
+        LoadSettings();
+        _targetWindow.Show();
+    }
+    
+    public bool IsWindowVisible => _targetWindow.IsVisible;
 }
