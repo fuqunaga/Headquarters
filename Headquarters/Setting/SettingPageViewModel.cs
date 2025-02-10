@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
+using MaterialDesignThemes.Wpf;
 
 namespace Headquarters;
 
@@ -8,6 +9,8 @@ public class SettingPageViewModel : ViewModelBase
     public ObservableCollection<object> Fields { get; } = [];
     public ICommand OpenProfileWindowCommand { get; } = new DelegateCommand(_ =>
     {
+        DialogService.CloseDialog();
+        
         ProfileWindow.Instance.DataContext = new ProfileWindowViewModel();
         ProfileWindow.Instance.ShowDialog();
     });

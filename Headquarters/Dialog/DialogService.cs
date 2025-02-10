@@ -17,4 +17,9 @@ public static class DialogService
 
         return result != null && (bool)result;
     }
+    
+    public static void CloseDialog(string dialogIdentifier = "RootDialog")
+    {
+        DialogHost.Close(dialogIdentifier);
+    }
 }
