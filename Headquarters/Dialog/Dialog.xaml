@@ -18,7 +18,8 @@
         
         <DataTemplate x:Key="ComboBoxTemplate" DataType="{x:Type local:ComboBoxDialogViewModel}">
             <ComboBox Text = "{Binding Text, UpdateSourceTrigger=PropertyChanged}"
-                      ItemsSource="{Binding Suggestions}" />
+                      ItemsSource="{Binding Suggestions}" 
+                      IsEditable="True" />
         </DataTemplate>
         
         <DataTemplate x:Key="LabelTemplate" DataType="{x:Type local:TextBoxDialogViewModel}">
@@ -80,7 +81,6 @@
             <Button IsDefault="True"
                     Content="{Binding OkButtonContent}"
                     IsEnabled="{Binding IsOkButtonEnabled}"
-                    Style="{DynamicResource MaterialDesignFlatDarkBgButton}"
                     Width="100"
                     Margin="0,8,8,0"
                     Command="{x:Static wpf:DialogHost.CloseDialogCommand}">

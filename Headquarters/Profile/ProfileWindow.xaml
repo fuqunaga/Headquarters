@@ -56,9 +56,8 @@
                                     CommandParameter="{Binding Url}">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="Autorenew"
-                                                             VerticalAlignment="Center"
-                                                             Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"/>
-                                    <Label Content="変更" />
+                                                             VerticalAlignment="Center"/>
+                                    <TextBlock Text="変更" />
                                 </StackPanel>
                             </Button>
                             
