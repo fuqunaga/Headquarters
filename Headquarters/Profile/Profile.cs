@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -16,13 +17,15 @@ namespace Headquarters;
 public static class Profile
 {
     public const string DefaultPath =  $"{PathSetting.DataPath}\\Profile";
+    public const string BackupPath = $"{DefaultPath}Backup";
     private const string TempPath = $"{PathSetting.DataPath}\\Temp";
     private const string DefaultScriptsFolder = $"{DefaultPath}\\Scripts";
-    
 
-    public static async Task<bool> Change(string url, Action<string>? addMessage = null)
+
+    public static async Task<bool> ChangeProfileByUrl(string url, Action<string>? addMessage = null)
     {
         var folderPath = GetTemporallyPath();
+
         try
         {
             var (success, subfolder) = await DownloadProfile(url, folderPath, addMessage);
@@ -32,12 +35,31 @@ public static class Profile
             }
 
             var newProfileSourcePath = Path.Combine(folderPath, subfolder);
+            return ChangeProfileByFolder(newProfileSourcePath, addMessage);
+        }
+        catch (Exception e)
+        {
+            addMessage?.Invoke(e.Message);
+            return false;
+        }
+        finally
+        {
+            // Tempフォルダを削除する
+            DeleteReadOnlyDirectory(folderPath);
+        }
+    }
+
+    public static bool ChangeProfileByFolder(string newProfileSourcePath, Action<string>? addMessage = null)
+    {
+        try
+        {
             // newProfileSourcePathが存在しない場合はエラー
             if (!Directory.Exists(newProfileSourcePath))
             {
+                var folderName = Path.GetFileName(newProfileSourcePath);
                 var message =　File.Exists(newProfileSourcePath)
-                    ? $"{subfolder} はフォルダではありません"
-                    : $"{subfolder} フォルダが見つかりません";
+                    ? $"{folderName} はフォルダではありません"
+                    : $"{folderName} フォルダが見つかりません";
 
                 addMessage?.Invoke(message);
                 return false;
@@ -70,9 +92,6 @@ public static class Profile
                 var profileWindow = Application.Current.Windows.OfType<ProfileWindow>().FirstOrDefault();
                 profileWindow?.Focus();
             }
-            
-            // Tempフォルダを削除する
-            DeleteReadOnlyDirectory(folderPath);
         }
         
         return true;
@@ -159,11 +178,10 @@ public static class Profile
         {
             return;
         }
+
+        Directory.CreateDirectory(BackupPath);
         
-        const string backupParentPath = $"{DefaultPath}Backup";
-        Directory.CreateDirectory(backupParentPath);
-        
-        var backupPath = Path.Combine(backupParentPath, $"Profile_{DateTime.Now:yyyyMMddHHmmss}");
+        var backupPath = Path.Combine(BackupPath, $"Profile_{DateTime.Now:yyyyMMdd_HHmmss}");
         Directory.Move(DefaultPath, backupPath);
         
         addMessage?.Invoke($"Profileを {backupPath} にバックアップしました");
@@ -190,5 +208,26 @@ public static class Profile
             fileInfo.Delete();
         }
         Directory.Delete(directory);
+    }
+
+    // BackupPath内のフォルダを日付順に降順で取得し名前を返す
+    public static IEnumerable<string> GetBackupProfileNames()
+    {
+        if (!Directory.Exists(BackupPath))
+        {
+            return [];
+        }
+
+        return Directory.GetDirectories(BackupPath)
+            .Select(x => new DirectoryInfo(x))
+            .OrderByDescending(x => x.CreationTime)
+            .Select(x => x.Name);
+    }
+
+ 
+    public static bool RestoreBackup(string backupName, Action<string>? addMessage = null)
+    {
+        var backupPath = Path.Combine(BackupPath, backupName);
+        return ChangeProfileByFolder(backupPath, addMessage);
     }
 }

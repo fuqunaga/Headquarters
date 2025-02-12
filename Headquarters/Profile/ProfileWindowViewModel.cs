@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Windows;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Newtonsoft.Json;
 
@@ -10,18 +10,12 @@ namespace Headquarters;
 public class ProfileWindowViewModel : ViewModelBase
 {
     private const string ProfilesDataFilePath = $"{PathSetting.DataPath}\\Profiles.json";
-    
-    private string _targetUrl = "";
     private string _outputText = "";
     
     
     public ObservableCollection<ProfileSourceViewModel> ProfileSources { get; } = [];
+    public BackupProfileSourceViewModel BackupProfileSource { get; } = new();
     
-    public string TargetUrl
-    {
-        get => _targetUrl;
-        set => SetProperty(ref _targetUrl, value);
-    }
 
     public string OutputText
     {
@@ -30,6 +24,7 @@ public class ProfileWindowViewModel : ViewModelBase
     }
     
     public ICommand ChangeProfileCommand { get; }
+    public ICommand RestoreBackupCommand { get; }
 
     public ProfileWindowViewModel()
     {
@@ -42,9 +37,10 @@ public class ProfileWindowViewModel : ViewModelBase
                 ChangeProfile(url);
             }
         });
+
+        RestoreBackupCommand = new DelegateCommand(_ => RestoreBackup());
     }
 
- 
     private void LoadDataFile()
     {
         if (!File.Exists(ProfilesDataFilePath))
@@ -81,7 +77,6 @@ public class ProfileWindowViewModel : ViewModelBase
         });
     }
 
-
     private async void ChangeProfile(string targetUrl)
     {
         var labelDialogViewModel = new LabelDialogViewModel()
@@ -91,19 +86,42 @@ public class ProfileWindowViewModel : ViewModelBase
             OkButtonContent = "Change",
         };
         
-        var ok = await DialogService.ShowDialog(labelDialogViewModel, "ProfileWindowDialog");
+        await ChangeProfile(labelDialogViewModel, () => Profile.ChangeProfileByUrl(targetUrl, AddMessage));
+    }
+
+    
+    private async void RestoreBackup()
+    {
+        var labelDialogViewModel = new LabelDialogViewModel()
+        {
+            Title = "Restore Backup",
+            Text = "Profileのバックアップを復元しますか？\n\n現在のパラメーターはすべて上書きされます\nあとでバックアップから復元できます",
+            OkButtonContent = "Restore",
+        };
+        
+        await ChangeProfile(labelDialogViewModel, () =>
+        {
+            var success = Profile.RestoreBackup(BackupProfileSource.SelectedBackupName, AddMessage);
+            return Task.FromResult(success);
+        });
+    }
+
+    private async Task ChangeProfile(LabelDialogViewModel dialogViewModel, Func<Task<bool>> profileAction)
+    {
+        var ok = await DialogService.ShowDialog(dialogViewModel, "ProfileWindowDialog");
         if (!ok)
         {
             return;
         }
-        
+    
         OutputText = "";
-        var success = await Profile.Change(targetUrl, AddMessage);
+        var success = await profileAction();
         AddMessage(success ? "Profileを変更しました" : "Profileの変更に失敗しました");
-
-        Console.WriteLine(Application.Current.ShutdownMode);
+        
+        BackupProfileSource.Refresh();
     }
 
+    
     private void AddMessage(string message)
     {
         var lineBreak = string.IsNullOrEmpty(OutputText) ? "" : "\n";
