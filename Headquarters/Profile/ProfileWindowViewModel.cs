@@ -61,7 +61,7 @@ public class ProfileWindowViewModel : ViewModelBase
                 HelpFirstLine = profileSourceData.Name,
                 HelpDetail = profileSourceData.Description ?? "",
                 Url = profileSourceData.Url,
-                IsEnabled = false
+                IsReadOnly = true
             });
         }
     }
@@ -73,7 +73,7 @@ public class ProfileWindowViewModel : ViewModelBase
             HelpFirstLine = "Git URL",
             HelpDetail = "URLを手動で入力",
             Url = "",
-            IsEnabled = true
+            IsReadOnly = false
         });
     }
 

@@ -25,14 +25,22 @@
 
             <StackPanel Grid.Row="0">
 
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal"
+                            Margin="8 4">
                     <materialDesign:PackIcon Kind="NoteMultiple"
                                              Margin="8"
                                              Width="24"
                                              Height="24" />
-                    <TextBlock VerticalAlignment="Center"
-                               Text="Profile"
-                               FontSize="22" />
+                    <TextBlock Text="Profile"
+                               FontSize="22" 
+                               Margin="0 8"/>
+
+                    <TextBlock Opacity="0.7"
+                               Margin="40 16">
+                        ProfileとはPowerShellスクリプト群と設定をまとめたものです<LineBreak />
+                        Profileを切り替えることでHeadquartersを特定用途向けの状態に切り替えることができます
+                    </TextBlock>
+
                 </StackPanel>
 
                 <Separator />
@@ -53,7 +61,7 @@
 
                                     <TextBox Grid.Column="1"
                                              Text="{Binding Url}"
-                                             IsEnabled="{Binding IsEnabled}"
+                                             IsReadOnly="{Binding IsReadOnly}"
                                              Margin="8 0" />
 
                                     <Button Grid.Column="2"
