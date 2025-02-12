@@ -47,8 +47,18 @@
         
         <Separator />
         
-        <Button Content="Profile" 
-                Command="{Binding OpenProfileWindowCommand}" 
-                Margin="8" />
+        <!-- Profile Window -->
+        <Button Command="{Binding OpenProfileWindowCommand}" 
+                Style="{StaticResource MaterialDesignFlatLightButton}"
+                HorizontalAlignment="Left"
+                Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
+                FontWeight="Normal"
+                Margin="32 8" >
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Profile ウィンドウ" />
+                <materialDesign:PackIcon Kind="OpenInNew"
+                                         Margin="4 0"/>
+            </StackPanel>
+        </Button>
     </StackPanel>
 </UserControl>

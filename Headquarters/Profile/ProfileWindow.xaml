@@ -15,10 +15,16 @@
             <Setter Property="Width" Value="100" />
         </Style>
     </Window.Resources>
-    
+
     <materialDesign:DialogHost Identifier="ProfileWindowDialog">
-        <StackPanel Margin="0 8">
-            <DockPanel>
+        <Grid Margin="0 8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0">
+
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <materialDesign:PackIcon Kind="NoteMultiple"
                                              Margin="8"
@@ -29,101 +35,100 @@
                                FontSize="22" />
                 </StackPanel>
 
-                <!-- <Button HorizontalAlignment="Right" -->
-                <!--         Content="{materialDesign:PackIcon Kind=WindowClose}" -->
-                <!--         Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" -->
-                <!--         Style="{StaticResource MaterialDesignIconButton}" /> -->
-            </DockPanel>
+                <Separator />
 
-            <Separator />
+                <StackPanel Grid.IsSharedSizeScope="True"
+                            Margin="8">
+                    <ItemsControl ItemsSource="{Binding ProfileSources}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate d:DataContext="{d:DesignInstance local:ProfileSourceViewModel}">
+                                <Grid Margin="0 8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="AUTO" SharedSizeGroup="HeaderWidth" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.IsSharedSizeScope="True"
-                        Margin="8">
-                <ItemsControl ItemsSource="{Binding ProfileSources}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate d:DataContext="{d:DesignInstance local:ProfileSourceViewModel}">
-                            <Grid Margin="0 8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="AUTO" SharedSizeGroup="HeaderWidth" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
+                                    <local:HelpTextBlock Grid.Column="0" />
 
-                                <local:HelpTextBlock Grid.Column="0" />
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding Url}"
+                                             IsEnabled="{Binding IsEnabled}"
+                                             Margin="8 0" />
 
-                                <TextBox Grid.Column="1"
-                                         Text="{Binding Url}"
-                                         IsEnabled="{Binding IsEnabled}"
-                                         Margin="8 0" />
+                                    <Button Grid.Column="2"
+                                            Command="{Binding DataContext.ChangeProfileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding Url}"
+                                            Style="{StaticResource ChangeProfileButtonStyle}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="Autorenew"
+                                                                     VerticalAlignment="Center" />
+                                            <TextBlock Text="変更" />
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
-                                <Button Grid.Column="2"
-                                        Command="{Binding DataContext.ChangeProfileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                        CommandParameter="{Binding Url}"
-                                        Style="{StaticResource ChangeProfileButtonStyle}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Kind="Autorenew"
-                                                                 VerticalAlignment="Center" />
-                                        <TextBlock Text="変更" />
-                                    </StackPanel>
-                                </Button>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                    <!-- Backup Field -->
+                    <Grid DataContext="{Binding BackupProfileSource}"
+                          Visibility="{Binding HasBackup, Converter={StaticResource BooleanToVisibilityConverter}}"
+                          Margin="0 8">
 
-                <!-- Backup Field -->
-                <Grid DataContext="{Binding BackupProfileSource}"
-                      Visibility="{Binding HasBackup, Converter={StaticResource BooleanToVisibilityConverter}}"
-                      Margin="0 8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="AUTO" SharedSizeGroup="HeaderWidth" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="AUTO" SharedSizeGroup="HeaderWidth" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                        <local:HelpTextBlock Grid.Column="0" />
 
-                    <local:HelpTextBlock Grid.Column="0" />
+                        <!-- 初回で最初のアイテムが選択されるようにSelectedIndex=0を指定 -->
+                        <ComboBox Grid.Column="1"
+                                  ItemsSource="{Binding BackupNames}"
+                                  SelectedIndex="0"
+                                  SelectedItem="{Binding SelectedBackupName}"
+                                  Margin="8 0" />
 
-                    <!-- 初回で最初のアイテムが選択されるようにSelectedIndex=0を指定 -->
-                    <ComboBox Grid.Column="1"
-                              ItemsSource="{Binding BackupNames}"
-                              SelectedIndex="0"
-                              SelectedItem="{Binding SelectedBackupName}"
-                              Margin="8 0" />
+                        <Button Grid.Column="2"
+                                Command="{Binding DataContext.RestoreBackupCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                Style="{StaticResource ChangeProfileButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Restore"
+                                                         VerticalAlignment="Center" />
+                                <TextBlock Text="元に戻す" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
 
-                    <Button Grid.Column="2"
-                            Command="{Binding DataContext.RestoreBackupCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                            Style="{StaticResource ChangeProfileButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Restore"
-                                                     VerticalAlignment="Center" />
-                            <TextBlock Text="元に戻す" />
-                        </StackPanel>
-                    </Button>
-                </Grid>
+                </StackPanel>
+
+                <Separator />
 
             </StackPanel>
-            
-            <Separator />
 
-            
-            
             <!-- Output Field -->
-            <Border BorderBrush="{DynamicResource MaterialDesign.Brush.TextBox.OutlineBorder}"
+            <Border Grid.Row="1"
+                    VerticalAlignment="Stretch"
+                    BorderBrush="{DynamicResource MaterialDesign.Brush.TextBox.OutlineBorder}"
                     BorderThickness="{x:Static materialDesign:Constants.DefaultOutlinedBorderInactiveThickness}"
                     CornerRadius="4"
-                    MinHeight="100"
+                    MinHeight="70"
                     Margin="8"
                     Padding="4">
-                
-                <TextBox Text="{Binding OutputText}"
-                         VerticalAlignment="Top"
-                         IsReadOnly="True"
-                         BorderThickness="0"
-                         materialDesign:TextFieldAssist.DecorationVisibility="Collapsed" />
-                
+
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+                    <TextBox Text="{Binding OutputText}"
+                             VerticalAlignment="Top"
+                             IsReadOnly="True"
+                             BorderThickness="0"
+                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed" />
+                </ScrollViewer>
+
             </Border>
 
-        </StackPanel>
+        </Grid>
     </materialDesign:DialogHost>
 </Window>
