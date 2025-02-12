@@ -7,7 +7,8 @@ namespace Headquarters;
 
 public static class SettingManager
 {
-    private const string DefaultSettingFilePath = $"{Profile.DefaultPath}.\\Setting.json";
+    public const string SettingFileName = "setting.json";
+    private static readonly string DefaultSettingFilePath = Path.Combine(Profile.DefaultPath, SettingFileName);
     
     /// <summary>
     /// Jsonによる設定データ

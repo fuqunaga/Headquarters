@@ -9,7 +9,7 @@ namespace Headquarters;
 
 public class ProfileWindowViewModel : ViewModelBase
 {
-    private const string ProfilesDataFilePath = $"{PathSetting.DataPath}\\Profiles.json";
+    private const string ProfilesDataFilePath = $"{PathSetting.DataPath}\\profiles.json";
     private string _outputText = "";
     
     
