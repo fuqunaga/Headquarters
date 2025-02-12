@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
-using MaterialDesignThemes.Wpf;
 
 namespace Headquarters;
 
@@ -10,9 +10,14 @@ public class SettingPageViewModel : ViewModelBase
     public ICommand OpenProfileWindowCommand { get; } = new DelegateCommand(_ =>
     {
         DialogService.CloseDialog();
-        
-        ProfileWindow.Instance.DataContext = new ProfileWindowViewModel();
-        ProfileWindow.Instance.ShowDialog();
+
+        var profileWindow = new ProfileWindow()
+        {
+            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            DataContext = new ProfileWindowViewModel()
+        };
+
+        profileWindow.ShowDialog();
     });
 
     public void InitializeWithGlobalParameter()
