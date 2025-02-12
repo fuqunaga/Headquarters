@@ -11,13 +11,22 @@ public class MainWindowViewModel : ViewModelBase
 {
     public static MainWindowViewModel Instance { get; private set; } = null!;
     
+    
     private readonly Window _targetWindow;
+    private int _selectedTabIndex;
     
     public Func<IEnumerable<MainTabViewModel>>? GetOrderedTabsFunc { get; set; }
     public SettingPageViewModel SettingPageViewModel { get; } = new();
     public ObservableCollection<MainTabViewModel> TabItems { get;  } = [];
-
+    public int SelectedTabIndex
+    {
+        get => _selectedTabIndex;
+        set => SetProperty(ref _selectedTabIndex, value);
+    }
     
+    public bool IsWindowVisible => _targetWindow.IsVisible;
+
+
     public MainWindowViewModel(Window window)
     {
         Instance = this;
@@ -67,8 +76,7 @@ public class MainWindowViewModel : ViewModelBase
     public void LoadAndShowWindow()
     {
         LoadSettings();
+        SelectedTabIndex = 0;
         _targetWindow.Show();
     }
-    
-    public bool IsWindowVisible => _targetWindow.IsVisible;
 }

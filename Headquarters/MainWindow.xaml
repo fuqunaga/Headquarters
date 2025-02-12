@@ -59,7 +59,7 @@
                                      ItemsSource="{Binding TabItems, Mode=OneWay}"
                                      NewItemFactory="{x:Static local:MainTabViewModel.Factory}"
                                      ItemContainerStyle="{StaticResource  TabItemStyle}"
-                                     SelectedIndex="0">
+                                     SelectedIndex="{Binding SelectedTabIndex}">
 
                 <TabControl.ContentTemplate>
                     <DataTemplate>

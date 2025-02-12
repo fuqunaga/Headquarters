@@ -86,8 +86,9 @@ public class ProfileWindowViewModel : ViewModelBase
     {
         var labelDialogViewModel = new LabelDialogViewModel()
         {
-            Title = "Profile変更",
+            Title = "Change Profile",
             Text = "Profileを変更しますか？\n\n現在のパラメーターはすべて上書きされます\nあとでバックアップから復元できます",
+            OkButtonContent = "Change",
         };
         
         var ok = await DialogService.ShowDialog(labelDialogViewModel, "ProfileWindowDialog");
