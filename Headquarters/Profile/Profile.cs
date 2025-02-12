@@ -19,9 +19,8 @@ public static class Profile
     public const string DefaultPath =  $"{PathSetting.DataPath}\\Profile";
     public const string BackupPath = $"{DefaultPath}Backup";
     private const string TempPath = $"{PathSetting.DataPath}\\Temp";
-    private const string DefaultScriptsFolder = $"{DefaultPath}\\Scripts";
-
-
+    private const string ScriptsFolderName = "Scripts";
+    
     public static async Task<bool> ChangeProfileByUrl(string url, Action<string>? addMessage = null)
     {
         var folderPath = GetTemporallyPath();
@@ -49,7 +48,7 @@ public static class Profile
         }
     }
 
-    public static bool ChangeProfileByFolder(string newProfileSourcePath, Action<string>? addMessage = null)
+    private static bool ChangeProfileByFolder(string newProfileSourcePath, Action<string>? addMessage = null)
     {
         try
         {
@@ -65,6 +64,12 @@ public static class Profile
                 return false;
             }
 
+            var (isValid, hasScriptsFolder) = ValidateFolderContentsAsProfile(newProfileSourcePath, addMessage);
+            if (!isValid)
+            {
+                return false;
+            }
+            
             // MainWindowを閉じる
             // このときsetting.jsonが保存される
             // MainWindow.CloseCurrentWindow();
@@ -75,8 +80,15 @@ public static class Profile
 
             // Profileフォルダを作成し、新しいProfileを移動する
             // .gitフォルダは隠しファイルでコピーされない。これは都合が良い
-            Directory.CreateDirectory(DefaultPath);
-            Directory.Move(newProfileSourcePath, DefaultScriptsFolder);
+            if (hasScriptsFolder)
+            {
+                Directory.Move(newProfileSourcePath, DefaultPath);
+            }
+            else
+            {
+                Directory.CreateDirectory(DefaultPath);
+                Directory.Move(newProfileSourcePath, Path.Combine(DefaultPath, ScriptsFolderName));
+            }
         }
         catch (Exception e)
         {
@@ -114,6 +126,7 @@ public static class Profile
                        $"git sparse-checkout set --no-cone {subfolder} && " +
                        $"git checkout {branchOrCommit}";
         
+        addMessage?.Invoke($"> {commands}");
         var success = await RunCommand(commands, addMessage);
         
         return (success, subfolder);
@@ -187,6 +200,27 @@ public static class Profile
         addMessage?.Invoke($"Profileを {backupPath} にバックアップしました");
     }
     
+    
+    private static (bool isValid, bool hasScriptsFolder) ValidateFolderContentsAsProfile(string newProfileSourcePath, Action<string>? addMessage)
+    {
+        var folders = Directory.GetDirectories(newProfileSourcePath).Select(Path.GetFileName);
+        var hasScriptsFolder = folders.Contains(ScriptsFolderName);
+
+        // Scriptsフォルダがない場合は直下にスクリプトがあることを期待
+        if (!hasScriptsFolder)
+        {
+            var files = Directory.GetFiles(newProfileSourcePath).Select(Path.GetFileName);
+            var hasScriptFile = files.Any(x => x.EndsWith(".ps1"));
+            if(!hasScriptFile)
+            {
+                addMessage?.Invoke(".ps1ファイル、Scriptsフォルダもどちらも存在しません");
+                return (false, hasScriptsFolder);
+            }
+        }
+        
+        return (true, hasScriptsFolder);
+    }
+    
     /// <summary>
     /// Recursively deletes a directory as well as any subdirectories and files. If the files are read-only, they are flagged as normal and then deleted.
     /// </summary>
@@ -195,6 +229,11 @@ public static class Profile
     /// https://stackoverflow.com/a/26372070/2015881
     private static void DeleteReadOnlyDirectory(string directory)
     {
+        if (!Directory.Exists(directory))
+        {
+            return;
+        }
+        
         foreach (var subdirectory in Directory.EnumerateDirectories(directory)) 
         {
             DeleteReadOnlyDirectory(subdirectory);

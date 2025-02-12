@@ -8,7 +8,8 @@
         mc:Ignorable="d"
         Style="{StaticResource MaterialDesignWindow}"
         Title="ProfileWindow"
-        SizeToContent="WidthAndHeight"
+        Width="700"
+        SizeToContent="Height"
         d:DataContext="{d:DesignInstance local:ProfileWindowViewModel}">
     <Window.Resources>
         <Style x:Key="ChangeProfileButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
@@ -116,27 +117,21 @@
 
             </StackPanel>
 
-            <!-- Output Field -->
-            <Border Grid.Row="1"
-                    VerticalAlignment="Stretch"
-                    BorderBrush="{DynamicResource MaterialDesign.Brush.TextBox.OutlineBorder}"
-                    BorderThickness="{x:Static materialDesign:Constants.DefaultOutlinedBorderInactiveThickness}"
-                    CornerRadius="4"
-                    MinHeight="70"
-                    Margin="8"
-                    Padding="4">
-
-                <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                              VerticalScrollBarVisibility="Auto">
-                    <TextBox Text="{Binding OutputText}"
-                             VerticalAlignment="Top"
-                             IsReadOnly="True"
-                             BorderThickness="0"
-                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed" />
-                </ScrollViewer>
-
-            </Border>
-
+            <TextBox Grid.Row="1"
+                     Text="{Binding OutputText}"
+                     IsReadOnly="True"
+                     VerticalAlignment="Stretch"
+                     MinHeight="100"
+                     Margin="8"
+                     BorderBrush="{DynamicResource MaterialDesign.Brush.TextBox.OutlineBorder}"
+                     BorderThickness="{x:Static materialDesign:Constants.DefaultOutlinedBorderInactiveThickness}"
+                     materialDesign:TextFieldAssist.UnderlineBrush="{Binding BorderBrush, RelativeSource={RelativeSource Self}}"
+                     materialDesign:TextFieldAssist.TextFieldCornerRadius="4"
+                     materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"
+                     materialDesign:TextFieldAssist.TextBoxViewVerticalAlignment="Top"
+                     materialDesign:TextFieldAssist.TextBoxViewMargin="4"
+                     HorizontalScrollBarVisibility="Auto"
+                     VerticalScrollBarVisibility="Auto" />
         </Grid>
     </materialDesign:DialogHost>
 </Window>
