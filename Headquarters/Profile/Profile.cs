@@ -34,7 +34,7 @@ public static class Profile
             }
 
             var newProfileSourcePath = Path.Combine(folderPath, subfolder);
-            return ChangeProfileByFolder(newProfileSourcePath, addMessage);
+            return await ChangeProfileByFolder(newProfileSourcePath, addMessage);
         }
         catch (Exception e)
         {
@@ -48,7 +48,7 @@ public static class Profile
         }
     }
 
-    private static bool ChangeProfileByFolder(string newProfileSourcePath, Action<string>? addMessage = null)
+    private static async Task<bool> ChangeProfileByFolder(string newProfileSourcePath, Action<string>? addMessage = null)
     {
         try
         {
@@ -74,21 +74,24 @@ public static class Profile
             // このときsetting.jsonが保存される
             // MainWindow.CloseCurrentWindow();
             MainWindowViewModel.Instance.SaveAndHideWindow();
-            
-            // 現在のProfileをBackupフォルダに移動する
-            MoveCurrentProfileToBackup();
 
-            // Profileフォルダを作成し、新しいProfileを移動する
-            // .gitフォルダは隠しファイルでコピーされない。これは都合が良い
-            if (hasScriptsFolder)
+            await Task.Run(() =>
             {
-                Directory.Move(newProfileSourcePath, DefaultPath);
-            }
-            else
-            {
-                Directory.CreateDirectory(DefaultPath);
-                Directory.Move(newProfileSourcePath, Path.Combine(DefaultPath, ScriptsFolderName));
-            }
+                // 現在のProfileをBackupフォルダに移動する
+                MoveCurrentProfileToBackup();
+
+                // Profileフォルダを作成し、新しいProfileを移動する
+                // .gitフォルダは隠しファイルでコピーされない。これは都合が良い
+                if (hasScriptsFolder)
+                {
+                    Directory.Move(newProfileSourcePath, DefaultPath);
+                }
+                else
+                {
+                    Directory.CreateDirectory(DefaultPath);
+                    Directory.Move(newProfileSourcePath, Path.Combine(DefaultPath, ScriptsFolderName));
+                }
+            });
         }
         catch (Exception e)
         {
@@ -264,9 +267,9 @@ public static class Profile
     }
 
  
-    public static bool RestoreBackup(string backupName, Action<string>? addMessage = null)
+    public static async Task<bool> RestoreBackup(string backupName, Action<string>? addMessage = null)
     {
         var backupPath = Path.Combine(BackupPath, backupName);
-        return ChangeProfileByFolder(backupPath, addMessage);
+        return await ChangeProfileByFolder(backupPath, addMessage);
     }
 }

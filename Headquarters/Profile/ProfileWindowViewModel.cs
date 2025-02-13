@@ -99,11 +99,7 @@ public class ProfileWindowViewModel : ViewModelBase
             OkButtonContent = "Restore",
         };
         
-        await ChangeProfile(labelDialogViewModel, () =>
-        {
-            var success = Profile.RestoreBackup(BackupProfileSource.SelectedBackupName, AddMessage);
-            return Task.FromResult(success);
-        });
+        await ChangeProfile(labelDialogViewModel, () => Profile.RestoreBackup(BackupProfileSource.SelectedBackupName, AddMessage));
     }
 
     private async Task ChangeProfile(LabelDialogViewModel dialogViewModel, Func<Task<bool>> profileAction)
