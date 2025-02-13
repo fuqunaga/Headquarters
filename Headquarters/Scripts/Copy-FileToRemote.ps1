@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-ファイルをコピーします
+ローカルPCのファイルをリモートPCにコピーします
 
 .DESCRIPTION
 PowerShellのCopy-Itemコマンドレットでファイルをコピーします
