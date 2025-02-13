@@ -9,16 +9,27 @@ public class BackupProfileSourceViewModel : ViewModelBase, IHelpTextBlockViewMod
     
     public string HelpFirstLine => "バックアップ";
     public string HelpDetail => "";
-    
-    public IEnumerable<string> BackupNames => _backupProfileNames ??= Profile.GetBackupProfileNames().ToList();
-    
+
+    public IEnumerable<string> BackupNames
+    {
+        get
+        {
+            if (_backupProfileNames == null)
+            {
+                 _backupProfileNames = Profile.GetBackupProfileNames().ToList();
+                 SelectedBackupName = BackupNames.FirstOrDefault() ?? "";
+            }
+                
+            return _backupProfileNames;
+        }
+    }
+
     public bool HasBackup => BackupNames.Any();
     public string SelectedBackupName { get; set; } = "";
     
     public void Refresh()
     {
         _backupProfileNames = null;
-        SelectedBackupName = BackupNames.FirstOrDefault() ?? "";
         
         OnPropertyChanged(nameof(HasBackup));
         OnPropertyChanged(nameof(BackupNames));

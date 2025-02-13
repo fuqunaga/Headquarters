@@ -96,8 +96,8 @@
                         <!-- 初回で最初のアイテムが選択されるようにSelectedIndex=0を指定 -->
                         <ComboBox Grid.Column="1"
                                   ItemsSource="{Binding BackupNames}"
-                                  SelectedIndex="0"
-                                  SelectedItem="{Binding SelectedBackupName}"
+                                  SelectedItem="{Binding SelectedBackupName, Mode=TwoWay}"
+                                  IsSynchronizedWithCurrentItem="True"
                                   Margin="8 0" />
 
                         <Button Grid.Column="2"
