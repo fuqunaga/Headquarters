@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using ScriptParameterSetTable = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, string>>;
 
@@ -10,6 +11,8 @@ namespace Headquarters;
 
 public class ScriptPageViewModel : ViewModelBase, IDisposable
 {
+    private static readonly string ScriptFolderPath = Path.Combine(Profile.DefaultPath, "Scripts");
+    
     public enum Page
     {
         SelectScript,
@@ -64,13 +67,13 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         }
     } 
     
-    public IEnumerable<string> ScriptParameterNames => _currentPage == Page.RunScript
-        ? CurrentScriptRunViewModel.Parameters.Select(parameterViewModel => parameterViewModel.Name)
+    public IEnumerable<string> ParameterNamesOnlyIpAddressTask => _currentPage == Page.RunScript
+        ? CurrentScriptRunViewModel.Script.EditableScriptParameterDefinitionsOnlyIpAddressTask.Select(p => p.Name)
         : Array.Empty<string>();
     
-    public ScriptPageViewModel(IpListViewModel ipListViewModel, ScriptChainData.ScriptData scriptData, string folderPath=$@"{Profile.DefaultPath}\\Scripts")
+    public ScriptPageViewModel(IpListViewModel ipListViewModel, ScriptChainData.ScriptData scriptData)
     {
-        _watcher = ScriptDirectoryWatcher.GetOrCreate(folderPath);
+        _watcher = ScriptDirectoryWatcher.GetOrCreate(ScriptFolderPath);
         _watcher.Scripts.CollectionChanged += OnScriptsChanged;
         
         Items = new ObservableCollection<ScriptButtonViewModel>(
@@ -222,10 +225,17 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         
         var psi = new ProcessStartInfo
         {
-            FileName = @".\Scripts\" + CurrentScriptName + ".ps1",
+            FileName = Path.Combine(ScriptFolderPath, $"{CurrentScriptName}.ps1"),
             UseShellExecute = true // 既定のプログラムで開くために必要
         };
 
-        Process.Start(psi);
+        try
+        {
+            Process.Start(psi);
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
     }
 }

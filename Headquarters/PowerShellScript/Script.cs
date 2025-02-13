@@ -57,29 +57,26 @@ namespace Headquarters
         // 変更可能なパラメータ
         // 複数の関数に同じパラメータがあった場合とりあえず最初のものを採用
         // HelpInfoがある場合のその順番にする
-        public IEnumerable<ScriptParameterDefinition> EditableScriptParameterDefinitions
+        public IEnumerable<ScriptParameterDefinition> EditableScriptParameterDefinitions =>
+            FilterEditableScriptParameterDefinitions(_scriptFunctionDictionary.Values.SelectMany(f => f.Parameters));
+
+        public IEnumerable<ScriptParameterDefinition> EditableScriptParameterDefinitionsOnlyIpAddressTask
         {
             get
             {
-                var editableParameters = _scriptFunctionDictionary.Values.SelectMany(f => f.Parameters)
-                    .GroupBy(p => p.Name)
-                    .Select(group => group.First())
-                    .Where(p => !ReservedParameterNames.Contains(p.Name, StringComparer.OrdinalIgnoreCase));
-                
-                if (_helpInfo == null)
+                var parameterDefinitions = IpAddressTask.Parameters.AsEnumerable();
+                if (HasBeginTask)
                 {
-                    return editableParameters;
+                    parameterDefinitions = parameterDefinitions.Except(BeginTask.Parameters, ScriptParameterDefinition.NameEqualityComparer.Default);
                 }
 
-                // parameterNamesの順番をHelpInfoの順番にする
-                var helpParameters = _helpInfo.Parameters.Keys
-                    .Select(name => editableParameters.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
-                    .Where(p => p != null)
-                    .Select(p => p!)
-                    .ToList();
-                
-                return helpParameters.Concat(editableParameters.Except(helpParameters));
-            } 
+                if (HasEndTask)
+                {
+                    parameterDefinitions = parameterDefinitions.Except(EndTask.Parameters, ScriptParameterDefinition.NameEqualityComparer.Default);
+                }
+                    
+                return FilterEditableScriptParameterDefinitions(parameterDefinitions);
+            }
         }
 
         public bool HasBeginTask => _scriptFunctionDictionary.ContainsKey(BeginTaskFunctionName);
@@ -108,6 +105,29 @@ namespace Headquarters
             return string.Empty;
         }
 
+        // 変更可能なパラメータ
+        // HelpInfoがある場合のその順番にする
+        private IEnumerable<ScriptParameterDefinition> FilterEditableScriptParameterDefinitions(IEnumerable<ScriptParameterDefinition> parameterDefinitions)
+        {
+            var editableParameters = parameterDefinitions
+                .GroupBy(p => p.Name)
+                .Select(group => group.First())
+                .Where(p => !ReservedParameterNames.Contains(p.Name, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+                
+            if (_helpInfo == null)
+            {
+                return editableParameters;
+            }
+
+            var helpParameters = _helpInfo.Parameters.Keys
+                .Select(name => editableParameters.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+                .Where(p => p != null)
+                .Select(p => p!)
+                .ToList();
+
+            return helpParameters.Concat(editableParameters.Except(helpParameters));
+        }
 
         public void Update()
         {

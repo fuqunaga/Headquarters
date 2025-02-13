@@ -74,7 +74,7 @@ public class MainTabViewModel : ViewModelBase, IDisposable
             }
         };
         
-        IpListViewModel.DataGridViewModel.getScriptParameterNamesFunc = () => ScriptChainPageViewModel.CurrentScriptPageViewModel.ScriptParameterNames;
+        IpListViewModel.DataGridViewModel.getScriptParameterNamesFunc = () => ScriptChainPageViewModel.CurrentScriptPageViewModel.ParameterNamesOnlyIpAddressTask;
         
         UpdateHeader();
         

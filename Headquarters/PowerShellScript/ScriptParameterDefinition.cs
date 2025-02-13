@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
@@ -48,4 +49,16 @@ public class ScriptParameterDefinition : IParameterDefinition
         }
     }
     
+    
+    #region Equality
+    
+    public class NameEqualityComparer : IEqualityComparer<ScriptParameterDefinition>
+    {
+        public static NameEqualityComparer Default { get; } = new();
+    
+        public bool Equals(ScriptParameterDefinition x, ScriptParameterDefinition y) => x.Name == y.Name;
+        public int GetHashCode(ScriptParameterDefinition obj) => obj.Name.GetHashCode();
+    }
+    
+    #endregion
 }

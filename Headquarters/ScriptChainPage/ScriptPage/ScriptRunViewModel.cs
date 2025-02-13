@@ -14,7 +14,6 @@ namespace Headquarters;
 public class ScriptRunViewModel : ViewModelBase, IDisposable
 {
     private readonly IpListViewModel _ipListViewModel;
-    private readonly Script _script;
     private readonly ParameterSet _scriptParameterSet;
     
     private string _scriptName = "";
@@ -24,7 +23,9 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     private CancellationTokenSource? _cancelTokenSource;
     private readonly ConcurrentDictionary<string, object> _sharedDictionary = [];
 
+    public Script Script { get; }
 
+    
     #region Binding Properties
 
     public string ScriptName
@@ -58,8 +59,8 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
 
     public ScriptRunViewModel(Script script, IpListViewModel ipListViewModel, ParameterSet scriptParameterSet)
     {
-        _script = script;
-        _script.onUpdate += OnUpdateScript;
+        Script = script;
+        Script.onUpdate += OnUpdateScript;
         
         _scriptParameterSet = scriptParameterSet;
         _ipListViewModel = ipListViewModel;
@@ -69,7 +70,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     
     public void Dispose()
     {
-        _script.onUpdate -= OnUpdateScript;
+        Script.onUpdate -= OnUpdateScript;
     }
 
     private void OnUpdateScript() => OnUpdateScript(true);
@@ -78,27 +79,27 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     {
         Parameters.Clear();
         
-        foreach (var scriptParameter in _script.EditableScriptParameterDefinitions)
+        foreach (var scriptParameter in Script.EditableScriptParameterDefinitions)
         {
             Parameters.Add(new ScriptParameterInputFieldViewModel(
                     scriptParameter,
-                    _script.GetParameterHelp(scriptParameter.Name),
+                    Script.GetParameterHelp(scriptParameter.Name),
                     _ipListViewModel,
                     _scriptParameterSet).InitializeValueIfEmpty()
             );
         }
         
-        ScriptName = _script.Name;
-        Description = _script.Description;
+        ScriptName = Script.Name;
+        Description = Script.Description;
 
         if (outputInformation)
         {
             AddOutputInformation("スクリプトファイルを読み込みました");
         }
 
-        if (_script.HasParseError)
+        if (Script.HasParseError)
         {
-            AddOutput(OutputIcon.Failure, "Script Parse Error", $"{string.Join("\n\n", _script.ParseErrorMessages)}");
+            AddOutput(OutputIcon.Failure, "Script Parse Error", $"{string.Join("\n\n", Script.ParseErrorMessages)}");
         }
     }
 
@@ -184,9 +185,9 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         // --------------------------------------------------------------------------------
         // BeginTask
         // --------------------------------------------------------------------------------
-        if (_script.HasBeginTask)
+        if (Script.HasBeginTask)
         {
-            var result = await RunScriptFunction(_script.BeginTask, cancellationToken);
+            var result = await RunScriptFunction(Script.BeginTask, cancellationToken);
             if(ShouldReturn(cancellationToken, result, isStopOnError, out var runResult))
             {
                 return runResult;
@@ -196,7 +197,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         // --------------------------------------------------------------------------------
         // IpAddressTask parallel
         // --------------------------------------------------------------------------------
-        if (_script.HasIpAddressTask)
+        if (Script.HasIpAddressTask)
         {
             var runResult = await RunIpAddressTasks(ipAndParameterList, cancellationToken, maxTaskCount, isStopOnError);
             if(runResult != ScriptRunResult.Success)
@@ -208,9 +209,9 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         // --------------------------------------------------------------------------------
         // EndTask
         // --------------------------------------------------------------------------------
-        if (_script.HasEndTask)
+        if (Script.HasEndTask)
         {
-            var result = await RunScriptFunction(_script.EndTask, cancellationToken);
+            var result = await RunScriptFunction(Script.EndTask, cancellationToken);
             if( result.canceled)
             {
                 return ScriptRunResult.Stop;
@@ -369,7 +370,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             eventSubscriber: scriptExecutionInfo.EventSubscriber
         );
 
-        scriptExecutionInfo.Result = await _script.IpAddressTask.Run(ip, param, sharedDictionary);
+        scriptExecutionInfo.Result = await Script.IpAddressTask.Run(ip, param, sharedDictionary);
         return scriptExecutionInfo.Result;
     }
 
