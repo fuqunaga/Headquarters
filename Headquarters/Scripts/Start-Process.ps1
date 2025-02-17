@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-アプリケーションを実行します
+リモートPC上のアプリケーションを実行します
 
 .PARAMETER FilePath
 開始するアプリケーションのパス
@@ -11,7 +11,6 @@ param(
     $FilePath,
     $Session
 )
-
 
 Invoke-Command $Session -ScriptBlock {
     if (!(Test-Path $using:FilePath)) {

@@ -3,7 +3,7 @@
 ローカルPCのファイルをリモートPCにコピーします
 
 .DESCRIPTION
-PowerShellのCopy-Itemコマンドレットでファイルをコピーします
+PowerShellのCopy-ItemコマンドレットでローカルPCファイルをリモートPCにコピーします
 RemoteFolderに"$(IP)"という文字列が含まれている場合、対応するIPListのIPアドレスに置換します
 Windowsの共有フォルダ機能（UNCパス）でのコピーも可能です
 例: \\$(IP)\share\path -> \\192.168.0.1\share\path

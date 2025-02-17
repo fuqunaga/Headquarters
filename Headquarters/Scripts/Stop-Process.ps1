@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-プロセスを停止します
+リモートPC上のプロセスを停止します
 
 .PARAMETER ProcessName
 停止するプロセス名

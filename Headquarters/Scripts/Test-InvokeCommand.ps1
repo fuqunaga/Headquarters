@@ -2,9 +2,6 @@
 .SYNOPSIS
 リモートPC上でコマンドを実行できるかテストします
 
-.DESCRIPTION
-リモートPC上でコマンドを実行できるかテストします
-
 .PARAMETER RemotePath
 リモートPC上のファイルパス
 このパスが存在するか確認するコマンドを実行します
