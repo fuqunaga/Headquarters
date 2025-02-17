@@ -30,10 +30,11 @@
         
         <!-- ScriptParameterInputFieldType別コンテンツ -->
         <DataTemplate x:Key="Field-UseIpList" DataType="{x:Type local:ParameterInputFieldViewModel}">
-            <TextBox IsEnabled="False"
-                     Text="IP Listの値を参照します"
-                     Padding="0"
-                     />
+            <Grid>
+                <TextBox IsEnabled="False"
+                         Text="IP Listの値を参照します"
+                         VerticalAlignment="Center" />
+            </Grid>
         </DataTemplate>
 
         <DataTemplate x:Key="Field-TextBox" DataType="{x:Type local:ParameterInputFieldViewModel}">
