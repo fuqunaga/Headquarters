@@ -59,6 +59,29 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        
+        <Style x:Key="HelpTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        
+        <ControlTemplate x:Key="HelpHeader">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="TextBox" Margin="8 0" />
+                <TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                            <Setter Property="Text" Value="{Binding Synopsis}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Synopsis}" Value="">
+                                    <Setter Property="Text" Value="Description" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+        </ControlTemplate>
     </UserControl.Resources>
 
 
@@ -68,28 +91,47 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
 
-        
-        <ScrollViewer  Grid.Row="0" 
-                       VerticalScrollBarVisibility="Auto"
-                       HorizontalScrollBarVisibility="Auto">
+
+        <ScrollViewer Grid.Row="0"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto">
+
             <StackPanel>
+
+                <!-- Synopsys -->
+                <!-- Descriptionがなければ表示 -->
+                <ContentControl Template="{StaticResource HelpHeader}"
+                                Margin="24 12">
+                    <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding HasSynopsis}" Value="True" />
+                                        <Condition Binding="{Binding HasDescription}" Value="False" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                </ContentControl>
+      
                 <!-- Description -->
                 <Expander HorizontalAlignment="Stretch"
-                      Visibility="{Binding Description, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}">
+                          Visibility="{Binding HasDescription, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Expander.Header>
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="TextBox" Margin="4 0 4 0" />
-                            <TextBlock Text="Description" />
-                        </StackPanel>
+                        <ContentControl Template="{StaticResource HelpHeader}" />
                     </Expander.Header>
-
+                    
                     <TextBlock Text="{Binding Description}"
-                           Margin="32 0 16 16"
-                           TextWrapping="Wrap"
-                           Opacity="0.7" />
+                               Style="{StaticResource HelpTextBlockStyle}"
+                               Margin="48 0 16 16"
+                               Opacity="0.7"/>
                 </Expander>
+                
                 <Border Style="{StaticResource HorizontalDividerBorder}" />
 
 

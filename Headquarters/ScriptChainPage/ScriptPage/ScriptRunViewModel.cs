@@ -17,6 +17,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     private readonly ParameterSet _scriptParameterSet;
     
     private string _scriptName = "";
+    private string _synopsis = "";
     private string _description = "";
     private bool _isLocked;
     private readonly List<Task> _runningTasks = [];
@@ -33,11 +34,32 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         get => _scriptName;
         private set => SetProperty(ref _scriptName, value);
     }
+    
+    public bool HasSynopsis => !string.IsNullOrEmpty(Synopsis);
+    public bool HasDescription => !string.IsNullOrEmpty(Description);
+    
+    public string Synopsis
+    {
+        get => _synopsis;
+        private set
+        {
+            if (SetProperty(ref _synopsis, value))
+            {
+                OnPropertyChanged(nameof(HasSynopsis));
+            }
+        }
+    }
 
     public string Description
     {
         get => _description;
-        private set => SetProperty(ref _description, value);
+        private set
+        {
+            if (SetProperty(ref _description, value))
+            {
+                OnPropertyChanged(nameof(HasDescription));
+            }
+        }
     }
 
     public bool IsLocked
@@ -90,6 +112,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         }
         
         ScriptName = Script.Name;
+        Synopsis = Script.Synopsis;
         Description = Script.Description;
 
         if (outputInformation)
