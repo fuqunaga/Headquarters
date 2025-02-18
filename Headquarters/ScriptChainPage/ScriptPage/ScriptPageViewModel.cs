@@ -208,8 +208,8 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         {
             FileName = "explorer.exe",
             Arguments = string.IsNullOrEmpty(CurrentScriptName)
-            ? @".\Scripts"
-            : $@"/select, .\Scripts\{CurrentScriptName}.ps1"
+                ? ScriptFolderPath
+                : $@"/select, {Path.Combine(ScriptFolderPath, CurrentScriptName)}.ps1"
         };
         
         Process.Start(psi);
