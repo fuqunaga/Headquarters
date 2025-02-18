@@ -31,16 +31,16 @@ public class MainWindowViewModel : ViewModelBase
     {
         Instance = this;
         _targetWindow = window;
-        _targetWindow.Closing += OnClosing;
+        _targetWindow.Closed += OnClosed;
         
         LoadSettings();
     }
 
-    private void OnClosing(object? sender, CancelEventArgs e)
+    private void OnClosed(object sender, EventArgs e)
     {
         SaveSettings();
     }
-
+    
     private void LoadSettings()
     {
         var settingData = SettingManager.Load() ?? SettingManager.SettingData.Default;
