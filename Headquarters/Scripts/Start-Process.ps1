@@ -9,10 +9,10 @@
 param(
     [ValidateNotNullOrEmpty()]
     $FilePath,
-    $Session
+    $TaskContext
 )
 
-Invoke-Command $Session -ScriptBlock {
+Invoke-Command -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential -ScriptBlock {
     if (!(Test-Path $using:FilePath)) {
         Write-Error "ファイル[$using:FilePath]が見つかりません。"
         return

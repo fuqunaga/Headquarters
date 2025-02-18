@@ -3,8 +3,8 @@
 リモートPCを再起動します
 #>
 
-param($Session)
+param($TaskContext)
 
-Invoke-Command $Session -ScriptBlock {
+Invoke-Command -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential -ScriptBlock {
    shutdown /r
 }

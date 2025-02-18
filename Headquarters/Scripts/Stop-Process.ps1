@@ -6,8 +6,8 @@
 停止するプロセス名
 #>
 
-param($Session, $ProcessName)
+param($ProcessName, $TaskContext)
 
-Invoke-Command $Session -ScriptBlock {
+Invoke-Command -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential -ScriptBlock {
     Stop-Process -Name $using:ProcessName -Force
 }

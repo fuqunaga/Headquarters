@@ -14,9 +14,9 @@ C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup\<$ShortcutName>.lnk
 ショートカットのリンク先
 #>
 
-param($Session, $ShortcutName, $TargetPath)
+param($ShortcutName, $TargetPath, $TaskContext)
 
-Invoke-Command $Session -ScriptBlock {
+Invoke-Command -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential -ScriptBlock {
    $item = Get-Item $using:TargetPath
    $WSH = New-Object -ComObject 'WScript.Shell'
    $lnk = $WSH.CreateShortcut("C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup\$using:ShortcutName.lnk")

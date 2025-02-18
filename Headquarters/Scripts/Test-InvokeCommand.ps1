@@ -7,9 +7,9 @@
 このパスが存在するか確認するコマンドを実行します
 #>
 
-param($Session, $RemotePath)
+param($RemotePath, $TaskContext)
 
-Invoke-Command -Session $session -ScriptBlock { 
+Invoke-Command -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential -ScriptBlock { 
     "hostname: $(hostname)"
     "Test-Path [$using:RemotePath]: $(Test-Path $using:RemotePath)"
 }
