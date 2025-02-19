@@ -12,7 +12,7 @@ namespace Headquarters
         public const string IpPropertyName = "IP";
 
         public bool IsSelected => (bool)dataRow[IsSelectedPropertyName];
-        public string IpString => (string)dataRow[IpPropertyName];
+        public string IpString => dataRow[IpPropertyName] as string ?? "";
 
 
         public string? Get(string name)
