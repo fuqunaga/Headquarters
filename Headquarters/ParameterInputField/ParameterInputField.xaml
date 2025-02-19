@@ -33,7 +33,9 @@
             <Grid>
                 <TextBox IsEnabled="False"
                          Text="IP Listの値を参照します"
-                         VerticalAlignment="Center" />
+                         VerticalAlignment="Center"
+                         Padding="0"
+                         />
             </Grid>
         </DataTemplate>
 
