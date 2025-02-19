@@ -178,8 +178,7 @@
                                 
                                 <!-- IsStopOnError -->
                                 <!-- "HeaderGroup"はMenuItemのスタイルで使用しているShaderSizeGroupと同名 -->
-                                <Grid IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
-                                      Style="{StaticResource AddToolTipOfLockStyle}"
+                                <Grid Style="{StaticResource LockableStyle}"
                                       Margin="24 4">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition SharedSizeGroup="HeaderGroup" />
@@ -195,8 +194,7 @@
                                 </Grid>
                                 
                                 <!-- MaxTaskCount -->
-                                <Grid IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
-                                      Style="{StaticResource AddToolTipOfLockStyle}"
+                                <Grid Style="{StaticResource LockableStyle}"
                                       Margin="24 4" >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition SharedSizeGroup="HeaderGroup" />

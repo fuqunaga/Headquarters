@@ -27,7 +27,8 @@
 
             <system:String x:Key="LockedControlToolTip">操作するにはタブのロックを解除してください</system:String>
             
-            <Style x:Key="AddToolTipOfLockStyle" TargetType="{x:Type FrameworkElement}">
+            <Style x:Key="LockableStyle" TargetType="{x:Type FrameworkElement}">
+                <Setter Property="IsEnabled" Value="{Binding (local:LockAssist.IsUnlocked), RelativeSource={RelativeSource AncestorType={x:Type local:MainTab}}}" />
                 <Setter Property="ToolTip" Value="{StaticResource LockedControlToolTip}" />
                 <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
                 <Setter Property="ToolTipService.Placement" Value="Mouse" />

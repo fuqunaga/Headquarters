@@ -62,8 +62,9 @@
                                      SelectedIndex="{Binding SelectedTabIndex}">
 
                 <TabControl.ContentTemplate>
-                    <DataTemplate>
-                        <local:MainTab />
+                    <DataTemplate DataType="{x:Type local:MainTabViewModel}">
+                        <local:MainTab
+                            local:LockAssist.IsUnlocked="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"/>
                     </DataTemplate>
                 </TabControl.ContentTemplate>
 

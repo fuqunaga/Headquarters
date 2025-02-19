@@ -35,8 +35,7 @@
 
                 <materialDesign:PopupBox Grid.Column="2" 
                                          StaysOpen="False"
-                                         IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
-                                         Style="{StaticResource AddToolTipOfLockStyle}">
+                                         Style="{StaticResource LockableStyle}">
                     <StackPanel>
                         <Button Command="{Binding ImportCommand}" >
                             <StackPanel Orientation="Horizontal">

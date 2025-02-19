@@ -39,11 +39,11 @@
 
         <Style TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
             <Setter Property="GridLinesVisibility" Value="All" />
-            <Setter Property="CanUserDeleteRows" Value="{Binding (local:DataGridAssist.IsUnlocked), RelativeSource={RelativeSource AncestorType=local:SelectableDataGrid}}" />
+            <Setter Property="CanUserDeleteRows" Value="{Binding (local:LockAssist.IsUnlocked), RelativeSource={RelativeSource AncestorType=local:SelectableDataGrid}}" />
         </Style>
 
         <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
-            <Setter Property="IsEnabled" Value="{Binding (local:DataGridAssist.IsUnlocked), RelativeSource={RelativeSource AncestorType=local:SelectableDataGrid}}" />
+            <Setter Property="IsEnabled" Value="{Binding (local:LockAssist.IsUnlocked), RelativeSource={RelativeSource AncestorType=local:SelectableDataGrid}}" />
             <!-- IsEnabled==false のときForegroundとOpacity両方変化して必要以上に暗くなるのでForegroudは固定 -->
             <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Foreground}" />
             <!-- Tooltip on Lock -->
@@ -57,7 +57,7 @@
     <local:SelectableDataGrid DataContext="{Binding}"
                               d:DataContext="{d:DesignInstance local:IpListDataGridViewModel}"
                               IsEnabled="{Binding IsEnabled}"
-                              local:DataGridAssist.IsUnlocked="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
+                              local:LockAssist.IsUnlocked="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
                               ToolTip="スクリプト連続実行中は変更できません"
                               ToolTipService.Placement="Mouse"
                               ToolTipService.ShowOnDisabled="True"

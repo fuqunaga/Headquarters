@@ -1,11 +1,10 @@
 ﻿using System.Windows;
-using MaterialDesignThemes.Wpf;
 
 namespace Headquarters;
 
-public static class DataGridAssist
+public static class LockAssist
 {
-    public static readonly DependencyProperty IsUnlockedProperty = DependencyProperty.RegisterAttached("IsUnlocked", typeof (bool), typeof (DataGridAssist), new PropertyMetadata((object) true));
+    public static readonly DependencyProperty IsUnlockedProperty = DependencyProperty.RegisterAttached("IsUnlocked", typeof (bool), typeof (LockAssist), new PropertyMetadata((object) true));
     
     public static void SetIsUnlocked(DependencyObject element, bool value)
     {
