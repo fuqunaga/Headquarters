@@ -74,9 +74,9 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
         HeaderViewModels.CollectionChanged += OnHeaderViewModelsChanged;
 
         return;
-        
-        
-        bool IsScriptChainEditable() => _scriptChainPageViewModel is { IsLocked: false, IsRunning: false };
+
+
+        bool IsScriptChainEditable() => _scriptChainPageViewModel.IsScriptChainEditable;
     }
     
     public void Dispose()

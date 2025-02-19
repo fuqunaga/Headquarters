@@ -101,6 +101,13 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                    
+                    <Button Command="{Binding AddScriptPageCommand}"
+                            Content="{materialDesign:PackIcon Kind=Plus, Size=20}"
+                            Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
+                            Style="{StaticResource MaterialDesignIconButton}" 
+                            Width="24"
+                            Height="24"/>
                 </StackPanel>
 
                 

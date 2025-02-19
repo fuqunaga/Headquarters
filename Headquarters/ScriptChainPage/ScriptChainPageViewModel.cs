@@ -79,7 +79,10 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
             }
         }
     }
+    
+    public bool IsScriptChainEditable => !IsLocked && !IsRunning;
 
+    
     #region Binding Properties
     public ObservableCollection<ScriptChainHeaderViewModel> HeaderViewModels { get; }
     public ScriptPageViewModel CurrentScriptPageViewModel => CurrentHeaderViewModel.ScriptPageViewModel;
@@ -121,11 +124,13 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     
     public ICommand ReturnPageCommand { get; }
     public ICommand SelectScriptPageCommand { get; }
+    public ICommand AddScriptPageCommand { get; }
     public ICommand RunCommand { get; }
     public ICommand StopCommand { get; }
     
     public ICommand OpenScriptFolderCommand { get; }
     public ICommand OpenScriptFileCommand { get; }
+    
 
     #endregion
     
@@ -134,6 +139,11 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     {
         _ipListViewModel = ipListViewModel;
 
+        ReturnPageCommand = new DelegateCommand(
+            _ => CurrentScriptPageViewModel.CurrentPage = ScriptPageViewModel.Page.SelectScript,
+            _ => !IsLocked && !IsRunning && CurrentScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.RunScript
+        );
+        
         SelectScriptPageCommand = new DelegateCommand(header =>
             {
                 if (header is ScriptChainHeaderViewModel scriptChainHeaderViewModel)
@@ -144,10 +154,15 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
             header => header is ScriptChainHeaderViewModel scriptChainHeaderViewModel &&
                       scriptChainHeaderViewModel != CurrentHeaderViewModel);
 
-        ReturnPageCommand = new DelegateCommand(
-            _ => CurrentScriptPageViewModel.CurrentPage = ScriptPageViewModel.Page.SelectScript,
-            _ => !IsLocked && !IsRunning && CurrentScriptPageViewModel.CurrentPage == ScriptPageViewModel.Page.RunScript
+        AddScriptPageCommand = new DelegateCommand(
+            _ =>
+            {
+                var headerViewModel = AddScriptPage(new ScriptChainData.ScriptData());
+                CurrentHeaderViewModel = headerViewModel;
+            },
+            _ => IsScriptChainEditable
         );
+ 
 
         RunCommand = new DelegateCommand(
             _ =>  Run(),
@@ -160,7 +175,6 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         
         OpenScriptFolderCommand = new DelegateCommand(
             _ => CurrentScriptPageViewModel.OpenScriptFolder()
-            
         );
         
         OpenScriptFileCommand = new DelegateCommand(
@@ -180,11 +194,9 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
     {
         if (oldHeaderViewModel != null)
         {
-            oldHeaderViewModel.IsSelected = false;
             oldHeaderViewModel.ScriptPageViewModel.PropertyChanged -= OnScriptPageViewModelPropertyChanged;
         }
         
-        newHeaderViewModel.IsSelected = true;
         newHeaderViewModel.ScriptPageViewModel.PropertyChanged += OnScriptPageViewModelPropertyChanged;
         
         OnPropertyChanged(nameof(CurrentScriptPageViewModel));
@@ -219,7 +231,10 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         HeaderViewModels.Clear();
     }
 
-    private void AddScriptPage(ScriptChainData.ScriptData scriptData) => InsertScriptPage(scriptData, HeaderViewModels.Count);
+    private ScriptChainHeaderViewModel AddScriptPage(ScriptChainData.ScriptData scriptData)
+    {
+        return InsertScriptPage(scriptData, HeaderViewModels.Count);
+    }
 
     public ScriptChainHeaderViewModel InsertScriptPage(ScriptChainData.ScriptData scriptData, int index)
     {
