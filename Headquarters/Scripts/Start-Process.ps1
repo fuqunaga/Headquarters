@@ -14,7 +14,7 @@ param(
 
 Invoke-Command -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential -ScriptBlock {
     if (!(Test-Path $using:FilePath)) {
-        Write-Error "ファイル[$using:FilePath]が見つかりません。"
+        Write-Error "ファイルが見つかりません：[$using:FilePath]"
         return
     }
 
