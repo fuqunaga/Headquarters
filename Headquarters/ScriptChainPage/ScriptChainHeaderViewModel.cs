@@ -8,16 +8,9 @@ namespace Headquarters;
 
 public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
 {
-    private bool _isSelected;
     private bool _isRunning;
     private readonly ScriptChainPageViewModel _scriptChainPageViewModel;  
 
-    public bool IsSelected
-    {
-        get => _isSelected;
-        set => SetProperty(ref _isSelected, value);
-    }
-    
     public bool IsRunning
     {
         get => _isRunning;
