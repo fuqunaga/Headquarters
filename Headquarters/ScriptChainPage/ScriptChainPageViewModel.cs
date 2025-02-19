@@ -323,6 +323,7 @@ public class ScriptChainPageViewModel : ViewModelBase, IDisposable
         {
             Title = "Confirm",
             Message = $"{checkedIpList.Count} 件のIPに対してスクリプトを実行します",
+            OkButtonContent = "Run",
             Items = checkedIpList
         };
         
