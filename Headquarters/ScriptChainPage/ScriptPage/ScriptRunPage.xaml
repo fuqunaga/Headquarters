@@ -138,7 +138,6 @@
                 <!-- Parameters -->
                 <ItemsControl DockPanel.Dock="Top" Grid.IsSharedSizeScope="True"
                           ItemsSource="{Binding Parameters}"
-                          IsEnabled="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
                           Margin="0,16"
                           KeyboardNavigation.TabNavigation="Continue">
 

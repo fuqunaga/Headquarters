@@ -61,12 +61,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             }
         }
     }
-
-    public bool IsLocked
-    {
-        get => _isLocked;
-        set => SetProperty(ref _isLocked, value);
-    }
     
     public ObservableCollection<ScriptParameterInputFieldViewModel> Parameters { get; } = [];
         
