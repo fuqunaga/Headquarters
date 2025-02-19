@@ -39,7 +39,6 @@
 
         <Style TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
             <Setter Property="GridLinesVisibility" Value="All" />
-            <Setter Property="CanUserAddRows" Value="{Binding (local:DataGridAssist.IsUnlocked), RelativeSource={RelativeSource AncestorType=local:SelectableDataGrid}}" />
             <Setter Property="CanUserDeleteRows" Value="{Binding (local:DataGridAssist.IsUnlocked), RelativeSource={RelativeSource AncestorType=local:SelectableDataGrid}}" />
         </Style>
 

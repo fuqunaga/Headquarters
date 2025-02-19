@@ -32,6 +32,8 @@ public class SelectableDataGridViewModel : ViewModelBase
             OnPropertyChanged();
         }
     }
+    
+    protected virtual bool IsAddRowCommandEnabled => true;
 
     public SelectableDataGridViewModel()
     {
@@ -39,7 +41,8 @@ public class SelectableDataGridViewModel : ViewModelBase
         {
             var newRow = Items.NewRow();
             Items.Rows.Add(newRow);
-        });
+        },
+        _ => IsAddRowCommandEnabled);
     }
 
     private void VerifyAndSettingSelectedColumnIfNeed()

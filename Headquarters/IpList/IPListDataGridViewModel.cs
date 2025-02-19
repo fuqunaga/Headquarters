@@ -28,7 +28,9 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
         get => _isLocked;
         set => SetProperty(ref _isLocked, value);
     }
-    
+
+    protected override bool IsAddRowCommandEnabled => !IsLocked;
+
     public ICommand AddColumnCommand { get; }
     public ICommand RenameColumnCommand { get; }
     public ICommand DeleteColumnCommand { get; }
