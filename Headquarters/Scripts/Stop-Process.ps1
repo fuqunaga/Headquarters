@@ -7,7 +7,11 @@
 
 .PARAMETER Force
 プロセスを強制停止する
-チェックしない場合はプロセス自身が終了処理を行うことができますが、フリーズしている場合など確実に停止しないケースがあり得ます
+ONにすると、プロセスを確実に停止できます。
+OFFにすると、プロセスは一般的な終了処理を行うことができ、
+終了時にログファイルを出力する場合などに有用です
+ただし、フリーズしている場合や確認ダイアログが表示される場合など、
+確実に終了しないことがあります
 #>
 
 param(
@@ -19,7 +23,7 @@ param(
 Invoke-Command -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential -ScriptBlock {
     # 引数のプロセス名が存在するか確認
     if (!(Get-Process -Name $using:ProcessName -ErrorAction SilentlyContinue)) {
-        Write-Error "プロセス[$using:ProcessName]が見つかりません"
+        Write-Output "プロセスが見つかりません：[$using:ProcessName]"
         return
     }
 
@@ -44,15 +48,8 @@ Invoke-Command -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Cre
     $taskName = "Stop-Process_TempTask"
     $action = New-ScheduledTaskAction -Execute "taskkill" -Argument "/IM $exeName"
 
+    # TODO:一瞬ウィンドウが表示されるのを抑制したいがいい方法が見つからず
     Register-ScheduledTask -TaskName $taskName -Action $action > $null
     Start-ScheduledTask -TaskName $taskName
     Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
-
-    # 3秒待機
-    Start-Sleep -Seconds 3
-    
-    # プロセスが停止したか確認
-    if (Get-Process -Name $using:ProcessName -ErrorAction SilentlyContinue) {
-        Write-Error "停止命令後にプロセス[$using:ProcessName]が見つかりました"
-    }
 }
