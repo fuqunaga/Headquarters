@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Windows.Input;
 
 namespace Headquarters;
 
@@ -12,6 +13,8 @@ public class SelectableDataGridViewModel : ViewModelBase
         
     private DataTable _items = new();
 
+    public ICommand AddRowCommand { get; }
+    
     public DataTable Items
     {
         get => _items;
@@ -28,6 +31,15 @@ public class SelectableDataGridViewModel : ViewModelBase
             
             OnPropertyChanged();
         }
+    }
+
+    public SelectableDataGridViewModel()
+    {
+        AddRowCommand = new DelegateCommand(_ =>
+        {
+            var newRow = Items.NewRow();
+            Items.Rows.Add(newRow);
+        });
     }
 
     private void VerifyAndSettingSelectedColumnIfNeed()
