@@ -21,7 +21,7 @@ Invoke-Command -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Cre
     $taskName = "Start-Process_TempTask"
     $action = New-ScheduledTaskAction -Execute $using:FilePath
 
-    Register-ScheduledTask -TaskName $taskName -Action $action > $null
+    Register-ScheduledTask -TaskName $taskName -Action $action -Force > $null
     Start-ScheduledTask -TaskName $taskName
     Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
 }

@@ -49,7 +49,7 @@ Invoke-Command -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Cre
     $action = New-ScheduledTaskAction -Execute "taskkill" -Argument "/IM $exeName"
 
     # TODO:一瞬ウィンドウが表示されるのを抑制したいがいい方法が見つからず
-    Register-ScheduledTask -TaskName $taskName -Action $action > $null
+    Register-ScheduledTask -TaskName $taskName -Action $action -Force > $null
     Start-ScheduledTask -TaskName $taskName
     Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
 }
