@@ -136,7 +136,7 @@
                 Style="{StaticResource LockableStyle}">
             
             <Grid>
-                <ContentControl Style="{StaticResource InputField}" Content="{Binding }"/>
+                <ContentControl Style="{StaticResource InputField}" Content="{Binding }" IsTabStop="False"/>
             </Grid>
         </Border>
     </Grid>
