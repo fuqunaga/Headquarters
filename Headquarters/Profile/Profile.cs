@@ -18,8 +18,11 @@ public static class Profile
 {
     public const string DefaultPath =  $"{PathSetting.DataPath}\\Profile";
     public const string BackupPath = $"{DefaultPath}Backup";
+    public const string ScriptsFolderPath = $"{DefaultPath}\\{ScriptsFolderName}";
+    public const string ScriptsFolderName = "Scripts";
+
     private const string TempPath = $"{PathSetting.DataPath}\\Temp";
-    private const string ScriptsFolderName = "Scripts";
+    
     
     public static async Task<bool> ChangeProfileByUrl(string url, Action<string>? addMessage = null)
     {
@@ -89,7 +92,7 @@ public static class Profile
                 else
                 {
                     Directory.CreateDirectory(DefaultPath);
-                    Directory.Move(newProfileSourcePath, Path.Combine(DefaultPath, ScriptsFolderName));
+                    Directory.Move(newProfileSourcePath, ScriptsFolderPath);
                 }
             });
         }

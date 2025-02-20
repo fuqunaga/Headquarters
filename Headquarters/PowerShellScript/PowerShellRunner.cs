@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Threading;
@@ -11,7 +12,7 @@ namespace Headquarters
     public static class PowerShellRunner
     {
         private static readonly string AddModulePathString = $$"""
-                                                               $path = "{{Environment.CurrentDirectory}}\Scripts\Modules"
+                                                               $path = "{{Path.Combine(Profile.ScriptsFolderPath, "Modules")}}"
                                                                if ( $env:PSModulePath.EndsWith($path) -eq $false )
                                                                {
                                                                    $env:PSModulePath += ";$path"

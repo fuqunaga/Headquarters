@@ -11,8 +11,8 @@ namespace Headquarters;
 
 public class ScriptPageViewModel : ViewModelBase, IDisposable
 {
-    private static readonly string ScriptFolderPath = Path.Combine(Profile.DefaultPath, "Scripts");
-    
+    private const string ScriptsFolderPath = Profile.ScriptsFolderPath;
+
     public enum Page
     {
         SelectScript,
@@ -73,7 +73,7 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
     
     public ScriptPageViewModel(IpListViewModel ipListViewModel, ScriptChainData.ScriptData scriptData)
     {
-        _watcher = ScriptDirectoryWatcher.GetOrCreate(ScriptFolderPath);
+        _watcher = ScriptDirectoryWatcher.GetOrCreate(ScriptsFolderPath);
         _watcher.Scripts.CollectionChanged += OnScriptsChanged;
         
         Items = new ObservableCollection<ScriptButtonViewModel>(
@@ -208,8 +208,8 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         {
             FileName = "explorer.exe",
             Arguments = string.IsNullOrEmpty(CurrentScriptName)
-                ? ScriptFolderPath
-                : $@"/select, {Path.Combine(ScriptFolderPath, CurrentScriptName)}.ps1"
+                ? ScriptsFolderPath
+                : $@"/select, {Path.Combine(ScriptsFolderPath, CurrentScriptName)}.ps1"
         };
         
         Process.Start(psi);
@@ -225,7 +225,7 @@ public class ScriptPageViewModel : ViewModelBase, IDisposable
         
         var psi = new ProcessStartInfo
         {
-            FileName = Path.Combine(ScriptFolderPath, $"{CurrentScriptName}.ps1"),
+            FileName = Path.Combine(ScriptsFolderPath, $"{CurrentScriptName}.ps1"),
             UseShellExecute = true // 既定のプログラムで開くために必要
         };
 
