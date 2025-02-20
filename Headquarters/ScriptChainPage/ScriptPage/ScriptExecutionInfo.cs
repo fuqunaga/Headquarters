@@ -121,21 +121,16 @@ public class ScriptExecutionInfo
             AddToOutputString(str);
         };
         
-        subscriber.onDebugAdded += AddToOutputString;
-        subscriber.onInformationAdded += AddToOutputString;
-        subscriber.onVerboseAdded += AddToOutputString;
+        subscriber.onDebugAdded +=  record => AddRecordToOutputString("Debug", record);;
+        subscriber.onInformationAdded +=  record => AddToOutputStringWithTag("Info", record.ToString(), "");
+        subscriber.onVerboseAdded += record => AddRecordToOutputString("Verbose", record);;
         
-        subscriber.onWarningAdded += (warningRecord) =>
-        {
-            var message = $"[Warning] {warningRecord.ToString().TrimEnd('\r', '\n')}\n{warningRecord.InvocationInfo?.PositionMessage}";
-            AddToOutputString(message);
-        };
-        subscriber.onErrorAdded += (errorRecord) =>
-        {
-            var message = $"[Error] {errorRecord.ToString().TrimEnd('\r', '\n')}\n{errorRecord.InvocationInfo?.PositionMessage}";
-            AddToOutputString(message);
-        };
-
+        subscriber.onWarningAdded += record => AddRecordToOutputString("Warning", record);
+        subscriber.onErrorAdded += (record) => AddToOutputStringWithTag("Error",
+            record.ToString(),
+            record.InvocationInfo?.PositionMessage ?? ""
+        );
+    
         
         subscriber.onProgressAdded += (progressRecord) =>
         {
@@ -145,6 +140,20 @@ public class ScriptExecutionInfo
         
         return subscriber;
         
+        
+        void AddRecordToOutputString<TRecord>(string tag, TRecord record)
+            where TRecord : InformationalRecord
+        {
+            var message = record.Message;
+            var positionMessage = record.InvocationInfo?.PositionMessage ?? "";
+            AddToOutputStringWithTag(tag, message, positionMessage);
+        }
+
+        void AddToOutputStringWithTag(string tag, string message, string positionMessage)
+        {
+            positionMessage = string.IsNullOrEmpty(positionMessage) ? "" : $"\n{positionMessage}";
+            AddToOutputString($"[{tag}] {message.TrimEnd('\r', '\n')}{positionMessage}");
+        }
         
         void AddToOutputString<T>(T addedObj)
         {
