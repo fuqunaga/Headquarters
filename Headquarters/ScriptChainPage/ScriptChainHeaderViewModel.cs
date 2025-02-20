@@ -84,7 +84,7 @@ public class ScriptChainHeaderViewModel : ViewModelBase, IDisposable
         {
             Title = "Close",
             OkButtonContent = "Close",
-            Text = ScriptPageViewModel.HeaderText,
+            Text = $"{ScriptPageViewModel.HeaderText} を閉じますか？",
         };
         var success = await DialogService.ShowDialog(viewModel);
         if (!success) return;

@@ -130,7 +130,7 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
         {
             Title = "Delete Column",
             OkButtonContent = "Delete",
-            Text = name,
+            Text = $"{name} 列を削除しますか？",
         };
         var success = await DialogService.ShowDialog(viewModel);
         if (!success) return;

@@ -147,7 +147,7 @@ public class MainTabViewModel : ViewModelBase, IDisposable
         {
             Title = "Close Tab",
             OkButtonContent = "Close",
-            Text = Header,
+            Text = $"{Header} タブを閉じますか？",
         };
         var success = await DialogService.ShowDialog(viewModel);
         if (!success) return;
