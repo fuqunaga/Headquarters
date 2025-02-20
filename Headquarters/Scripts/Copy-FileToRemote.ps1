@@ -2,18 +2,12 @@
 .SYNOPSIS
 ローカルPCのファイルをリモートPCにコピーします
 
-.DESCRIPTION
-PowerShellのCopy-ItemコマンドレットでローカルPCファイルをリモートPCにコピーします
-RemoteFolderに"$(IP)"という文字列が含まれている場合、対応するIPListのIPアドレスに置換します
-Windowsの共有フォルダ機能（UNCパス）でのコピーも可能です
-例: \\$(IP)\share\path -> \\192.168.0.1\share\path
-
 .PARAMETER LocalPath
-コピー元のパス
+コピー元のパス（ローカルPC）
 
 .PARAMETER RemoteFolder
-コピー先のフォルダ
-"$(IP)"という文字列が含まれていると対応するIPListのIPアドレスに置換します
+コピー先のフォルダ（リモートPC）
+"$(IP)"という文字列が含まれている場合、対応するIPListのIPアドレスに置換されます
 これにより共有フォルダ（UNCパス）でのコピーも可能です
 例: \\$(IP)\share\path -> \\192.168.0.1\share\path
 
@@ -24,8 +18,8 @@ Windowsの共有フォルダ機能（UNCパス）でのコピーも可能です
 
 .PARAMETER EnableCompression
 圧縮ファイルでコピー
-コピー元と同じ場所に圧縮ファイルを作成し、コピー、解凍します
-7z形式
+コピー元と同じ場所に7zの圧縮ファイルを作成し、コピー、解凍します
+初回実行時はモジュールをインストールするためインターネット接続が必要です
 
 .PARAMETER SkipCompressionIfNewer
 不要な圧縮をスキップ

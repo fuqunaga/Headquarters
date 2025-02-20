@@ -2,23 +2,18 @@
 .SYNOPSIS
 リモートPCのファイルをローカルPCにコピーします
 
-.DESCRIPTION
-PowerShellのCopy-ItemコマンドレットでリモートPCのファイルをローカルPCにコピーします
-RemotePathに"$(IP)"という文字列が含まれている場合、対応するIPListのIPアドレスに置換します
-Windowsの共有フォルダ機能（UNCパス）でのコピーも可能です
-例: \\$(IP)\share\path -> \\192.168.0.1\share\path
-
 .PARAMETER RemotePath
-コピー元のパス
-"$(IP)"という文字列が含まれていると対応するIPListのIPアドレスに置換します
+コピー元のパス（リモートPC）
+"$(IP)"という文字列が含まれている場合、対応するIPListのIPアドレスに置換されます
 これにより共有フォルダ（UNCパス）でのコピーも可能です
 例: \\$(IP)\share\path -> \\192.168.0.1\share\path
 
 .PARAMETER LocalPath
-コピー先のパス
-"$(IP)"という文字列が含まれていると対応するIPListのIPアドレスに置換します
-例: c:\Backup\$(IP)\MyFile -> c:\Backup\192.168.0.1\MyFile
-"$(IP)"かIPListで指定してIPアドレスごとにパラメータを分けないと最後にコピーされたファイルで上書きされてしまうのでご注意ください
+コピー先のパス（ローカルPC）
+"$(IP)"という文字列が含まれている場合、対応するIPListのIPアドレスに置換されます
+例: C:\Backup\$(IP)\MyFile -> C:\Backup\192.168.0.1\MyFile
+"$(IP)"またはIPListで指定されたIPアドレスごとにパラメータを分けないと、最後にコピーされたファイルで上書きされてしまいます
+各IPアドレスに対応するユニークなパスを指定してください
 #>
 
 
