@@ -48,6 +48,11 @@
             <Style x:Key="TabItemStyle" TargetType="{x:Type dragablz:DragablzItem}" BasedOn="{StaticResource CustomMaterialDesignDragableTabItemStyle}">
                 <Setter Property="Padding" Value="0" />
                 <Setter Property="ContextMenu" Value="{StaticResource TabItemContextMenu}" />
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="#10FFFFFF" />
+                    </Trigger>
+                </Style.Triggers>
             </Style>
 
         </ResourceDictionary>
@@ -55,7 +60,7 @@
 
     <materialDesign:DialogHost Identifier="RootDialog">
         <Grid>
-            <dragablz:TabablzControl x:Name="MainTabControl"
+            <dragablz:TabablzControl x:Name="MainTabControl" Loaded="TabablzControl_Loaded"
                                      ItemsSource="{Binding TabItems, Mode=OneWay}"
                                      NewItemFactory="{x:Static local:MainTabViewModel.Factory}"
                                      ItemContainerStyle="{StaticResource  TabItemStyle}"
@@ -71,18 +76,17 @@
                 <dragablz:TabablzControl.HeaderSuffixContent>
                     <Grid MinWidth="64">
                         <!-- Add new tab button -->
-                        <!-- RippleAssist.IsDisabledをいれておくとタブを追加したときに表示が荒ぶる軽減する -->
                         <Button HorizontalAlignment="Left"
                                 Command="{x:Static dragablz:TabablzControl.AddItemCommand}"
                                 Style="{StaticResource MaterialDesignIconForegroundButton}"
                                 materialDesign:RippleAssist.IsDisabled="True"
                                 Width="24"
                                 Height="24">
-
+                        
                             <materialDesign:PackIcon Kind="Plus"
                                                      Width="18"
                                                      Height="18" />
-
+                        
                         </Button>
 
                         <!-- Setting button -->
