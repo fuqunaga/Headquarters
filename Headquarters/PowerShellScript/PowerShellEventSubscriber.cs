@@ -26,9 +26,7 @@ public class PowerShellEventSubscriber
         // PSDataCollectionを直接操作するとダメそう（スレッド周り？）なのでReadAll()する
         output.DataAdded += (_, args) => onOutputAdded?.Invoke(output.ReadAll()[args.Index]);
 
-
         var streams = powerShell.Streams;
-        // PSDataCollectionを操作するとダメそう（スレッド周り？）なのでReadAll()する
         streams.Debug.DataAdded += (_, args) => onDebugAdded?.Invoke(streams.Debug.ReadAll()[args.Index]);
         streams.Error.DataAdded += (_, args) =>　onErrorAdded?.Invoke(streams.Error.ReadAll()[args.Index]);
         streams.Information.DataAdded += (_, args) => onInformationAdded?.Invoke(streams.Information.ReadAll()[args.Index]);
