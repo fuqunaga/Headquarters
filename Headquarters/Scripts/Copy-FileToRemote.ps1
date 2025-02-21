@@ -90,11 +90,20 @@ function IpAddressTask()
     # リレーコピー時は完了済みのPCがあればそのPCをコピー元として利用
 
     $sessionLocal = $null
+    $sourceTaskContext = $null
     if ($EnableRelayCopy)
     {
         $atomicUseLocalKey = "UseLocalPcAsSource"
         $pool = Get-Pool -PoolId "CopyFileTask" -TaskContext $TaskContext
-        $sessionLocal = Get-SessionLocal -Pool $pool -atomicUseLocalKey $atomicUseLocalKey -TaskContext $TaskContext
+
+        $sourceTaskContext = Get-SourceTaskContext -Pool $pool -atomicUseLocalKey $atomicUseLocalKey -TaskContext $TaskContext
+        if($sourceTaskContext)
+        {
+            # New-PSSessionではなくInvoke-PSSessionを使うことでダブルホップを回避
+            # https://zenn.dev/fuqunaga/articles/1d52ec77c643c5
+            Install-ModuleIfNotYet -Name "Invoke-PSSession"
+            $sessionLocal = Invoke-PSSession -ComputerName $sourceTaskContext.IpAddress -Credential $sourceTaskContext.Credential
+        }
     }
 
     try
@@ -106,7 +115,8 @@ function IpAddressTask()
             -EnableCompression $EnableCompression `
             -DeleteCompressedFileRemote $DeleteCompressedFileRemote `
             -TaskContext $TaskContext `
-            -sessionLocal $sessionLocal
+            -sessionLocal $sessionLocal `
+            -SourceTaskContext $sourceTaskContext
     }
     finally
     {
@@ -144,7 +154,9 @@ function EndTask()
 }
 
 
-function Get-SessionLocal($pool, $atomicUseLocalKey, $TaskContext)
+# ファイルのコピー元として扱うPCのTaskContextを取得
+# ローカルで行う場合は$nullを返却
+function Get-SourceTaskContext($pool, $atomicUseLocalKey, $TaskContext)
 {
     $waitStartTime = Get-Date
 
@@ -152,17 +164,17 @@ function Get-SessionLocal($pool, $atomicUseLocalKey, $TaskContext)
     {
         $sourceTaskContext = $pool.TryGetObject()
         if ($sourceTaskContext) {
-            # New-PSSessionではなくInvoke-PSSessionを使うことでダブルホップを回避
-            # https://zenn.dev/fuqunaga/articles/1d52ec77c643c5
-            Install-ModuleIfNotYet -Name "Invoke-PSSession"
-            return Invoke-PSSession -ComputerName $sourceTaskContext.IpAddress -Credential $sourceTaskContext.Credential
+            return $sourceTaskContext
         }
 
         # ローカルPCをコピー元として利用
         # 1タスクだけ許可する
+        if($TaskContext.IpAddress -like "192.168.12.87")
+        {
         if ($TaskContext.SharedDictionary.TryAdd($atomicUseLocalKey, $TaskContext.IpAddress)) {
             return
         }
+    }
 
         $elapsedTime = (Get-Date) - $waitStartTime
         Write-Progress "ローカルPCかリレーコピー元PCが使用可能になるのを待機しています 経過時間[$($elapsedTime.ToString("hh\:mm\:ss"))]"
@@ -184,14 +196,15 @@ function CopyTask()
         [bool]$EnableCompression=$true,
         [bool]$DeleteCompressedFileRemote=$false,
         $TaskContext,
-        $sessionLocal
+        $SessionLocal,
+        $SourceTaskContext
     )
 
 
-    $isRelayCopy = $EnableRelayCopy -and $sessionLocal
+    $isRelayCopy = $EnableRelayCopy -and $SessionLocal
     if ($isRelayCopy)
     {
-        Write-Output "リレーコピー: $($sourceTaskContext.IpAddress) をコピー元として使用します"
+        Write-Output "リレーコピー: $($SourceTaskContext.IpAddress) をコピー元として使用します"
     }
 
     # $sourcePath 取得
@@ -204,29 +217,27 @@ function CopyTask()
     }
     if ($isRelayCopy)
     {
-        $sourceFolder = ConvertPathAndConnectUNC -TargetPath $RemoteFolder -SessionLocal $sessionLocal -TaskContext $sourceTaskContext
+        $sourceFolder = Convert-PathAndConnectUNC -TargetPath $RemoteFolder -SessionLocal $SessionLocal -TaskContext $SourceTaskContext
         $sourcePath = Join-Path $sourceFolder (Split-Path $sourcePath -Leaf)
     }
 
-
-
-    $destinationFolder = ConvertPathAndConnectUNC -TargetPath $RemoteFolder -SessionLocal $sessionLocal -TaskContext $TaskContext
-
-    $sessionRemote = New-PSSession -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential
-
+    $destinationFolder = Convert-PathAndConnectUNC -TargetPath $RemoteFolder -SessionLocal $SessionLocal -TaskContext $TaskContext
     $outputPath = Join-Path $destinationFolder (Split-Path $sourcePath -Leaf)
+
     $label = "コピー"
     if ($isRelayCopy)
     {
-        $label = "リレーコピー($($sourceTaskContext.IpAddress))"
+        $label = "リレーコピー"
     }
     Write-Output "$($label): $sourcePath -> (Remote)$outputPath"
-    Copy-FileToRemote -sourcePath $sourcePath -destinationFolder $destinationFolder -SessionLocal $sessionLocal -SessionRemote $sessionRemote
+    Copy-FileToRemote -sourcePath $sourcePath -destinationFolder $destinationFolder -SessionLocal $SessionLocal -TaskContext $TaskContext
 
 
     # 圧縮してたら解凍
     if ($EnableCompression)
     {
+        $sessionRemote = New-PSSession -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential
+
         # フォルダの場合はdestinationFolder下に元のフォルダ名を作成して解凍
         $expandTargetPath = $destinationFolder
         if ( Test-Path $LocalPath -PathType Container )
@@ -277,11 +288,9 @@ function Get-LastWriteItem($path)
 }
 
 
-<#
-入力されたパスを実際に使用可能なパスに変換します
-UNCパスの場合、認証を通すために一時的なドライブを作成します
-#>
-function ConvertPathAndConnectUNC()
+# 入力されたパスを実際に使用可能なパスに変換します
+# UNCパスの場合、認証を通すために一時的なドライブを作成します
+function Convert-PathAndConnectUNC()
 {
     param(
         [Parameter(Mandatory)]
@@ -308,7 +317,9 @@ function ConvertPathAndConnectUNC()
 
             if (-not (Test-Path $root)) {
                 $driveName = "Copy-File_TempDrive_$($root -replace '[\\.]', '')"
-                New-PSDrive -Name $driveName -PSProvider FileSystem -Root $root -Credential $cred > $null
+
+                # 文字列をOutputしちゃうので > $null で抑制
+                New-PSDrive -Name $driveName -PSProvider FileSystem -Root $root -Credential $cred -ErrorAction SilentlyContinue > $null 
                 if (-not $?) {
                     throw "UNCパスの認証に失敗しました。共有フォルダの設定がされていないかもしれません $root"
                 }
@@ -321,7 +332,11 @@ function ConvertPathAndConnectUNC()
     return $outputPath
 }
 
+
 # SessionLocal上でリモートにファイルをコピーします
+# リモートPCにディレクトリが存在しない場合、作成
+# Copy-Itemはディレクトリが存在するとその直下にファイルをコピーするが
+# ディレクトリが存在しない場合はファイル名として解釈してしまう
 function Copy-FileToRemote()
 {
     param(
@@ -332,13 +347,10 @@ function Copy-FileToRemote()
         [ValidateNotNullOrEmpty()]
         [string]$destinationFolder,
         $SessionLocal,
-        $SessionRemote
+        $TaskContext
     )
 
-    # リモートPCにディレクトリが存在しない場合、作成
-    # Copy-Itemはディレクトリが存在するとその直下にファイルをコピーするが
-    # ディレクトリが存在しない場合はファイル名として解釈してしまう
-    Invoke-Command -Session $SessionRemote -ScriptBlock {
+    Invoke-Command -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential -ScriptBlock {
         if (-not (Test-Path -Path $using:destinationFolder))
         {
             New-Item -ItemType Directory -Path $using:destinationFolder > $null
@@ -346,19 +358,29 @@ function Copy-FileToRemote()
     }
 
     $isUnc = ([System.Uri]$destinationFolder).IsUnc
-    $copyScriptBlock = {
-        param($sourcePath, $destinationFolder)
-        Copy-Item -Recurse -Force -Path $sourcePath -Destination $destinationFolder
-    }
-    if (-not $isUnc)
+    
+    # SessionLocal上で実行されるスクリプトブロック
+    $copyScriptBlock = $null
+    if ($isUnc)
     {
         $copyScriptBlock = {
-            param($sourcePath, $destinationFolder, $sessionRemote)
+            param($sourcePath, $destinationFolder)
+            Copy-Item -Recurse -Force -Path $sourcePath -Destination $destinationFolder
+        }
+    }
+    else
+    {
+        # PSSessionはリモート上に持っていけないので,
+        # TaskContextのIpAddressとCredentialを引数に渡してリモートでNew-PSSessionを実行する
+        $copyScriptBlock = {
+            param($sourcePath, $destinationFolder, $ipAddress, [PSCredential]$cred)
+
+            $sessionRemote = New-PSSession -ComputerName $ipAddress -Credential $cred
             Copy-Item -Recurse -Force -Path $sourcePath -Destination $destinationFolder -ToSession $sessionRemote
         }
     }
 
-    Invoke-ScriptBlock -ScriptBlock $copyScriptBlock -Session $SessionLocal -Arguments $sourcePath, $destinationFolder, $SessionRemote
+    Invoke-ScriptBlock -ScriptBlock $copyScriptBlock -Session $SessionLocal -Arguments $sourcePath, $destinationFolder, $TaskContext.IpAddress, $TaskContext.Credential
 }
 
 
