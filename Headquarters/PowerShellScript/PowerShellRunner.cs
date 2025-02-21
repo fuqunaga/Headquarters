@@ -90,14 +90,27 @@ namespace Headquarters
             
             var result = new Result();
             
-            var output = new PSDataCollection<PSObject>();
+            
             param.EventSubscriber.onOutputAdded += obj =>
             {
                 result.objs ??= [];
                 result.objs.Add(obj);
             };
             
+            // エラー出力時は停止する
+            // PowerShellのエラーはWrite-Errorのように停止しないエラーがある
+            // エラーが出てる場合、それ以降の処理が無駄になる場合が多いので停止する
+            // $ErrorActionPreference = "Stop" はエラーメッセージに余計な文言がついて分かりにくいのでやめた
+            param.EventSubscriber.onErrorAdded += _ =>
+            {
+                // powerShell.Stop()だと処理が返ってこないので非同期で停止
+                powerShell.BeginStop(null, null);
+                result.hasError = true;
+            };
+            
+            var output = new PSDataCollection<PSObject>();
             param.EventSubscriber.Subscribe(powerShell, output);
+            
             
             using var _ = param.CancellationToken.Register(
                 state => {
@@ -120,17 +133,10 @@ namespace Headquarters
             }
             catch (Exception e)
             {
-                if (e is OperationCanceledException)
-                {
-                    // result.canceled = true;
-                }
-                else
-                {
-                    powerShell.Streams.Error.Add(new ErrorRecord(e, "Invoke", ErrorCategory.NotSpecified, null));
-                    result.hasError = true;
-                }
+                powerShell.Streams.Error.Add(new ErrorRecord(e, "Invoke", ErrorCategory.NotSpecified, null));
             }
 
+            // エラーイベントをListenしてるからいらない？
             result.hasError |= powerShell.HadErrors;
             
             return result;
