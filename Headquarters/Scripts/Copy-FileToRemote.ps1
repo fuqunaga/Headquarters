@@ -48,10 +48,10 @@ function BeginTask()
     {
         return
     }
-    
+
     $archivePath = Get-CompressedFilePath -FilePath $LocalPath
     $needCompression = $true
-    
+
     # $archivePathが存在し、$LocalPathより新しい場合は圧縮をスキップ
     if ($SkipCompressionIfNewer -and (Test-Path $archivePath))
     {
@@ -62,9 +62,9 @@ function BeginTask()
         $needCompression = $lastWriteTime -gt $archiveLastWriteTime
         if (!$needCompression)
         {
-            Write-Information "コピー元より新しい圧縮ファイルが見つかりました。圧縮をスキップします"
-            Write-Information "- [$archiveLastWriteTime] $archivePath  圧縮ファイル "
-            Write-Information "- [$lastWriteTime] $($lastWriteItem.FullName)  コピー元の最も新しいファイル "
+            Write-Output "コピー元より新しい圧縮ファイルが見つかりました。圧縮をスキップします
+- [$archiveLastWriteTime] $archivePath  圧縮ファイル
+- [$lastWriteTime] $($lastWriteItem.FullName)  コピー元の最も新しいファイル"
         }
     }
 
@@ -88,40 +88,28 @@ function IpAddressTask()
     )
 
     # リレーコピー時は完了済みのPCがあればそのPCをコピー元として利用
+
     $sessionLocal = $null
     if ($EnableRelayCopy)
     {
         $atomicUseLocalKey = "UseLocalPcAsSource"
         $pool = Get-Pool -PoolId "CopyFileTask" -TaskContext $TaskContext
-        $waitStartTime = Get-Date
-
-        while($true)
-        {
-            $sourceTaskContext = $pool.TryGetObject()
-            if ($sourceTaskContext) {
-                $sessionLocal = Invoke-PSSession -ComputerName $sourceTaskContext.IpAddress -Credential $sourceTaskContext.Credential
-                break;
-            }
-
-            # ローカルPCをコピー元として利用
-            # 1タスクだけ許可する
-            if ($TaskContext.SharedDictionary.TryAdd($atomicUseLocalKey, $TaskContext.IpAddress)) {
-                break;
-            }
-
-            $elapsedTime = (Get-Date) - $waitStartTime
-            Write-Progress "ローカルPCかリレーコピー元PCが使用可能になるのを待機しています 経過時間[$($elapsedTime.ToString("hh\:mm\:ss"))]"
-
-            # 1~5秒待機
-            # 複数のタスクが同時にチェックするのは避けるため待ち時間を散らす
-            Start-Sleep -Seconds (Get-Random -Minimum 1 -Maximum 5)
-        }
+        $sessionLocal = Get-SessionLocal -Pool $pool -atomicUseLocalKey $atomicUseLocalKey -TaskContext $TaskContext
     }
 
-    try {
-        CopyTask -LocalPath $LocalPath -RemoteFolder $RemoteFolder -EnableRelayCopy $EnableRelayCopy -EnableCompression $EnableCompression -DeleteCompressedFileRemote $DeleteCompressedFileRemote -TaskContext $TaskContext -sessionLocal $sessionLocal
+    try
+    {
+        CopyTask `
+            -LocalPath $LocalPath `
+            -RemoteFolder $RemoteFolder `
+            -EnableRelayCopy $EnableRelayCopy `
+            -EnableCompression $EnableCompression `
+            -DeleteCompressedFileRemote $DeleteCompressedFileRemote `
+            -TaskContext $TaskContext `
+            -sessionLocal $sessionLocal
     }
-    finally {
+    finally
+    {
         if ($EnableRelayCopy) {
             # ローカルPC使用中フラグを削除
             if(-not $sessionLocal)
@@ -150,11 +138,40 @@ function EndTask()
     if ($DeleteCompressedFileLocal)
     {
         $archivePath = Get-CompressedFilePath -FilePath $LocalPath
-        Write-Information "圧縮ファイル削除 $archivePath"
+        Write-Output "圧縮ファイル削除 $archivePath"
         Remove-Item -Path $archivePath
     }
 }
 
+
+function Get-SessionLocal($pool, $atomicUseLocalKey, $TaskContext)
+{
+    $waitStartTime = Get-Date
+
+    while($true)
+    {
+        $sourceTaskContext = $pool.TryGetObject()
+        if ($sourceTaskContext) {
+            # New-PSSessionではなくInvoke-PSSessionを使うことでダブルホップを回避
+            # https://zenn.dev/fuqunaga/articles/1d52ec77c643c5
+            Install-ModuleIfNotYet -Name "Invoke-PSSession"
+            return Invoke-PSSession -ComputerName $sourceTaskContext.IpAddress -Credential $sourceTaskContext.Credential
+        }
+
+        # ローカルPCをコピー元として利用
+        # 1タスクだけ許可する
+        if ($TaskContext.SharedDictionary.TryAdd($atomicUseLocalKey, $TaskContext.IpAddress)) {
+            return
+        }
+
+        $elapsedTime = (Get-Date) - $waitStartTime
+        Write-Progress "ローカルPCかリレーコピー元PCが使用可能になるのを待機しています 経過時間[$($elapsedTime.ToString("hh\:mm\:ss"))]"
+
+        # 1~5秒待機
+        # 複数のタスクが同時にチェックするのは避けるため待ち時間を散らす
+        Start-Sleep -Seconds (Get-Random -Minimum 1 -Maximum 5)
+    }
+}
 
 function CopyTask()
 {
@@ -174,7 +191,7 @@ function CopyTask()
     $isRelayCopy = $EnableRelayCopy -and $sessionLocal
     if ($isRelayCopy)
     {
-        Write-Information "リレーコピー: $($sourceTaskContext.IpAddress) をコピー元として使用します"
+        Write-Output "リレーコピー: $($sourceTaskContext.IpAddress) をコピー元として使用します"
     }
 
     # $sourcePath 取得
@@ -196,14 +213,14 @@ function CopyTask()
     $destinationFolder = ConvertPathAndConnectUNC -TargetPath $RemoteFolder -SessionLocal $sessionLocal -TaskContext $TaskContext
 
     $sessionRemote = New-PSSession -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential
-    
+
     $outputPath = Join-Path $destinationFolder (Split-Path $sourcePath -Leaf)
     $label = "コピー"
     if ($isRelayCopy)
     {
         $label = "リレーコピー($($sourceTaskContext.IpAddress))"
     }
-    Write-Information "$($label): $sourcePath -> (Remote)$outputPath"
+    Write-Output "$($label): $sourcePath -> (Remote)$outputPath"
     Copy-FileToRemote -sourcePath $sourcePath -destinationFolder $destinationFolder -SessionLocal $sessionLocal -SessionRemote $sessionRemote
 
 
@@ -222,7 +239,7 @@ function CopyTask()
         # 圧縮ファイルを削除
         if ($DeleteCompressedFileRemote -and -not $EnableRelayCopy)
         {
-            Write-Information "圧縮ファイル削除(Remote) $outputPath"
+            Write-Output "圧縮ファイル削除(Remote) $outputPath"
             Invoke-Command -Session $sessionRemote -ScriptBlock {
                 Remove-Item -Path $using:outputPath
             }
@@ -245,14 +262,14 @@ function Get-CompressedFilePath()
 
 
 function Get-LastWriteItem($path)
-{ 
+{
     $item = Get-Item $path
 
     if ($item.Attributes -band [System.IO.FileAttributes]::Directory) {
         # The path is a directory, get the newest file's last write time recursively
         return Get-ChildItem $path -Recurse |
-                      Sort-Object LastWriteTime -Descending |
-                      Select-Object -First 1
+                Sort-Object LastWriteTime -Descending |
+                Select-Object -First 1
     }
     else {
         return $item
@@ -272,7 +289,7 @@ function ConvertPathAndConnectUNC()
         $TargetPath,
         $SessionLocal,
         [Parameter(Mandatory)]
-        [ValidateNotNull()] 
+        [ValidateNotNull()]
         $TaskContext
     )
 
@@ -283,7 +300,7 @@ function ConvertPathAndConnectUNC()
     {
         $root = [System.IO.Path]::GetPathRoot($outputPath)
         $cred = $TaskContext.Credential
-        
+
         # UNC認証が必要な場合、一時的なドライブを作成して認証を通すハック
         # https://stackoverflow.com/questions/67469217/powershell-unc-path-with-credentials
         $AuthenticateUncFunc = {
@@ -304,6 +321,7 @@ function ConvertPathAndConnectUNC()
     return $outputPath
 }
 
+# SessionLocal上でリモートにファイルをコピーします
 function Copy-FileToRemote()
 {
     param(
