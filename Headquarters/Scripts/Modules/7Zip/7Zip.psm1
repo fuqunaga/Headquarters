@@ -22,7 +22,7 @@ function Compress-7ZipExt()
 
 
     Invoke-CommandExt -Session $Session -ScriptBlock {
-        Install-ModuleIfNotYet -ModuleName "7Zip4Powershell"
+        Install-ModuleIfNotYet -Name "7Zip4Powershell"
         Compress-7Zip -ArchiveFileName $ArchiveFileName -Path $Path
     }
 
@@ -52,7 +52,7 @@ function Expand-7ZipExt()
 
 
     Invoke-CommandExt -Session $Session -ScriptBlock {
-        Install-ModuleIfNotYet -ModuleName "7Zip4Powershell"
+        Install-ModuleIfNotYet -Name "7Zip4Powershell"
         Expand-7Zip -ArchiveFileName $using:ArchiveFileName -TargetPath $using:TargetPath
     }
 

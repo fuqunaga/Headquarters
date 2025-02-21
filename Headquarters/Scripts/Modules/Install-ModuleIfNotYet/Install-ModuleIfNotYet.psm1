@@ -6,15 +6,15 @@ function Install-ModuleIfNotYet {
     param
     (
         [ValidateNotNullOrEmpty()]
-        $ModuleName
+        $Name
     )
 
-    if (-not (Get-Module -ListAvailable $ModuleName)) {
+    if (-not (Get-Module -ListAvailable $Name)) {
 
         # NuGetがインストールされていない場合はインストールする
         Get-PackageProvider -Name "NuGet" -ForceBootstrap > $null
 
-        Write-Output "モジュールをインストールします : [$ModuleName]"
-        Install-Module -Name $ModuleName -Force -Scope CurrentUser
+        Write-Output "モジュールをインストールします : [$Name]"
+        Install-Module -Name $Name -Force -Scope CurrentUser
     }
 }
