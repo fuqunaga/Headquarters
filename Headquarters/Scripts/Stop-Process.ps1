@@ -34,8 +34,12 @@ Invoke-Command -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Cre
 
 
     # taskkill /F なしでWM_CLOSEメッセージが送信されるらしい
-    # ただしリモートプロセスに対しては /F がないと動作しないっぽいので
+    # PowerShellからの実行は/Fがないと動作しない（対話的ではないから？）ので
     # タスクスケジューラでローカルプロセスとして実行する
+    # 
+    # ダメだった他の方法
+    # - $process.CloseMainWindow() も対話的でないとダメそう
+    # - Win32APIでSendMessage() は対象が確認ダイアログを出した場合処理が返ってこない（ユーザーがダイアログを操作してもダメだった）
 
     # $ProcessNameの末尾に.exeがない場合は追加
     $exeName = $using:ProcessName
