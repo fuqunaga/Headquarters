@@ -18,6 +18,8 @@ namespace Headquarters
                                                                    $env:PSModulePath += ";$path"
                                                                }
                                                                """;
+        
+        private static readonly string AddChangeExecutionPolicyString = "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force";
 
         /// <summary>
         /// Headquarters.Path 属性を定義
@@ -76,6 +78,7 @@ namespace Headquarters
             }
             
             powerShell.AddScript(AddModulePathString);
+            powerShell.AddScript(AddChangeExecutionPolicyString);
             powerShell.AddScript(AddAttributeString);
             powerShell.AddStatement();
             powerShell.AddScript(scriptString);
