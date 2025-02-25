@@ -75,27 +75,30 @@ public class ScriptExecutionInfo
     
     private string GetProgressString()
     {
-        if(_progressRecords.Count == 0)
+        lock (_progressRecords)
         {
-            return "";
+            if (_progressRecords.Count == 0)
+            {
+                return "";
+            }
+
+            var removeIds = _progressRecords
+                .Where(kv => kv.Value.RecordType == ProgressRecordType.Completed)
+                .Select(kv => kv.Key)
+                .ToList();
+
+            foreach (var id in removeIds)
+            {
+                _progressRecords.Remove(id);
+            }
+
+            var progressStrings = _progressRecords.Values.Select(record =>
+            {
+                var percent = record.PercentComplete < 0 ? "" : $"{record.PercentComplete}%";
+                return $"{record.Activity} {percent}";
+            });
+            return StringJoinWithoutNullOrEmpty("\n", progressStrings);
         }
-        
-        var removeIds =_progressRecords
-            .Where(kv => kv.Value.RecordType == ProgressRecordType.Completed)
-            .Select(kv => kv.Key)
-            .ToList();
-        
-        foreach (var id in removeIds)
-        {
-            _progressRecords.Remove(id);
-        }
-        
-        var progressStrings = _progressRecords.Values.Select(record =>
-        {
-            var percent = record.PercentComplete < 0 ? "" : $"{record.PercentComplete}%";
-            return $"{record.Activity} {percent}";
-        });
-        return StringJoinWithoutNullOrEmpty("\n", progressStrings);
     }
     
     private static string StringJoinWithoutNullOrEmpty(string separator, params string[] strings)
@@ -134,7 +137,11 @@ public class ScriptExecutionInfo
         
         subscriber.onProgressAdded += (progressRecord) =>
         {
-            _progressRecords[progressRecord.ActivityId] = progressRecord;
+            lock (_progressRecords)
+            {
+                _progressRecords[progressRecord.ActivityId] = progressRecord;
+            }
+
             onPropertyChanged?.Invoke();
         };
         
