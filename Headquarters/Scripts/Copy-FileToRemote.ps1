@@ -142,10 +142,11 @@ function EndTask()
     param(
         [ValidateNotNullOrEmpty()]
         $LocalPath,
+        [bool]$EnableCompression=$true,
         [bool]$DeleteCompressedFileLocal=$false
     )
 
-    if ($DeleteCompressedFileLocal)
+    if ($EnableCompression -and $DeleteCompressedFileLocal)
     {
         $archivePath = Get-CompressedFilePath -FilePath $LocalPath
         Write-Output "圧縮ファイル削除 $archivePath"
@@ -166,15 +167,17 @@ function Get-SourceTaskContext($pool, $atomicUseLocalKey, $TaskContext)
         if ($sourceTaskContext) {
             return $sourceTaskContext
         }
-
+        
+        # デバッグ用に1タスクだけ許可する
+#        if(-not ($TaskContext.IpAddress -like "192.168.12.87"))
+#        {
+#            continue
+#        }
+        
         # ローカルPCをコピー元として利用
-        # 1タスクだけ許可する
-        if($TaskContext.IpAddress -like "192.168.12.87")
-        {
         if ($TaskContext.SharedDictionary.TryAdd($atomicUseLocalKey, $TaskContext.IpAddress)) {
             return
         }
-    }
 
         $elapsedTime = (Get-Date) - $waitStartTime
         Write-Progress "ローカルPCかリレーコピー元PCが使用可能になるのを待機しています 経過時間[$($elapsedTime.ToString("hh\:mm\:ss"))]"

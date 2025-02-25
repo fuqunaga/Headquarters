@@ -12,26 +12,59 @@
 コピー先のパス（ローカルPC）
 "$(IP)"という文字列が含まれている場合、対応するIPListのIPアドレスに置換されます
 例: C:\Backup\$(IP)\MyFile -> C:\Backup\192.168.0.1\MyFile
-"$(IP)"またはIPListで指定されたIPアドレスごとにパラメータを分けないと、最後にコピーされたファイルで上書きされてしまいます
-各IPアドレスに対応するユニークなパスを指定してください
+"$(IP)"またはIPListを用いて各IPアドレスごとにユニークなパスになるよう指定してください
 #>
 
 
-param(
-    [ValidateNotNullOrEmpty()]
-    $RemotePath,
-    [ValidateNotNullOrEmpty()]
-    $LocalPath,
-    $TaskContext
-)
+function IpAddressTask()
+{
+    param(
+        [ValidateNotNullOrEmpty()]
+        $RemotePath,
+        [ValidateNotNullOrEmpty()]
+        $LocalPath,
+        $TaskContext
+    )
 
+    $sourcePath = Convert-PathAndConnectUNC -TargetPath $RemotePath -TaskContext $TaskContext
+
+    # フォルダかどうかを判定
+    # IPアドレスが展開されるとc:\192.168.0.1などが拡張子ありでファイルとして認識されるため、展開前に判定する
+    $isDestinaionPathFolder = $LocalPath.EndsWith("\") -or ([System.IO.Path]::GetExtension($LocalPath) -eq "")
+    $destinationPath = $LocalPath.Replace("`$(IP)", $TaskContext.IpAddress).TrimEnd("\")
+    $destinationFolderPath = $destinationPath
+
+    # Destinationがフォルダ
+    if ($isDestinaionPathFolder)
+    {
+        if (Test-Path -PathType Leaf $destinationPath)
+        {
+            throw "コピー先がフォルダとして指定されていますが同名のファイルが存在します $destinationPath"
+        }
+    }
+    else
+    {
+        $destinationFolderPath = [System.IO.Path]::GetDirectoryName($destinationPath)
+    }
+
+
+    # フォルダが存在しない場合、作成
+    if (-not (Test-Path $destinationFolderPath))
+    {
+        New-Item $destinationFolderPath -ItemType Directory
+    }
+
+    $session = New-PSSession -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential
+    Copy-Item -FromSession $session -Recurse -Force -Path $sourcePath -Destination $destinationPath
+
+}
 
 
 <#
 入力されたパスを実際に使用可能なパスに変換します
 UNCパスの場合、認証を通すために一時的なドライブを作成します
 #>
-function ConvertPathAndConnectUNC()
+function Convert-PathAndConnectUNC()
 {
     param(
         [Parameter(Mandatory)]
@@ -63,28 +96,3 @@ function ConvertPathAndConnectUNC()
 
     return $outputPath
 }
-
-
-$sourcePath = ConvertPathAndConnectUNC -TargetPath $RemotePath -TaskContext $TaskContext
-
-# フォルダかどうかを判定
-# IPアドレスが展開されるとc:\192.168.0.1などが拡張子ありでファイルとして認識されるため、展開前に判定する
-$isDestinaionPathFolder = $LocalPath.EndsWith("\") -or ([System.IO.Path]::GetExtension($LocalPath) -eq "")
-$destinationPath = $LocalPath.Replace("`$(IP)", $TaskContext.IpAddress).TrimEnd("\")
-
-# Check if destinationPath
-if ($isDestinaionPathFolder)
-{
-    if (Test-Path -PathType Leaf $destinationPath)
-    {
-        throw "コピー先がフォルダとして指定されていますが同名のファイルが存在します $destinationPath"
-    }
-
-    if (-not (Test-Path $destinationPath))
-    {
-        New-Item $destinationPath -ItemType Directory
-    }
-}
-
-$session = New-PSSession -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential
-Copy-Item -FromSession $session -Recurse -Force -Path $sourcePath -Destination $destinationPath
