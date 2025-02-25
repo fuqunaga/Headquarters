@@ -19,7 +19,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
     private string _scriptName = "";
     private string _synopsis = "";
     private string _description = "";
-    private bool _isLocked;
     private readonly List<Task> _runningTasks = [];
     private CancellationTokenSource? _cancelTokenSource;
     private readonly ConcurrentDictionary<string, object> _sharedDictionary = [];
@@ -157,12 +156,14 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             })
             .ToList();
             
-        AddOutputInformation("スクリプトを開始します");
-        var stopwatch = Stopwatch.StartNew();
-
+        _sharedDictionary.Clear();
+        
         using var cancelTokenSource = new CancellationTokenSource();
         _cancelTokenSource = cancelTokenSource;
-
+        
+        AddOutputInformation("スクリプトを開始します");
+        var stopwatch = Stopwatch.StartNew();
+        
         try
         {
             var result = await RunScriptFunctions(ipAndParameterList, _cancelTokenSource.Token, maxTaskCount, isStopOnError);
@@ -194,6 +195,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
         finally
         {
             _cancelTokenSource = null;
+            _sharedDictionary.Clear();
         }
     }
 
@@ -272,7 +274,7 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
             eventSubscriber: scriptExecInfo.EventSubscriber
         );
                 
-        var result = await scriptFunction.Run(invokeParameter);
+        var result = await scriptFunction.Run(invokeParameter, _sharedDictionary);
         scriptExecInfo.Result = result;
         return result;
     }
@@ -291,8 +293,6 @@ public class ScriptRunViewModel : ViewModelBase, IDisposable
                 };
             }
         ).ToList();
-        
-        _sharedDictionary.Clear();
         
         // 自前のSemaphoreSlimで各Taskが実行可能になってから実行することでMaxTaskCount通りの同時実行数にする
         // RunspacePool任せの並列実行だとすべてRunning状態になってからRunspacePool待ちになる

@@ -81,7 +81,7 @@ public class ScriptFunction
         TaskContext? taskContext = null;
         if (IsSessionRequired)
         {
-            taskContext ??= CreateTaskContext();
+            taskContext ??= CreateTaskContextLocal();
             if(param.Runspace == null)
             {
                 var runspace = RunspaceFactory.CreateRunspace();
@@ -104,23 +104,29 @@ public class ScriptFunction
         
         if (IsTaskContextRequired)
         {
-            taskContext ??= CreateTaskContext();
+            taskContext ??= CreateTaskContextLocal();
             param.Parameters[Script.ReservedParameterName.TaskContext] = taskContext;
         }
 
         
         return await Run(param);
         
-        
-        TaskContext CreateTaskContext()
+ 
+        TaskContext CreateTaskContextLocal() => ScriptFunction.CreateTaskContext(ipAddress, param, sharedDictionary);
+    }
+
+    public async Task<PowerShellRunner.Result> Run(PowerShellRunner.InvokeParameter param, ConcurrentDictionary<string, object> sharedDictionary)
+    {
+        if (IsTaskContextRequired)
         {
-            var userName = param.Parameters[GlobalParameter.UserNameParameterName] as string ?? GlobalParameter.UserName;
-            var userPassword = param.Parameters[GlobalParameter.UserPasswordParameterName] as string ?? GlobalParameter.UserName;
-            return new TaskContext(ipAddress, userName, userPassword, sharedDictionary);
+            var taskContext = CreateTaskContext("", param, sharedDictionary);
+            param.Parameters[Script.ReservedParameterName.TaskContext] = taskContext;
         }
+        
+        return await Run(param);
     }
     
-    public async Task<PowerShellRunner.Result> Run(PowerShellRunner.InvokeParameter param)
+    private async Task<PowerShellRunner.Result> Run(PowerShellRunner.InvokeParameter param)
     {
         var functionParameters = param.Parameters
             .Where(p => ParameterNames.Contains(p.Key, StringComparer.OrdinalIgnoreCase))
@@ -133,5 +139,23 @@ public class ScriptFunction
         );
         
         return await PowerShellRunner.InvokeAsync(_scriptString, functionInvokeParameter, _commandString);
+    }
+    
+    
+    private static TaskContext CreateTaskContext(string ipAddress, PowerShellRunner.InvokeParameter param, ConcurrentDictionary<string, object> sharedDictionary)
+    {
+        var userName = GlobalParameter.UserName;
+        if (param.Parameters.TryGetValue(GlobalParameter.UserName, out var userNameObj) && userNameObj is string userNameString)
+        {
+            userName = userNameString;
+        }
+        
+        var userPassword = GlobalParameter.UserPassword;
+        if (param.Parameters.TryGetValue(GlobalParameter.UserPassword, out var userPasswordObj) && userPasswordObj is string userPasswordString)
+        {
+            userPassword = userPasswordString;
+        }
+        
+        return new TaskContext(ipAddress, userName, userPassword, sharedDictionary);
     }
 }
