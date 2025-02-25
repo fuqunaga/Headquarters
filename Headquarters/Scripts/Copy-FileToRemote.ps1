@@ -34,15 +34,36 @@
 #>
 
 
+# プールID
+$poolId = "CopyFileToRemotePool"
+# リレーコピーで１つのコピー元が同時に担当するコピー先の数
+$targetCountPerSource = 5
+# リレーコピーでPoolに登録するローカルPCの値
+# TaskContext型でなければ何でもいい
+$localPcDummyValue = "LocalPC"
+
 function BeginTask()
 {
     param(
         [ValidateScript({Test-PathExistence $_})]
         [Headquarters.Path()]
         $LocalPath,
+        [bool]$EnableRelayCopy=$true,
         [bool]$EnableCompression=$true,
-        [bool]$SkipCompressionIfNewer=$true
+        [bool]$SkipCompressionIfNewer=$true,
+        $TaskContext
     )
+
+    # リレーコピーならあらかじめPoolに$targetCountPerSource分だけローカルPCが使えるように登録
+    if ($EnableRelayCopy)
+    {
+        $pool = Get-Pool -PoolId $poolId -TaskContext $TaskContext
+        for($i = 0; $i -lt $targetCountPerSource; $i++)
+        {
+            $pool.SetObject($localPcDummyValue)
+        }
+    }
+
 
     if (-not $EnableCompression)
     {
@@ -93,11 +114,10 @@ function IpAddressTask()
     $sourceTaskContext = $null
     if ($EnableRelayCopy)
     {
-        $atomicUseLocalKey = "UseLocalPcAsSource"
-        $pool = Get-Pool -PoolId "CopyFileTask" -TaskContext $TaskContext
+        $pool = Get-Pool -PoolId $poolId -TaskContext $TaskContext
 
-        $sourceTaskContext = Get-SourceTaskContext -Pool $pool -atomicUseLocalKey $atomicUseLocalKey -TaskContext $TaskContext
-        if($sourceTaskContext)
+        $sourceTaskContext = Get-SourceTaskContext -Pool $pool -TaskContext $TaskContext
+        if($sourceTaskContext -is [Headquarters.TaskContext])
         {
             # New-PSSessionではなくInvoke-PSSessionを使うことでダブルホップを回避
             # https://zenn.dev/fuqunaga/articles/1d52ec77c643c5
@@ -120,18 +140,22 @@ function IpAddressTask()
     }
     finally
     {
-        if ($EnableRelayCopy) {
-            # ローカルPC使用中フラグを削除
-            if(-not $sessionLocal)
-            {
-                $dummyFlag = ""
-                $TaskContext.SharedDictionary.TryRemove($atomicUseLocalKey, [ref]$dummyFlag)
-            }
-
+        if ($EnableRelayCopy)
+        {
             # 終了済みTaskContextを返却
-            $pool.SetObject($TaskContext)
-            if ($sessionLocal) {
+            if ($sessionLocal)
+            {
                 $pool.SetObject($sourceTaskContext)
+            }
+            else
+            {
+                $pool.SetObject($localPcDummyValue)
+            }
+            
+            # 今回コピーした先のTaskContextは$targetCountPerSource分だけ登録
+            for($i = 0; $i -lt $targetCountPerSource; $i++)
+            {
+                $pool.SetObject($TaskContext)
             }
         }
     }
@@ -165,26 +189,16 @@ function Get-SourceTaskContext($pool, $atomicUseLocalKey, $TaskContext)
     {
         $sourceTaskContext = $pool.TryGetObject()
         if ($sourceTaskContext) {
+            Write-Progress "ローカルPCかリレーコピー元PCが使用可能になるのを待機しています" -Completed
             return $sourceTaskContext
-        }
-        
-        # デバッグ用に1タスクだけ許可する
-#        if(-not ($TaskContext.IpAddress -like "192.168.12.87"))
-#        {
-#            continue
-#        }
-        
-        # ローカルPCをコピー元として利用
-        if ($TaskContext.SharedDictionary.TryAdd($atomicUseLocalKey, $TaskContext.IpAddress)) {
-            return
         }
 
         $elapsedTime = (Get-Date) - $waitStartTime
         Write-Progress "ローカルPCかリレーコピー元PCが使用可能になるのを待機しています 経過時間[$($elapsedTime.ToString("hh\:mm\:ss"))]"
 
-        # 1~5秒待機
+        # 0.5~1秒待機
         # 複数のタスクが同時にチェックするのは避けるため待ち時間を散らす
-        Start-Sleep -Seconds (Get-Random -Minimum 1 -Maximum 5)
+        Start-Sleep -Seconds (Get-Random -Minimum 0.5 -Maximum 1)
     }
 }
 
@@ -322,7 +336,7 @@ function Convert-PathAndConnectUNC()
                 $driveName = "Copy-File_TempDrive_$($root -replace '[\\.]', '')"
 
                 # 文字列をOutputしちゃうので > $null で抑制
-                New-PSDrive -Name $driveName -PSProvider FileSystem -Root $root -Credential $cred -ErrorAction SilentlyContinue > $null 
+                New-PSDrive -Name $driveName -PSProvider FileSystem -Root $root -Credential $cred -ErrorAction SilentlyContinue > $null
                 if (-not $?) {
                     throw "UNCパスの認証に失敗しました。共有フォルダの設定がされていないかもしれません $root"
                 }
@@ -361,7 +375,7 @@ function Copy-FileToRemote()
     }
 
     $isUnc = ([System.Uri]$destinationFolder).IsUnc
-    
+
     # SessionLocal上で実行されるスクリプトブロック
     $copyScriptBlock = $null
     if ($isUnc)
