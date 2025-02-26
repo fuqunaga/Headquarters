@@ -162,14 +162,8 @@ public class ScriptExecutionInfo
             AddToOutputString($"[{tag}] {message.TrimEnd('\r', '\n')}{positionMessage}");
         }
         
-        void AddToOutputString<T>(T addedObj)
+        void AddToOutputString(string text)
         {
-            var text = addedObj?.ToString() ?? "";
-            if (string.IsNullOrEmpty(text))
-            {
-                return;
-            }
-
             lock (subscriber)
             {
                 if (string.IsNullOrEmpty(_outputString))
@@ -178,7 +172,7 @@ public class ScriptExecutionInfo
                 }
                 else
                 {
-                    _outputString += "\n" + text;
+                    _outputString += $"\n{text}";
                 }
 
                 onPropertyChanged?.Invoke();
