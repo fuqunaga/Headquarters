@@ -114,9 +114,6 @@
     <Resource Include="Resources\Images\icon.ico" />
     <Resource Include="Resources\Images\icon.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Utility\" />
-  </ItemGroup>
   <Target Name="RemoveConfigFile" AfterTargets="AfterBuild">
     <Delete Files="$(OutputPath)Headquarters.exe.config" />
   </Target>
