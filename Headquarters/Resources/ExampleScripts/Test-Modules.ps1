@@ -10,7 +10,8 @@ Test-PathExistence:
 
 TaskContextUtility:
 TaskContextを用いたユーティリティ関数
-- New-PSSessionFromTaskContext : TaskContextを用いてPSSessionを作成します
+- New-PSSessionFromTaskContext - TaskContextを用いてPSSessionを作成します
+- Convert-PathToUncAndAuth - TaskContextを用いて$(IP)付きのパスをUNCパスに変換します
 
 Import-CommandToSession:
 ローカルで定義した関数をリモートセッションにインポートします
@@ -20,16 +21,24 @@ Install-ModuleIfNotYet:
 インターネットに接続された環境でのみ有効です
 
 7Zip:
-7Zip4Powershellのラッパー
-指定したセッションで7Zip4Powershellのインストールと操作を行います
+指定したセッションで7Zip4Powershellを使用可能な状態にするラッパー
 
+.PARAMETER Path
+テストするパス
 #>
 
 
 param(
     [Headquarters.Path()]
+    [string]
     $Path="C:\",
-    $TaskContext)
+
+    [string]
+    $SharedFolderPath="\\`$(IP)\",
+
+    [Headquarters.TaskContext]
+    $TaskContext
+)
 
 
 function LocalFunction()
@@ -44,8 +53,19 @@ Write-Output "> Test-PathExistence -Path `$Path`n$(Test-PathExistence -Path $Pat
 # TaskContextUtility
 Write-Output "> `$session = New-PSSessionFromTaskContext -TaskContext `$TaskContext`n"
 $session = New-PSSessionFromTaskContext -TaskContext $TaskContext
-#Write-Output "> $pool = Get-PoolFromTaskContext -TaskContext `$TaskContext"
-#$pool = Get-PoolFromTaskContext -TaskContext $TaskContext
+
+Write-Output "> Convert-PathToUncAndAuth -Path `$SharedFolderPath -TaskContext `$TaskContext"
+try
+{
+    Convert-PathToUncAndAuth -Path $SharedFolderPath -TaskContext $TaskContext
+}
+catch
+{
+    # ここのエラーは許容
+    Write-Output $_.Exception.Message
+}
+# 改行
+Write-Output ""
 
 
 # Import-CommandToSession
@@ -69,11 +89,15 @@ $sourceFilePath = "C:\Windows\Temp\HeadquartersTest\TestFile.txt"
 $compressedFilePath = "C:\Windows\Temp\HeadquartersTest\TestFile.7z"
 $expandFolderPath = "C:\Windows\Temp\HeadquartersTest\TestFileExpanded"
 
-Write-Output "> New-Item -Path ""C:\Windows\Temp\HeadquartersTest"" -ItemType Directory -Force"
-New-Item -Path "C:\Windows\Temp\HeadquartersTest" -ItemType Directory -Force
+Write-Output "> Invoke-Command -Session `$session -ScriptBlock {
+>     New-Item -Path ""C:\Windows\Temp\HeadquartersTest"" -ItemType Directory -Force
+>     ""テストファイルです"" | Out-File -FilePath `$using:sourceFilePath
+> }"
+Invoke-Command -Session $session -ScriptBlock {
+    New-Item -Path "C:\Windows\Temp\HeadquartersTest" -ItemType Directory -Force
+    "テストファイルです" | Out-File -FilePath $using:sourceFilePath
+}
 
-Write-Output "> ""テストファイルです"" | Out-File -FilePath `$sourceFilePath"
-"テストファイルです" | Out-File -FilePath $sourceFilePath
 
 Write-Output "> Compress-7ZipExt -OutputFilePath `$compressedFilePath -SourcePath `$sourceFilePath -Session `$session"
 Compress-7ZipExt -OutputFilePath $compressedFilePath -SourcePath $sourceFilePath -Session $session
