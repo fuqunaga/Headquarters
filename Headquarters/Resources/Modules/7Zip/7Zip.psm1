@@ -13,9 +13,9 @@ function Compress-7ZipExt()
     param
     (
         [ValidateNotNullOrEmpty()]
-        $ArchiveFileName,
+        $OutputFilePath,
         [ValidateNotNullOrEmpty()]
-        $Path,
+        $SourcePath,
         [bool]$EnableOutput=$true,
         $Session
     )
@@ -23,7 +23,7 @@ function Compress-7ZipExt()
 
     Invoke-CommandExt -Session $Session -ScriptBlock {
         Install-ModuleIfNotYet -Name "7Zip4Powershell"
-        Compress-7Zip -ArchiveFileName $ArchiveFileName -Path $Path
+        Compress-7Zip -ArchiveFileName $using:OutputFilePath -Path $using:SourcePath
     }
 
     if($EnableOutput)
@@ -33,7 +33,7 @@ function Compress-7ZipExt()
         {
             $optionString = "(Remote)"
         }
-        Write-Output "圧縮$optionString $Path -> $ArchiveFileName"
+        Write-Output "圧縮$optionString $SourcePath -> $OutputFilePath"
     }
 }
 
@@ -43,9 +43,9 @@ function Expand-7ZipExt()
     param
     (
         [ValidateNotNullOrEmpty()]
-        $ArchiveFileName,
+        $ArchiveFilePath,
         [ValidateNotNullOrEmpty()]
-        $TargetPath,
+        $OutputFolderPath,
         [bool]$EnableOutput=$true,
         $Session
     )
@@ -53,7 +53,7 @@ function Expand-7ZipExt()
 
     Invoke-CommandExt -Session $Session -ScriptBlock {
         Install-ModuleIfNotYet -Name "7Zip4Powershell"
-        Expand-7Zip -ArchiveFileName $using:ArchiveFileName -TargetPath $using:TargetPath
+        Expand-7Zip -ArchiveFileName $using:ArchiveFilePath -TargetPath $using:OutputFolderPath
     }
 
     if($EnableOutput)
@@ -63,7 +63,7 @@ function Expand-7ZipExt()
         {
             $optionString = "(Remote)"
         }
-        Write-Output "解凍$optionString $ArchiveFileName -> $TargetPath"
+        Write-Output "解凍$optionString $ArchiveFilePath -> $OutputFolderPath"
     }
 }
 
@@ -86,3 +86,5 @@ function Invoke-CommandExt()
         Invoke-Command -ScriptBlock $ScriptBlock
     }
 }
+
+Expose-ModuleMember -Function Compress-7ZipExt, Expand-7ZipExt
