@@ -189,7 +189,8 @@ function Get-SourceTaskContext($pool, $atomicUseLocalKey, $TaskContext)
     {
         $sourceTaskContext = $pool.TryGetObject()
         if ($sourceTaskContext) {
-            Write-Progress "ローカルPCかリレーコピー元PCが使用可能になるのを待機しています" -Completed
+            # Completedを出力して表示を削除
+            Write-Progress "Completed" -Completed
             return $sourceTaskContext
         }
 
