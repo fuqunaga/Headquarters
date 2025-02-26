@@ -24,8 +24,8 @@ namespace Headquarters
                                                                    }
                                                                }
                                                                """;
-        
-        private static readonly string AddChangeExecutionPolicyString = "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force";
+
+        private const string AddChangeExecutionPolicyString = "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force";
 
         /// <summary>
         /// Headquarters.Path 属性を定義
