@@ -1,9 +1,6 @@
 ﻿<#
 .SYNOPSIS
-タスク間でobjectを共有するための機能を提供します
-
-.DESCRIPTION
-TaskContext.SharedDictionaryを使用してタスク間でobjectを共有します
+TaskContextのSharedDictionaryを利用したマルチスレッド対応のオブジェクトプール
 
 .PARAMETER PoolId
 Poolを識別するための任意のID
@@ -60,7 +57,7 @@ class Pool {
     }
 }
 
-function Get-Pool() {
+function Get-PoolFromTaskContext() {
     param(
         [ValidateNotNullOrEmpty()]
         [string]$PoolId,
