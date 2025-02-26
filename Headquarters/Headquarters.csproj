@@ -12,7 +12,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Images\icon.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\Images\icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -25,12 +25,6 @@
     <None Update="app.manifest">
       <SubType>Designer</SubType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\icon.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Costura.Fody" Version="5.7.0">
@@ -65,24 +59,68 @@
       <XamlRuntime>Wpf</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="ScriptChainPage\ScriptPage\ScriptPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <XamlRuntime>Wpf</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="ScriptChainPage\ScriptPage\ScriptRunPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <XamlRuntime>Wpf</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Update="ScriptParamaterInputField\ScriptParameterInputField.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Update="MainWindow\MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <XamlRuntime>Wpf</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="MainWindow\MainTab\MainTab.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="MainWindow\MainTab\MainTabHeader.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="MainWindow\IpList\IpList.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="MainWindow\IpList\IpListDataGrid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="MainWindow\Dialog\Dialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="MainWindow\ParameterInputField\HelpTextBlock.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="MainWindow\ParameterInputField\ParameterInputField.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="MainWindow\ScriptChainPage\ScriptPage\ScriptPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="MainWindow\ScriptChainPage\ScriptPage\ScriptRunPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="MainWindow\ScriptChainPage\ScriptChainPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="MainWindow\Setting\SettingPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="MainWindow\Profile\ProfileWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UIUtility\SelectableDataGrid\SelectableDataGrid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="UIUtility\CustomDragablz\CustomDragablzMaterialDesign.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\icon.ico" />
+    <Resource Include="Resources\Images\icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Utility\" />
   </ItemGroup>
   <Target Name="RemoveConfigFile" AfterTargets="AfterBuild">
     <Delete Files="$(OutputPath)Headquarters.exe.config" />
   </Target>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(ProjectDir)profiles.json&quot; &quot;$(TargetDir)HeadquartersData\&quot; /Y&#xA;&#xA;robocopy &quot;$(ProjectDir)Scripts&quot; &quot;$(TargetDir)HeadquartersData\Profile\Scripts&quot; /E /XD &quot;$(ProjectDir)Scripts\.idea&quot; /NJH /NJS /NP&#xA;IF %ERRORLEVEL% LSS 8 EXIT 0" />
+    <Exec Command="xcopy &quot;$(ProjectDir)Resources\profiles.json&quot; &quot;$(TargetDir)HeadquartersData\&quot; /Y&#xA;xcopy &quot;$(ProjectDir)Resources\Modules&quot; &quot;$(TargetDir)HeadquartersData\Modules&quot; /Y /S /I&#xA;&#xA;robocopy &quot;$(ProjectDir)Resources\Scripts&quot; &quot;$(TargetDir)HeadquartersData\Profile\Scripts&quot; /E /XD &quot;.idea&quot; /NJH /NJS /NP&#xA;IF %ERRORLEVEL% LSS 8 EXIT 0" />
   </Target>
 </Project>

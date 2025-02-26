@@ -12,10 +12,16 @@ namespace Headquarters
     public static class PowerShellRunner
     {
         private static readonly string AddModulePathString = $$"""
-                                                               $path = "{{Path.Combine(Profile.ScriptsFolderPath, "Modules")}}"
-                                                               if ( $env:PSModulePath.EndsWith($path) -eq $false )
-                                                               {
-                                                                   $env:PSModulePath += ";$path"
+                                                               $paths = @(
+                                                                   "{{Path.Combine(PathSetting.DataPath, "Modules")}}"
+                                                                   "{{Path.Combine(Profile.ScriptsFolderPath, "Modules")}}"
+                                                               )
+                                                               
+                                                               $currentPaths = $env:PSModulePath -split ";"
+                                                               foreach ($path in $paths) {
+                                                                   if ($currentPaths -notcontains $path) {
+                                                                       $env:PSModulePath = "$env:PSModulePath;$path"
+                                                                   }
                                                                }
                                                                """;
         

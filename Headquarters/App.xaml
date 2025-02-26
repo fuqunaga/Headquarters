@@ -4,7 +4,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:Headquarters"
-             StartupUri="MainWindow.xaml">
+             StartupUri="MainWindow/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -17,7 +17,7 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
                 
                 <!-- Include the Dragablz Material Design style -->
-                <ResourceDictionary Source="CustomDragablz/CustomDragablzMaterialDesign.xaml" />                
+                <ResourceDictionary Source="UIUtility/CustomDragablz/CustomDragablzMaterialDesign.xaml" />                
             </ResourceDictionary.MergedDictionaries>
             
             <local:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
