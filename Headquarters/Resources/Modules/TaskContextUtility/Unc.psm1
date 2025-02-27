@@ -8,7 +8,6 @@ function Convert-PathToUncAndAuth()
     param(
         [ValidateNotNullOrEmpty()]
         $Path,
-        [Headquarters.TaskContext]
         $TaskContext
     )
 

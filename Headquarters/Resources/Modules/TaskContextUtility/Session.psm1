@@ -7,7 +7,6 @@ function New-PSSessionFromTaskContext()
 {
     [CmdletBinding()]
     param(
-        [Headquarters.TaskContext]
         $TaskContext
     )
 
