@@ -57,7 +57,9 @@ class Pool {
     }
 }
 
-function Get-PoolFromTaskContext() {
+function Get-PoolFromTaskContext() 
+{
+    [CmdletBinding()]
     param(
         [ValidateNotNullOrEmpty()]
         [string]$PoolId,

@@ -3,7 +3,9 @@
 TaskContextからSessionを作成
 #>
 
-function New-PSSessionFromTaskContext() {
+function New-PSSessionFromTaskContext() 
+{
+    [CmdletBinding()]
     param(
         [Headquarters.TaskContext]
         $TaskContext

@@ -4,6 +4,7 @@
 #>
 function Import-CommandToSession
 {
+    [CmdletBinding()]
     param
     (
         $CommandName,

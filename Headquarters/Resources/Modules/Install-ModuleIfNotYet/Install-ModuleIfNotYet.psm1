@@ -2,7 +2,9 @@
 .SYNOPSIS
 対象のモジュールが見つかれなければ対話しないようにInstall-Moduleを実行します
 #>
-function Install-ModuleIfNotYet {
+function Install-ModuleIfNotYet 
+{
+    [CmdletBinding()]
     param
     (
         [ValidateNotNullOrEmpty()]

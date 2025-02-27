@@ -9,7 +9,9 @@
 例: param([ValidateScript({Test-PathExistence $_})] $Path)
 #>
 
-function Test-PathExistence {
+function Test-PathExistence 
+{
+    [CmdletBinding()]
     param
     (
         [string]$Path

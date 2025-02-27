@@ -10,6 +10,7 @@
 
 function Compress-7ZipExt()
 {
+    [CmdletBinding()]
     param
     (
         [ValidateNotNullOrEmpty()]
@@ -40,6 +41,7 @@ function Compress-7ZipExt()
 
 function Expand-7ZipExt()
 {
+    [CmdletBinding()]
     param
     (
         [ValidateNotNullOrEmpty()]
