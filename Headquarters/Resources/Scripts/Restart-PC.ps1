@@ -5,6 +5,4 @@
 
 param($TaskContext)
 
-Invoke-Command -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential -ScriptBlock {
-   shutdown /r
-}
+Restart-Computer -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential -Force
