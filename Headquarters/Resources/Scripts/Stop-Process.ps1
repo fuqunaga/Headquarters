@@ -23,7 +23,7 @@ param(
 Invoke-Command -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential -ScriptBlock {
     # 引数のプロセス名が存在するか確認
     if (!(Get-Process -Name $using:ProcessName -ErrorAction SilentlyContinue)) {
-        Write-Output "プロセスが見つかりません：[$using:ProcessName]"
+        Write-Host "プロセスが見つかりません：[$using:ProcessName]"
         return
     }
 
