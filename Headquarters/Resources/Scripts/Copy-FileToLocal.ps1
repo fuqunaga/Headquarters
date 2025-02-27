@@ -16,83 +16,49 @@
 #>
 
 
-function IpAddressTask()
+param(
+    [ValidateNotNullOrEmpty()]
+    $RemotePath,
+    [ValidateNotNullOrEmpty()]
+    [Headquarters.Path()]
+    $LocalPath,
+    $TaskContext
+)
+
+$sourcePath = Convert-PathToUncAndAuth -Path $RemotePath -TaskContext $TaskContext
+
+# フォルダかどうかを判定
+# IPアドレスが展開されるとc:\192.168.0.1などが拡張子ありでファイルとして認識されるため、展開前に判定する
+$isDestinaionPathFolder = $LocalPath.EndsWith("\") -or ([System.IO.Path]::GetExtension($LocalPath) -eq "")
+$destinationPath = $LocalPath.Replace("`$(IP)", $TaskContext.IpAddress).TrimEnd("\")
+$destinationFolderPath = $destinationPath
+
+# Destinationがフォルダ
+if ($isDestinaionPathFolder)
 {
-    param(
-        [ValidateNotNullOrEmpty()]
-        $RemotePath,
-        [ValidateNotNullOrEmpty()]
-        $LocalPath,
-        $TaskContext
-    )
-
-    $sourcePath = Convert-PathAndConnectUNC -TargetPath $RemotePath -TaskContext $TaskContext
-
-    # フォルダかどうかを判定
-    # IPアドレスが展開されるとc:\192.168.0.1などが拡張子ありでファイルとして認識されるため、展開前に判定する
-    $isDestinaionPathFolder = $LocalPath.EndsWith("\") -or ([System.IO.Path]::GetExtension($LocalPath) -eq "")
-    $destinationPath = $LocalPath.Replace("`$(IP)", $TaskContext.IpAddress).TrimEnd("\")
-    $destinationFolderPath = $destinationPath
-
-    # Destinationがフォルダ
-    if ($isDestinaionPathFolder)
+    if (Test-Path -PathType Leaf $destinationPath)
     {
-        if (Test-Path -PathType Leaf $destinationPath)
-        {
-            throw "コピー先がフォルダとして指定されていますが同名のファイルが存在します $destinationPath"
-        }
+        throw "コピー先がフォルダとして指定されていますが同名のファイルが存在します $destinationPath"
     }
-    else
-    {
-        $destinationFolderPath = [System.IO.Path]::GetDirectoryName($destinationPath)
-    }
-
-
-    # フォルダが存在しない場合、作成
-    if (-not (Test-Path $destinationFolderPath))
-    {
-        New-Item $destinationFolderPath -ItemType Directory
-    }
-
-    $session = New-PSSession -ComputerName $TaskContext.IpAddress -Credential $TaskContext.Credential
-    Copy-Item -FromSession $session -Recurse -Force -Path $sourcePath -Destination $destinationPath
-
+}
+else
+{
+    $destinationFolderPath = [System.IO.Path]::GetDirectoryName($destinationPath)
 }
 
 
-<#
-入力されたパスを実際に使用可能なパスに変換します
-UNCパスの場合、認証を通すために一時的なドライブを作成します
-#>
-function Convert-PathAndConnectUNC()
+# フォルダが存在しない場合、作成
+if (-not (Test-Path $destinationFolderPath))
 {
-    param(
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        $TargetPath,
-        [Parameter(Mandatory)]
-        [ValidateNotNull()]
-        $TaskContext
-    )
+    New-Item $destinationFolderPath -ItemType Directory
+}
 
-    $outputPath = $TargetPath.Replace("`$(IP)", $TaskContext.IpAddress)
-
-    $isUnc = ([System.Uri]$outputPath).IsUnc
-    if ($isUnc)
-    {
-        $root = [System.IO.Path]::GetPathRoot($outputPath)
-        $cred = $TaskContext.Credential
-
-        # UNC認証が必要な場合、一時的なドライブを作成して認証を通すハック
-        # https://stackoverflow.com/questions/67469217/powershell-unc-path-with-credentials
-        if (-not (Test-Path $root)) {
-            $driveName = "Copy-File_TempDrive_$($root -replace '[\\.]', '')"
-            New-PSDrive -Name $driveName -PSProvider FileSystem -Root $root -Credential $cred > $null
-            if (-not $?) {
-                throw "UNCパスの認証に失敗しました。共有フォルダの設定がされていないかもしれません $root"
-            }
-        }
-    }
-
-    return $outputPath
+if (([System.Uri]$sourcePath).IsUnc)
+{
+    Copy-Item -Recurse -Force -Path $sourcePath -Destination $destinationPath
+}
+else
+{
+    $session = New-PSSessionFromTaskContext -TaskContext $TaskContext
+    Copy-Item -Recurse -Force -Path $sourcePath -Destination $destinationPath -FromSession $session
 }
