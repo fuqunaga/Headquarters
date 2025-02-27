@@ -125,7 +125,7 @@ public class ScriptExecutionInfo
         };
         
         subscriber.onDebugAdded +=  record => AddRecordToOutputString("Debug", record);;
-        subscriber.onInformationAdded +=  record => AddToOutputStringWithTag("Info", record.ToString(), "");
+        subscriber.onInformationAdded +=  record => AddToOutputString(record.ToString());
         subscriber.onVerboseAdded += record => AddRecordToOutputString("Verbose", record);;
         
         subscriber.onWarningAdded += record => AddRecordToOutputString("Warning", record);
