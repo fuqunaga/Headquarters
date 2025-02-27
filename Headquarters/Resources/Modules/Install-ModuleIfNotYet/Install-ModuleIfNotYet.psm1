@@ -16,7 +16,7 @@ function Install-ModuleIfNotYet
         # NuGetがインストールされていない場合はインストールする
         Get-PackageProvider -Name "NuGet" -ForceBootstrap > $null
 
-        Write-Output "モジュールをインストールします : [$Name]"
+        Write-Host "モジュールをインストールします : [$Name]"
         Install-Module -Name $Name -Force -Scope CurrentUser
     }
 }

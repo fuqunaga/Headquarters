@@ -34,7 +34,7 @@ function Compress-7ZipExt()
         {
             $optionString = "(Remote)"
         }
-        Write-Output "圧縮$optionString $SourcePath -> $OutputFilePath"
+        Write-Host "圧縮$optionString $SourcePath -> $OutputFilePath"
     }
 }
 
@@ -65,7 +65,7 @@ function Expand-7ZipExt()
         {
             $optionString = "(Remote)"
         }
-        Write-Output "解凍$optionString $ArchiveFilePath -> $OutputFolderPath"
+        Write-Host "解凍$optionString $ArchiveFilePath -> $OutputFolderPath"
     }
 }
 
