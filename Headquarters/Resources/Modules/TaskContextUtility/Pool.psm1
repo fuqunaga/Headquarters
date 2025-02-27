@@ -15,35 +15,35 @@ class Pool {
         $this.PoolId = $PoolId
     }
 
-    [System.Collections.Concurrent.ConcurrentQueue[object]]GetQueue()
+    [System.Collections.Concurrent.ConcurrentBag[object]]GetBag()
     {
         $sharedDictionary = $this.TaskContext.SharedDictionary
-        $queue = $null
-        $sharedDictionary.TryGetValue($this.PoolId, [ref]$queue);
-        return $queue
+        $bag = $null
+        $sharedDictionary.TryGetValue($this.PoolId, [ref]$bag);
+        return $bag
     }
 
 
-    [System.Collections.Concurrent.ConcurrentQueue[object]]GetOrCreateQueue()
+    [System.Collections.Concurrent.ConcurrentBag[object]]GetOrCreateBag()
     {
-        $queue = $this.GetQueue()
-        if($null -eq $queue) {
+        $bag = $this.GetBag()
+        if($null -eq $bag) {
             $sharedDictionary = $this.TaskContext.SharedDictionary
-            $queue = $sharedDictionary.GetOrAdd($this.PoolId, [System.Collections.Concurrent.ConcurrentQueue[object]]::new())
+            $bag = $sharedDictionary.GetOrAdd($this.PoolId, [System.Collections.Concurrent.ConcurrentBag[object]]::new())
         }
 
-        return $queue;
+        return $bag;
     }
 
     [object]TryGetObject()
     {
-        $queue = $this.GetQueue()
-        if ( $null -eq $queue) {
+        $bag = $this.GetBag()
+        if ( $null -eq $bag) {
             return $null
         }
 
         $obj = $null;
-        if (-not $queue.TryDequeue([ref]$obj)) {
+        if (-not $bag.TryTake([ref]$obj)) {
             return $null
         }
 
@@ -52,8 +52,8 @@ class Pool {
 
     [void]SetObject([object]$Object)
     {
-        $queue = $this.GetOrCreateQueue()
-        $queue.Enqueue($Object)
+        $bag = $this.GetOrCreateBag()
+        $bag.Add($Object)
     }
 }
 
