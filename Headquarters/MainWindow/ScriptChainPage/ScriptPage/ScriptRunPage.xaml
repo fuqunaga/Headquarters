@@ -85,15 +85,16 @@
     </UserControl.Resources>
 
 
-    <Grid>
+    <Grid x:Name="MainGrid">
         <Grid.RowDefinitions>
+            <RowDefinition x:Name="RowDef0" Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition x:Name="RowDef2" Height="*" />
         </Grid.RowDefinitions>
 
 
         <ScrollViewer Grid.Row="0"
+                      x:Name="ParametersRow"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Auto">
 
@@ -151,7 +152,8 @@
             </StackPanel>
         </ScrollViewer>
 
-        <GridSplitter Grid.Row="1" 
+        <GridSplitter Grid.Row="1"
+                      x:Name="Splitter"
                       HorizontalAlignment="Stretch"
                       Height="5" Cursor="SizeNS" 
                       />
