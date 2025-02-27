@@ -23,9 +23,10 @@ function Compress-7ZipExt()
 
 
     Invoke-CommandExt -Session $Session -ScriptBlock {
+        param($OutputFilePath, $SourcePath)
         Install-ModuleIfNotYet -Name "7Zip4Powershell"
-        Compress-7Zip -ArchiveFileName $using:OutputFilePath -Path $using:SourcePath
-    }
+        Compress-7Zip -ArchiveFileName $OutputFilePath -Path $SourcePath
+    } -ArgumentList $OutputFilePath, $SourcePath
 
     if($EnableOutput)
     {
@@ -75,17 +76,18 @@ function Invoke-CommandExt()
     param
     (
         $Session,
-        $ScriptBlock
+        $ScriptBlock,
+        $ArgumentList
     )
 
     if($Session)
     {
         Import-CommandToSession -CommandName "Install-ModuleIfNotYet" -Session $Session
-        Invoke-Command -Session $Session -ScriptBlock $ScriptBlock
+        Invoke-Command -Session $Session -ScriptBlock $ScriptBlock -ArgumentList $ArgumentList
     }
     else
     {
-        Invoke-Command -ScriptBlock $ScriptBlock
+        Invoke-Command -ScriptBlock $ScriptBlock -ArgumentList $ArgumentList
     }
 }
 
