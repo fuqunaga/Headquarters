@@ -12,6 +12,7 @@ TaskContextUtility:
 TaskContextを用いたユーティリティ関数
 - New-PSSessionFromTaskContext - TaskContextを用いてPSSessionを作成します
 - Convert-PathToUncAndAuth - TaskContextを用いて$(IP)付きのパスをUNCパスに変換します
+- Get-PoolFromTaskContext - TaskContextのSharedDictionaryを利用したマルチスレッド対応のオブジェクトプールを取得します
 
 Import-CommandToSession:
 ローカルで定義した関数をリモートセッションにインポートします
@@ -31,7 +32,7 @@ Install-ModuleIfNotYet:
 param(
     [Headquarters.Path()]
     [string]
-    $Path="C:\",
+    $Path="C:\Windows\Temp",
 
     [string]
     $SharedFolderPath="\\`$(IP)\",
@@ -41,66 +42,91 @@ param(
 )
 
 
-function LocalFunction()
+function Out-Title($title)
 {
-    Write-Output "LocalFunction が呼び出されました`n"
+    Write-Host "■ $title"
 }
 
-# Test-PathExistence
-Write-Output "> Test-PathExistence -Path `$Path`n$(Test-PathExistence -Path $Path)`n"
-
-
-# TaskContextUtility
-Write-Output "> `$session = New-PSSessionFromTaskContext -TaskContext `$TaskContext`n"
-$session = New-PSSessionFromTaskContext -TaskContext $TaskContext
-
-Write-Output "> Convert-PathToUncAndAuth -Path `$SharedFolderPath -TaskContext `$TaskContext"
-try
+function Out-Code($code)
 {
-    Convert-PathToUncAndAuth -Path $SharedFolderPath -TaskContext $TaskContext
+    Write-Host "> $code"
+}
+
+function Out-NewLine($count=1)
+{
+    Write-Host ("`n" * $($count-1))
+}
+
+function RunAndOut-Command($command)
+{
+    Out-Code $command
+    Invoke-Expression $command
+}
+
+function LocalFunction()
+{
+    Write-Host "LocalFunction が呼び出されました"
+}
+
+Out-Title "Test-PathExistence"
+try {
+    $result = RunAndOut-Command "Test-PathExistence -Path `$Path"
+    Write-Host $result.ToString()
 }
 catch
 {
     # ここのエラーは許容
-    Write-Output $_.Exception.Message
+    Write-Host $_.Exception.Message
 }
-# 改行
-Write-Output ""
+Out-NewLine 2
 
 
-# Import-CommandToSession
-Write-Output "> Import-CommandToSession -CommandName ""LocalFunction"" -Session `$session"
-Import-CommandToSession -CommandName "LocalFunction" -Session $session
+Out-Title "TaskContextUtility"
+$code = "`$session = New-PSSessionFromTaskContext -TaskContext `$TaskContext"
+Out-Code $code
+Invoke-Expression $code
+try
+{
+    RunAndOut-Command "Convert-PathToUncAndAuth -Path `$SharedFolderPath -TaskContext `$TaskContext"
+}
+catch
+{
+    # ここのエラーは許容
+    Write-Host $_.Exception.Message
+}
+Out-NewLine 2
 
-Write-Output "> Invoke-Command -Session `$session -ScriptBlock { LocalFunction }"
-Invoke-Command -Session $session -ScriptBlock { LocalFunction }
+
+Out-Title "Import-CommandToSession"
+RunAndOut-Command "Import-CommandToSession -CommandName ""LocalFunction"" -Session `$session"
+RunAndOut-Command "Invoke-Command -Session `$session -ScriptBlock { LocalFunction }"
+Out-NewLine 2
 
 
-# Install-ModuleIfNotYet:
-Write-Output "> Install-ModuleIfNotYet -Name ""7Zip4Powershell""`n"
-Install-ModuleIfNotYet -Name "7Zip4Powershell"
+Out-Title "Install-ModuleIfNotYet"
+RunAndOut-Command "Install-ModuleIfNotYet -Name ""7Zip4Powershell"""
+Out-NewLine 2
 
 
-#7Zip
-Write-Output "> `$sourceFilePath = ""C:\Windows\Temp\HeadquartersTest\TestFile.txt"""
-Write-Output "> `$compressedFilePath = ""C:\Windows\Temp\HeadquartersTest\TestFile.7z"""
-Write-Output "> `$expandFolderPath = ""C:\Windows\Temp\HeadquartersTest\TestFileExpanded"""
-$sourceFilePath = "C:\Windows\Temp\HeadquartersTest\TestFile.txt"
-$compressedFilePath = "C:\Windows\Temp\HeadquartersTest\TestFile.7z"
-$expandFolderPath = "C:\Windows\Temp\HeadquartersTest\TestFileExpanded"
-
-Write-Output "> Invoke-Command -Session `$session -ScriptBlock {
->     New-Item -Path ""C:\Windows\Temp\HeadquartersTest"" -ItemType Directory -Force
->     ""テストファイルです"" | Out-File -FilePath `$using:sourceFilePath
-> }"
-Invoke-Command -Session $session -ScriptBlock {
-    New-Item -Path "C:\Windows\Temp\HeadquartersTest" -ItemType Directory -Force
-    "テストファイルです" | Out-File -FilePath $using:sourceFilePath
+Out-Title "7Zip"
+$codes = @(
+    "`$sourceFilePath = ""C:\Windows\Temp\HeadquartersTest\TestFile.txt""",
+    "`$compressedFilePath = ""C:\Windows\Temp\HeadquartersTest\TestFile.7z""",
+    "`$expandFolderPath = ""C:\Windows\Temp\HeadquartersTest\TestFileExpanded"""
+)
+foreach($code in $codes)
+{
+    Out-Code $code
+    Invoke-Expression $code
 }
 
+RunAndOut-Command "Invoke-Command -Session `$session -ScriptBlock {
+    New-Item -Path ""C:\Windows\Temp\HeadquartersTest"" -ItemType Directory -Force
+    ""テストファイルです"" | Out-File -FilePath `$using:sourceFilePath
+}"
+Out-NewLine
 
-Write-Output "> Compress-7ZipExt -OutputFilePath `$compressedFilePath -SourcePath `$sourceFilePath -Session `$session"
-Compress-7ZipExt -OutputFilePath $compressedFilePath -SourcePath $sourceFilePath -Session $session
+RunAndOut-Command "Compress-7ZipExt -OutputFilePath `$compressedFilePath -SourcePath `$sourceFilePath -Session `$session"
+Write-Host ""
 
-Write-Output "> Expand-7ZipExt -ArchiveFilePath `$compressedFilePath -OutputFolderPath `$expandFolderPath -Session `$session"
-Expand-7ZipExt -ArchiveFilePath $compressedFilePath -OutputFolderPath $expandFolderPath -Session $session
+RunAndOut-Command "Expand-7ZipExt -ArchiveFilePath `$compressedFilePath -OutputFolderPath `$expandFolderPath -Session `$session"
