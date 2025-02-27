@@ -25,7 +25,10 @@ Install-ModuleIfNotYet:
 指定したセッションで7Zip4Powershellを使用可能な状態にするラッパー
 
 .PARAMETER Path
-テストするパス
+Test-PathExistenceのテスト対象パス
+
+.PARAMETER SharedFolderPath
+Convert-PathToUncAndAuthのテスト対象パス
 #>
 
 
@@ -57,10 +60,12 @@ function Out-NewLine($count=1)
     Write-Host ("`n" * $($count-1))
 }
 
-function RunAndOut-Command($command)
+function RunAndOut-Command([Parameter(ValueFromPipeline)]$command)
 {
-    Out-Code $command
-    Invoke-Expression $command
+    process {
+        Out-Code $command
+        Invoke-Expression $command
+    }
 }
 
 function LocalFunction()
@@ -82,9 +87,20 @@ Out-NewLine 2
 
 
 Out-Title "TaskContextUtility"
+
+$codes = @("`$pool = Get-PoolFromTaskContext -TaskContext `$TaskContext",
+"`$obj = `$pool.TryGetObject()",
+"`$pool.SetObject(`$TaskContext.IpAddress)",
+"Write-Host `$obj"
+)
+$codes | RunAndOut-Command
+Out-NewLine
+
 $code = "`$session = New-PSSessionFromTaskContext -TaskContext `$TaskContext"
 Out-Code $code
 Invoke-Expression $code
+Out-NewLine
+
 try
 {
     RunAndOut-Command "Convert-PathToUncAndAuth -Path `$SharedFolderPath -TaskContext `$TaskContext"
@@ -94,6 +110,7 @@ catch
     # ここのエラーは許容
     Write-Host $_.Exception.Message
 }
+
 Out-NewLine 2
 
 
