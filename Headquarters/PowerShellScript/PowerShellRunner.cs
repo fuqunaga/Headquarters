@@ -144,9 +144,6 @@ namespace Headquarters
             {
                 powerShell.Streams.Error.Add(new ErrorRecord(e, "Invoke", ErrorCategory.NotSpecified, null));
             }
-
-            // エラーイベントをListenしてるからいらない？
-            result.hasError |= powerShell.HadErrors;
             
             return result;
         }
