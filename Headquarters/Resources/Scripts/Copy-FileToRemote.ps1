@@ -16,6 +16,9 @@
 コピー済みのPCをコピー元として再利用しローカルPCのネットワーク帯域を節約します
 大容量のファイルを多数のPCにコピーする場合におすすめです
 
+.PARAMETER MaxTargetsPerSource
+リレーコピー時に1PCが同時に行う最大コピー先数
+
 .PARAMETER EnableCompression
 圧縮ファイルでコピー
 コピー元と同じ場所に7zの圧縮ファイルを作成し、コピー、解凍します
@@ -36,8 +39,7 @@
 
 # プールID
 $poolId = "CopyFileToRemotePool"
-# リレーコピーで１つのコピー元が同時に担当するコピー先の数
-$targetCountPerSource = 5
+
 # リレーコピーでPoolに登録するローカルPCの値
 # TaskContext型でなければ何でもいい
 $localPcDummyValue = "LocalPC"
@@ -48,17 +50,18 @@ function BeginTask()
         [ValidateScript({Test-PathExistence $_})]
         [Headquarters.Path()]
         $LocalPath,
-        [bool]$EnableRelayCopy=$true,
+        [bool]$EnableRelayCopy=$false,
+        [int]$MaxTargetsPerSource=5,
         [bool]$EnableCompression=$true,
         [bool]$SkipCompressionIfNewer=$true,
-        $TaskContext
+        [Headquarters.TaskContext]$TaskContext
     )
 
-    # リレーコピーならあらかじめPoolに$targetCountPerSource分だけローカルPCが使えるように登録
+    # リレーコピーならあらかじめPoolに$MaxTargetsPerSource分だけローカルPCが使えるように登録
     if ($EnableRelayCopy)
     {
-        $pool = Get-Pool -PoolId $poolId -TaskContext $TaskContext
-        for($i = 0; $i -lt $targetCountPerSource; $i++)
+        $pool = Get-PoolFromTaskContext -PoolId $poolId -TaskContext $TaskContext
+        for($i = 0; $i -lt $MaxTargetsPerSource; $i++)
         {
             $pool.SetObject($localPcDummyValue)
         }
@@ -83,7 +86,7 @@ function BeginTask()
         $needCompression = $lastWriteTime -gt $archiveLastWriteTime
         if (!$needCompression)
         {
-            Write-Output "コピー元より新しい圧縮ファイルが見つかりました。圧縮をスキップします
+            Write-Host "コピー元より新しい圧縮ファイルが見つかりました。圧縮をスキップします
 - [$archiveLastWriteTime] $archivePath  圧縮ファイル
 - [$lastWriteTime] $($lastWriteItem.FullName)  コピー元の最も新しいファイル"
         }
@@ -91,9 +94,10 @@ function BeginTask()
 
     if($needCompression)
     {
-        Compress-7ZipExt -ArchiveFileName $archivePath -Path $LocalPath
+        Compress-7ZipExt -OutputFilePath $archivePath -SourcePath $LocalPath
     }
 }
+
 
 function IpAddressTask()
 {
@@ -102,9 +106,10 @@ function IpAddressTask()
         $LocalPath,
         [ValidateNotNullOrEmpty()]
         $RemoteFolder,
-        [bool]$EnableRelayCopy=$true,
-        [bool]$EnableCompression=$true,
-        [bool]$DeleteCompressedFileRemote=$false,
+        [bool]$EnableRelayCopy,
+        [int]$MaxTargetsPerSource,
+        [bool]$EnableCompression,
+        [bool]$DeleteCompressedFileRemote,
         $TaskContext
     )
 
@@ -114,10 +119,10 @@ function IpAddressTask()
     $sourceTaskContext = $null
     if ($EnableRelayCopy)
     {
-        $pool = Get-Pool -PoolId $poolId -TaskContext $TaskContext
+        $pool = Get-PoolFromTaskContext -PoolId $poolId -TaskContext $TaskContext
 
         $sourceTaskContext = Get-SourceTaskContext -Pool $pool -TaskContext $TaskContext
-        if($sourceTaskContext -is [Headquarters.TaskContext])
+        if ($sourceTaskContext -is [Headquarters.TaskContext])
         {
             # New-PSSessionではなくInvoke-PSSessionを使うことでダブルホップを回避
             # https://zenn.dev/fuqunaga/articles/1d52ec77c643c5
@@ -151,15 +156,19 @@ function IpAddressTask()
             {
                 $pool.SetObject($localPcDummyValue)
             }
-            
-            # 今回コピーした先のTaskContextは$targetCountPerSource分だけ登録
-            for($i = 0; $i -lt $targetCountPerSource; $i++)
-            {
-                $pool.SetObject($TaskContext)
-            }
+        }
+    }
+
+    if ($EnableRelayCopy)
+    {
+        # 今回コピーした先のTaskContextは$MaxTargetsPerSource分だけ登録
+        for($i = 0; $i -lt $MaxTargetsPerSource; $i++)
+        {
+            $pool.SetObject($TaskContext)
         }
     }
 }
+
 
 function EndTask()
 {
@@ -173,7 +182,7 @@ function EndTask()
     if ($EnableCompression -and $DeleteCompressedFileLocal)
     {
         $archivePath = Get-CompressedFilePath -FilePath $LocalPath
-        Write-Output "圧縮ファイル削除 $archivePath"
+        Write-Host "圧縮ファイル削除 $archivePath"
         Remove-Item -Path $archivePath
     }
 }
@@ -222,7 +231,7 @@ function CopyTask()
     $isRelayCopy = $EnableRelayCopy -and $SessionLocal
     if ($isRelayCopy)
     {
-        Write-Output "リレーコピー: $($SourceTaskContext.IpAddress) をコピー元として使用します"
+        Write-Host "リレーコピー: $($SourceTaskContext.IpAddress) をコピー元として使用します"
     }
 
     # $sourcePath 取得
@@ -235,11 +244,11 @@ function CopyTask()
     }
     if ($isRelayCopy)
     {
-        $sourceFolder = Convert-PathAndConnectUNC -TargetPath $RemoteFolder -SessionLocal $SessionLocal -TaskContext $SourceTaskContext
+        $sourceFolder = Convert-PathToUncAndAuthWithSession -TargetPath $RemoteFolder -SessionLocal $SessionLocal -TaskContext $SourceTaskContext
         $sourcePath = Join-Path $sourceFolder (Split-Path $sourcePath -Leaf)
     }
 
-    $destinationFolder = Convert-PathAndConnectUNC -TargetPath $RemoteFolder -SessionLocal $SessionLocal -TaskContext $TaskContext
+    $destinationFolder = Convert-PathToUncAndAuthWithSession -TargetPath $RemoteFolder -SessionLocal $SessionLocal -TaskContext $TaskContext
     $outputPath = Join-Path $destinationFolder (Split-Path $sourcePath -Leaf)
 
     $label = "コピー"
@@ -247,7 +256,7 @@ function CopyTask()
     {
         $label = "リレーコピー"
     }
-    Write-Output "$($label): $sourcePath -> (Remote)$outputPath"
+    Write-Host "$($label): $sourcePath -> (Remote)$outputPath"
     Copy-FileToRemote -sourcePath $sourcePath -destinationFolder $destinationFolder -SessionLocal $SessionLocal -TaskContext $TaskContext
 
 
@@ -263,12 +272,12 @@ function CopyTask()
             $expandTargetPath = Join-Path $destinationFolder (Split-Path $LocalPath -Leaf)
         }
 
-        Expand-7ZipExt -ArchiveFileName $outputPath -TargetPath $expandTargetPath -Session $SessionRemote
+        Expand-7ZipExt -ArchiveFilePath $outputPath -OutputFolderPath $expandTargetPath -Session $SessionRemote
 
         # 圧縮ファイルを削除
         if ($DeleteCompressedFileRemote -and -not $EnableRelayCopy)
         {
-            Write-Output "圧縮ファイル削除(Remote) $outputPath"
+            Write-Host "圧縮ファイル削除(Remote) $outputPath"
             Invoke-Command -Session $sessionRemote -ScriptBlock {
                 Remove-Item -Path $using:outputPath
             }
@@ -306,48 +315,57 @@ function Get-LastWriteItem($path)
 }
 
 
-# 入力されたパスを実際に使用可能なパスに変換します
-# UNCパスの場合、認証を通すために一時的なドライブを作成します
-function Convert-PathAndConnectUNC()
+function Convert-PathToUncAndAuthWithSession()
 {
     param(
-        [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         $TargetPath,
         $SessionLocal,
-        [Parameter(Mandatory)]
         [ValidateNotNull()]
         $TaskContext
     )
-
-    $outputPath = $TargetPath.Replace("`$(IP)", $TaskContext.IpAddress)
-
-    $isUnc = ([System.Uri]$outputPath).IsUnc
-    if ($isUnc)
+    
+    if ($SessionLocal)
     {
-        $root = [System.IO.Path]::GetPathRoot($outputPath)
-        $cred = $TaskContext.Credential
-
-        # UNC認証が必要な場合、一時的なドライブを作成して認証を通すハック
-        # https://stackoverflow.com/questions/67469217/powershell-unc-path-with-credentials
-        $AuthenticateUncFunc = {
-            param($root, [pscredential]$cred)
-
-            if (-not (Test-Path $root)) {
-                $driveName = "Copy-File_TempDrive_$($root -replace '[\\.]', '')"
-
-                # 文字列をOutputしちゃうので > $null で抑制
-                New-PSDrive -Name $driveName -PSProvider FileSystem -Root $root -Credential $cred -ErrorAction SilentlyContinue > $null
-                if (-not $?) {
-                    throw "UNCパスの認証に失敗しました。共有フォルダの設定がされていないかもしれません $root"
-                }
-            }
+        Import-CommandToSession -CommandName "Convert-PathToUncAndAuth" -Session $SessionLocal
+        return Invoke-Command -Session $SessionLocal -ScriptBlock {
+            Convert-PathToUncAndAuth -Path $using:TargetPath -TaskContext $using:TaskContext
         }
-
-        Invoke-ScriptBlock -ScriptBlock $AuthenticateUncFunc -Session $sessionLocal -Arguments $root, $cred
+    }
+    else
+    {
+        return Convert-PathToUncAndAuth -Path $TargetPath -TaskContext $TaskContext
     }
 
-    return $outputPath
+    
+#    $outputPath = $TargetPath.Replace("`$(IP)", $TaskContext.IpAddress)
+#
+#    $isUnc = ([System.Uri]$outputPath).IsUnc
+#    if ($isUnc)
+#    {
+#        $root = [System.IO.Path]::GetPathRoot($outputPath)
+#        $cred = $TaskContext.Credential
+#
+#        # UNC認証が必要な場合、一時的なドライブを作成して認証を通すハック
+#        # https://stackoverflow.com/questions/67469217/powershell-unc-path-with-credentials
+#        $AuthenticateUncFunc = {
+#            param($root, [pscredential]$cred)
+#
+#            if (-not (Test-Path $root)) {
+#                $driveName = "Copy-File_TempDrive_$($root -replace '[\\.]', '')"
+#
+#                # 文字列をOutputしちゃうので > $null で抑制
+#                New-PSDrive -Name $driveName -PSProvider FileSystem -Root $root -Credential $cred -ErrorAction SilentlyContinue > $null
+#                if (-not $?) {
+#                    throw "UNCパスの認証に失敗しました。共有フォルダの設定がされていないかもしれません $root"
+#                }
+#            }
+#        }
+#
+#        Invoke-ScriptBlock -ScriptBlock $AuthenticateUncFunc -Session $sessionLocal -Arguments $root, $cred
+#    }
+#
+#    return $outputPath
 }
 
 
