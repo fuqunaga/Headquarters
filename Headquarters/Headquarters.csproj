@@ -32,6 +32,7 @@
     </PackageReference>
     <PackageReference Include="Dragablz" Version="0.0.3.234" />
     <PackageReference Include="Emoji.Wpf" Version="0.3.4" />
+    <PackageReference Include="Gu.Wpf.NumericInput" Version="0.5.5" />
     <PackageReference Include="IPAddressRange" Version="6.0.0" />
     <PackageReference Include="MaterialDesignColors" Version="3.1.0" />
     <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
