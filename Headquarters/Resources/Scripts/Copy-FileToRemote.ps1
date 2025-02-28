@@ -51,7 +51,7 @@ function BeginTask()
         [Headquarters.Path()]
         $LocalPath,
         [bool]$EnableRelayCopy=$false,
-        [int]$MaxTargetsPerSource=5,
+        [UInt32]$MaxTargetsPerSource=5,
         [bool]$EnableCompression=$true,
         [bool]$SkipCompressionIfNewer=$true,
         [Headquarters.TaskContext]$TaskContext
