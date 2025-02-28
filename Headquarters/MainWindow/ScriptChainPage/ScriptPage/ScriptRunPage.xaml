@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
              xmlns:local="clr-namespace:Headquarters"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:ScriptRunViewModel}"
@@ -82,6 +81,37 @@
                 </TextBlock>
             </StackPanel>
         </ControlTemplate>
+        
+        <DataTemplate x:Key="IconSmall" DataType="{x:Type local:OutputIcon}">
+            <materialDesign:PackIcon FontSize="12">
+                <materialDesign:PackIcon.Style>
+                    <Style TargetType="materialDesign:PackIcon">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding }" Value="{x:Static local:OutputIcon.Information}">
+                                <Setter Property="Kind" Value="InformationVariant" />
+                                <Setter Property="Foreground" Value="#0288D1" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding }" Value="{x:Static local:OutputIcon.NotStarted}">
+                                <Setter Property="Kind" Value="TimerSandEmpty" />
+                                <Setter Property="Foreground" Value="#B0BEC5" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding }" Value="{x:Static local:OutputIcon.Running}">
+                                <Setter Property="Kind" Value="Sync" />
+                                <Setter Property="Foreground" Value="#42A5F5" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding }" Value="{x:Static local:OutputIcon.Success}">
+                                <Setter Property="Kind" Value="CheckBold" />
+                                <Setter Property="Foreground" Value="#66BB6A" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding }" Value="{x:Static local:OutputIcon.Failure}">
+                                <Setter Property="Kind" Value="CloseThick" />
+                                <Setter Property="Foreground" Value="#E57373" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </materialDesign:PackIcon.Style>
+            </materialDesign:PackIcon>
+        </DataTemplate>
     </UserControl.Resources>
 
 
@@ -245,8 +275,9 @@
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
-                                            <emoji:TextBlock Text="{Binding IconEmoji}"
-                                                             FontSize="12" />
+                                           <ContentControl Content="{Binding Icon}" ContentTemplate="{StaticResource IconSmall}"
+                                                           HorizontalAlignment="Center"
+                                                           />
                                             <TextBlock Text="{Binding Count}"
                                                        d:Text="123"
                                                        Style="{StaticResource FilterTextBlock}" />
@@ -273,10 +304,8 @@
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
 
-                                    <emoji:TextBlock Grid.Column="0"
-                                                     Text="{Binding IconEmoji}"
-                                                     FontSize="12" />
-
+                                    <ContentControl Grid.Column="0"
+                                                    Content="{Binding Icon}" ContentTemplate="{StaticResource IconSmall}" />
                                     
                                     <TextBox Grid.Column="1"
                                              Text="{Binding Text, Mode=OneWay}"

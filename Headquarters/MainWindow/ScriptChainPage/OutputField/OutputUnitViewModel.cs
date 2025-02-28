@@ -4,27 +4,13 @@ public class OutputUnitViewModel : ViewModelBase
 {
     private readonly IOutputUnit _outputUnit;
     private OutputIcon _icon = OutputIcon.NotStarted;
-    private string _iconEmoji = OutputIconEmoji.NotStarted;
     private string _text = "";
     
     public OutputIcon Icon
     {
         get => _icon;
-        private set
-        {
-            if ( SetProperty(ref _icon, value) )
-            {
-                IconEmoji = _icon.GetEmoji();
-            }
-        }
+        private set => SetProperty(ref _icon, value);
     }
-
-    public string IconEmoji
-    {
-        get => _iconEmoji;
-        private set => SetProperty(ref _iconEmoji, value);
-    }
-    
     public string Text
     {
         get => _text;

@@ -1,4 +1,6 @@
-﻿namespace Headquarters;
+﻿using MaterialDesignThemes.Wpf;
+
+namespace Headquarters;
 
 public enum OutputIcon
 {

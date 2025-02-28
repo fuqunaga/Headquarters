@@ -7,8 +7,6 @@ public class OutputFilterButtonViewModel(OutputIcon icon) : ViewModelBase
 
     public OutputIcon Icon => icon;
 
-    public string IconEmoji => icon.GetEmoji();
-    
     public string IconDescription => icon.GetDescription();
 
     public int Count
@@ -22,5 +20,4 @@ public class OutputFilterButtonViewModel(OutputIcon icon) : ViewModelBase
         get => _isOutputVisible;
         set => SetProperty(ref _isOutputVisible, value);
     }
-    
 }
