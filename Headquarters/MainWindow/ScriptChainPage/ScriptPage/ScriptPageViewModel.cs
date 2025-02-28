@@ -11,7 +11,7 @@ namespace Headquarters;
 
 public class ScriptPageViewModel : ViewModelBase, IDisposable
 {
-    private const string ScriptsFolderPath = Profile.ScriptsFolderPath;
+    private static string ScriptsFolderPath => Profile.CurrentScriptsFolderPath;
 
     public enum Page
     {

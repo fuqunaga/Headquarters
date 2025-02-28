@@ -17,12 +17,28 @@ namespace Headquarters;
 public static class Profile
 {
     public const string DefaultPath =  $"{PathSetting.DataPath}\\Profile";
-    public const string BackupPath = $"{DefaultPath}Backup";
-    public const string ScriptsFolderPath = $"{DefaultPath}\\{ScriptsFolderName}";
-    public const string ScriptsFolderName = "Scripts";
-
+    private const string BackupPath = $"{DefaultPath}Backup";
+    private const string ScriptsFolderName = "Scripts";
     private const string TempPath = $"{PathSetting.DataPath}\\Temp";
+    private const string DefaultScriptsFolderPath = $"{DefaultPath}\\{ScriptsFolderName}";
+
+    public static string CurrentScriptsFolderPath { get; private set; } = DefaultScriptsFolderPath;
+
+    private static void ResetCurrentScriptsFolderPath()
+    {
+        CurrentScriptsFolderPath = DefaultScriptsFolderPath;
+    }
     
+    public static bool ChangeCurrentScriptsFolderPath(string path)
+    {
+        if (CurrentScriptsFolderPath == path || !Directory.Exists(path))
+        {
+            return false;
+        }
+
+        CurrentScriptsFolderPath = path;
+        return true;
+    }
     
     public static async Task<bool> ChangeProfileByUrl(string url, Action<string>? addMessage = null)
     {
@@ -82,6 +98,8 @@ public static class Profile
             {
                 // 現在のProfileをBackupフォルダに移動する
                 MoveCurrentProfileToBackup();
+                
+                ResetCurrentScriptsFolderPath();
 
                 // Profileフォルダを作成し、新しいProfileを移動する
                 // .gitフォルダは隠しファイルでコピーされない。これは都合が良い
@@ -92,7 +110,7 @@ public static class Profile
                 else
                 {
                     Directory.CreateDirectory(DefaultPath);
-                    Directory.Move(newProfileSourcePath, ScriptsFolderPath);
+                    Directory.Move(newProfileSourcePath, DefaultScriptsFolderPath);
                 }
             });
         }
