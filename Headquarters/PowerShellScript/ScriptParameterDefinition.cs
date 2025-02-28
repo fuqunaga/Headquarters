@@ -16,6 +16,7 @@ public class ScriptParameterDefinition : IParameterDefinition
     
     public string Name { get; }
     public bool IsBool { get; }
+    public Type? ConstraintType => Attributes.OfType<TypeConstraintAst>().Select(ast => ast.TypeName.GetReflectionType()).FirstOrDefault();
     public object? DefaultValue { get; }
     public IEnumerable<string> ValidateSetValues => Attributes.OfType<AttributeAst>()
         .Where(ast => ast.TypeName.GetReflectionAttributeType() == typeof(ValidateSetAttribute))
@@ -28,7 +29,6 @@ public class ScriptParameterDefinition : IParameterDefinition
 
 
     private IReadOnlyList<AttributeBaseAst> Attributes => _parameterAst.Attributes;
-    private IEnumerable<Type> AttributeTypes => Attributes.Select(ast => ast.TypeName.GetReflectionType()).Where(type => type != null);
     private IEnumerable<string> AttributeNames => Attributes.Select(ast => ast.TypeName.Name);
     
     
@@ -37,8 +37,7 @@ public class ScriptParameterDefinition : IParameterDefinition
         _parameterAst = parameterAst;
         
         Name =  _parameterAst.Name.ToString().TrimStart('$');
-        IsBool = AttributeTypes.Any(attr => attr == typeof(bool) || attr == typeof(SwitchParameter));
-        
+
         try
         {
             DefaultValue = _parameterAst.DefaultValue?.SafeGetValue();

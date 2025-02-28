@@ -6,4 +6,8 @@ public enum ParameterInputFieldType
     TextBox,
     ComboBox,
     ToggleButton,
+    IntBox,
+    UintBox,
+    FloatBox,
+    DoubleBox,
 }

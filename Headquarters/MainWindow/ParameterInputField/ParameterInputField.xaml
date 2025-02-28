@@ -6,6 +6,8 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:materialDesignInternal="clr-namespace:MaterialDesignThemes.Wpf.Internal;assembly=MaterialDesignThemes.Wpf"
              xmlns:local="clr-namespace:Headquarters"
+             xmlns:numeric="http://gu.se/NumericInput"
+             xmlns:globalization="clr-namespace:System.Globalization;assembly=mscorlib"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance local:ParameterInputFieldViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
@@ -27,6 +29,12 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="BaseBoxStyle" TargetType="numeric:BaseBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
+            <Setter Property="TextAlignment" Value="Left" />
+            <Setter Property="ValidationTrigger" Value="PropertyChanged" />
+            <Setter Property="Culture" Value="{x:Static globalization:CultureInfo.InvariantCulture}" />
+        </Style>
+        
         
         <!-- ScriptParameterInputFieldType別コンテンツ -->
         <DataTemplate x:Key="Field-UseIpList" DataType="{x:Type local:ParameterInputFieldViewModel}">
@@ -93,7 +101,28 @@
                     Opacity="0.5" />
             </StackPanel>
         </DataTemplate>
-
+        
+        <!-- NumericInput -->
+        <!-- FallbackValueを設定しておかないとロード時に空文字だったときにValidationが効かずエラー表示にならない -->
+        <DataTemplate x:Key="Field-IntBox" DataType="{x:Type local:ParameterInputFieldViewModel}">
+            <numeric:IntBox Value="{Binding Value, FallbackValue = 0}"
+                            Style="{StaticResource BaseBoxStyle}" />
+        </DataTemplate>
+        <DataTemplate x:Key="Field-UintBox" DataType="{x:Type local:ParameterInputFieldViewModel}">
+            <numeric:IntBox Value="{Binding Value, FallbackValue = 0}"
+                            Style="{StaticResource BaseBoxStyle}"
+                            MinValue="0" />
+        </DataTemplate>
+        <DataTemplate x:Key="Field-FloatBox" DataType="{x:Type local:ParameterInputFieldViewModel}">
+            <numeric:FloatBox Value="{Binding Value, FallbackValue = 0}"
+                              Style="{StaticResource BaseBoxStyle}" />
+        </DataTemplate>
+        <DataTemplate x:Key="Field-DoubleBox" DataType="{x:Type local:ParameterInputFieldViewModel}">
+            <numeric:DoubleBox Value="{Binding Value, FallbackValue = 0}"
+                               Style="{StaticResource BaseBoxStyle}" />
+        </DataTemplate>
+        
+        
         <!-- ScriptParameterInputFieldType別コンテンツ出し分け -->
         <Style x:Key="InputField" TargetType="ContentControl">
             <Setter Property="materialDesign:HintAssist.Hint" Value="{Binding Name}" />
@@ -115,7 +144,24 @@
                              Value="{x:Static local:ParameterInputFieldType.ToggleButton}">
                     <Setter Property="ContentTemplate" Value="{StaticResource Field-ToggleButton}" />
                 </DataTrigger>
+                <DataTrigger Binding="{Binding FieldType}"
+                             Value="{x:Static local:ParameterInputFieldType.IntBox}">
+                    <Setter Property="ContentTemplate" Value="{StaticResource Field-IntBox}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding FieldType}"
+                             Value="{x:Static local:ParameterInputFieldType.UintBox}">
+                    <Setter Property="ContentTemplate" Value="{StaticResource Field-UintBox}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding FieldType}"
+                             Value="{x:Static local:ParameterInputFieldType.FloatBox}">
+                    <Setter Property="ContentTemplate" Value="{StaticResource Field-FloatBox}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding FieldType}"
+                             Value="{x:Static local:ParameterInputFieldType.DoubleBox}">
+                    <Setter Property="ContentTemplate" Value="{StaticResource Field-DoubleBox}" />
+                </DataTrigger>
             </Style.Triggers>
+            
         </Style>
         
     </UserControl.Resources>

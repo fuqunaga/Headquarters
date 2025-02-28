@@ -51,14 +51,34 @@ namespace Headquarters
             HasHelp = !string.IsNullOrEmpty(help);
             
             ComboBoxItems = parameterDefinition.ValidateSetValues.ToList();
-            FieldType = ComboBoxItems.Any() switch
-            {
-                true => ParameterInputFieldType.ComboBox,
-                false when parameterDefinition.IsBool => ParameterInputFieldType.ToggleButton,
-                _ => ParameterInputFieldType.TextBox
-            };
+            FieldType = GetFieldType();
             
             OpenFileCommand = new DelegateCommand(_ => OnOpenFile(), _ => ShowOpenFileButton);
+            
+            return;
+
+            
+            ParameterInputFieldType GetFieldType()
+            {
+                if (ComboBoxItems.Any())
+                {
+                    return ParameterInputFieldType.ComboBox;
+                }
+
+                if (parameterDefinition.IsBool())
+                {
+                    return ParameterInputFieldType.ToggleButton;
+                }
+
+                return parameterDefinition.ConstraintType switch
+                {
+                    var t when t == typeof(int) => ParameterInputFieldType.IntBox,
+                    var t when t == typeof(uint) => ParameterInputFieldType.UintBox,
+                    var t when t == typeof(float) => ParameterInputFieldType.FloatBox,
+                    var t when t == typeof(double) => ParameterInputFieldType.DoubleBox,
+                    _ => ParameterInputFieldType.TextBox
+                };
+            }
         }
         
         private void OnOpenFile()

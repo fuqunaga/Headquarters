@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Headquarters;
 
 public class ParameterDefinition(string name) : IParameterDefinition
 {
     public string Name => name;
-    public bool IsBool { get; set;}
+    public Type? ConstraintType { get; set;}
     public object? DefaultValue { get; set;}
     public IEnumerable<string> ValidateSetValues { get; set;} = [];
     public bool IsPath { get; set;}

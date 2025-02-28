@@ -44,7 +44,7 @@ public static class GlobalParameter
                 (
                     new ParameterDefinition(ShowConfirmationDialogOnExecuteParameterName)
                     {
-                        IsBool = true,
+                        ConstraintType = typeof(bool),
                         DefaultValue = true,
                     },
                     "タスク実行前に確認ダイアログを表示する"

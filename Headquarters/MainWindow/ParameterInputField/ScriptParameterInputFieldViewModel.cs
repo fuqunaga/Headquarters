@@ -58,7 +58,7 @@ namespace Headquarters
         {
             var stringValue = ipListParameter ?? Value;
             
-            if (parameterDefinition.IsBool)
+            if (parameterDefinition.IsBool())
             {
                 if ( bool.TryParse(stringValue, out var boolValue))
                 {
