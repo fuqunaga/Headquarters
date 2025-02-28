@@ -45,9 +45,12 @@
                 </StackPanel>
 
                 <Separator />
+                
+              
 
                 <StackPanel Grid.IsSharedSizeScope="True"
                             Margin="8">
+
                     <ItemsControl ItemsSource="{Binding ProfileSources}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate d:DataContext="{d:DesignInstance local:ProfileSourceViewModel}">
@@ -63,6 +66,7 @@
                                     <TextBox Grid.Column="1"
                                              Text="{Binding Url}"
                                              IsReadOnly="{Binding IsReadOnly}"
+                                             VerticalAlignment="Center"
                                              Margin="8 0" />
 
                                     <Button Grid.Column="2"
@@ -111,6 +115,38 @@
                         </Button>
                     </Grid>
 
+                    <Separator />
+                    
+                    <!-- Script Folder -->
+                    <Grid DataContext="{Binding ChangeScriptFolderViewModel}"
+                          Margin="0 8">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="AUTO" SharedSizeGroup="HeaderWidth" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <local:HelpTextBlock Grid.Column="0" />
+
+                        <local:TextBoxWithOpenFileButton Grid.Column="1" />
+                        
+                        <!-- <TextBox Grid.Column="1" -->
+                        <!--          Text="{Binding ScriptFolder}" -->
+                        <!--          VerticalAlignment="Center" -->
+                        <!--          Margin="8 0" /> -->
+                        <!-- -->
+                        <Button Grid.Column="2"
+                                Command="{Binding ChangeScriptFolderCommand}"
+                                Style="{StaticResource ChangeProfileButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Autorenew"
+                                                         VerticalAlignment="Center" />
+                                <TextBlock Text="変更" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                    
                 </StackPanel>
 
                 <Separator />

@@ -15,7 +15,8 @@ public class ProfileWindowViewModel : ViewModelBase
     
     public ObservableCollection<ProfileSourceViewModel> ProfileSources { get; } = [];
     public BackupProfileSourceViewModel BackupProfileSource { get; } = new();
-    
+
+    public ChangeScriptFolderViewModel ChangeScriptFolderViewModel { get; } = new();
 
     public string OutputText
     {
@@ -25,7 +26,7 @@ public class ProfileWindowViewModel : ViewModelBase
     
     public ICommand ChangeProfileCommand { get; }
     public ICommand RestoreBackupCommand { get; }
-
+    
     public ProfileWindowViewModel()
     {
         LoadDataFile();
