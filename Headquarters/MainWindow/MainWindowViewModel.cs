@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 
@@ -32,13 +33,49 @@ public class MainWindowViewModel : ViewModelBase
         Instance = this;
         _targetWindow = window;
         _targetWindow.Closed += OnClosed;
-        
+
+        ValidateProfileFolder();
         LoadSettings();
     }
 
     private void OnClosed(object sender, EventArgs e)
     {
         SaveSettings();
+    }
+
+    // プロファイルフォルダがアクセス出来ない場合作り直す
+    // シンボリックリンクでターゲットが削除された場合を想定
+    private static void ValidateProfileFolder()
+    {
+        const string profilePath = Profile.DefaultPath;
+
+        if (SymbolicLinkService.IsMissingTargetSymbolicLink(profilePath))
+        {
+            Directory.Delete(profilePath, true);
+
+            MessageBox.Show($"""
+                            {profilePath} にアクセスできなかったため削除しました
+                            シンボリックリンク元のフォルダが変更された可能性があります
+                            """, "Profileフォルダエラー");
+        }
+        
+        const string scriptPath = Profile.ScriptsFolderPath;
+        if (SymbolicLinkService.IsMissingTargetSymbolicLink(scriptPath))
+        {
+            Directory.Delete(scriptPath, true);
+            
+            MessageBox.Show($"""
+                            {scriptPath} にアクセスできなかったため削除しました
+                            シンボリックリンク元のフォルダが変更された可能性があります
+                            """, "Scriptsフォルダエラー");
+        }
+        
+        // Scriptsフォルダまで作成しておく
+        // 自動的にProfileフォルダも作成される
+        if(!Directory.Exists(scriptPath))
+        {
+            Directory.CreateDirectory(scriptPath);
+        }
     }
     
     private void LoadSettings()

@@ -23,7 +23,7 @@ public static class Profile
     private const string ScriptsFolderName = "Scripts";
     private const string TempPath = $"{PathSetting.DataPath}\\Temp";
     
-
+    
     public static async Task<bool> ChangeProfileByUrl(string url, Action<string>? addMessage = null)
     {
         var folderPath = GetTemporallyPath();
@@ -233,7 +233,7 @@ public static class Profile
             var hasScriptFile = files.Any(x => x.EndsWith(".ps1"));
             if(!hasScriptFile)
             {
-                addMessage?.Invoke(".ps1ファイル、Scriptsフォルダもどちらも存在しません");
+                addMessage?.Invoke(".ps1ファイル、Scriptsフォルダどちらも見つかりません");
                 return (false, hasScriptsFolder);
             }
         }
