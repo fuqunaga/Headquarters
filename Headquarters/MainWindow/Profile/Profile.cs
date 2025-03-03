@@ -17,12 +17,12 @@ namespace Headquarters;
 public static class Profile
 {
     public const string DefaultPath =  $"{PathSetting.DataPath}\\Profile";
+    public const string ScriptsFolderPath = $"{DefaultPath}\\{ScriptsFolderName}";
+    
     private const string BackupPath = $"{DefaultPath}Backup";
     private const string ScriptsFolderName = "Scripts";
     private const string TempPath = $"{PathSetting.DataPath}\\Temp";
-    private const string DefaultScriptsFolderPath = $"{DefaultPath}\\{ScriptsFolderName}";
-
-    public static string CurrentScriptsFolderPath { get;  } = DefaultScriptsFolderPath;
+    
 
     public static async Task<bool> ChangeProfileByUrl(string url, Action<string>? addMessage = null)
     {
@@ -101,11 +101,11 @@ public static class Profile
                     Directory.CreateDirectory(DefaultPath);
                     if(useSymbolicLink)
                     {
-                        SymbolicLinkService.CreateSymbolicLink(DefaultScriptsFolderPath, newProfileSourcePath);
+                        SymbolicLinkService.CreateSymbolicLink(ScriptsFolderPath, newProfileSourcePath);
                     }
                     else
                     {
-                        Directory.Move(newProfileSourcePath, DefaultScriptsFolderPath);
+                        Directory.Move(newProfileSourcePath, ScriptsFolderPath);
                     }
                 }
             });

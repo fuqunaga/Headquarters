@@ -14,7 +14,7 @@ namespace Headquarters
         private static readonly string AddModulePathString = $$"""
                                                                $paths = @(
                                                                    "{{Path.Combine(PathSetting.DataPath, "Modules")}}"
-                                                                   "{{Path.Combine(Profile.CurrentScriptsFolderPath, "Modules")}}"
+                                                                   "{{Path.Combine(Profile.ScriptsFolderPath, "Modules")}}"
                                                                )
                                                                
                                                                $currentPaths = $env:PSModulePath -split ";"
