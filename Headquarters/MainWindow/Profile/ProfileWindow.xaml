@@ -39,7 +39,10 @@
                     <TextBlock Opacity="0.7"
                                Margin="40 16">
                         ProfileとはPowerShellスクリプト群と設定をまとめたものです<LineBreak />
-                        Profileを切り替えることでHeadquartersを特定用途向けの状態に切り替えることができます
+                        Profileを切り替えることでHeadquartersを特定用途向けの状態に切り替えることができます<LineBreak />
+                        PowerShellスクリプトを含むフォルダ（Scriptsフォルダ）、<LineBreak />
+                        もしくは、Scriptsフォルダを含む親フォルダを指定できます<LineBreak />
+                        親フォルダを指定することでsetting.jsonや外部ツールなども含めることができます
                     </TextBlock>
 
                 </StackPanel>
