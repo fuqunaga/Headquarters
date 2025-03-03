@@ -10,6 +10,14 @@ namespace Headquarters;
 public class ProfileWindowViewModel : ViewModelBase
 {
     private const string ProfilesDataFilePath = $"{PathSetting.DataPath}\\profiles.json";
+    
+    private static readonly LabelDialogViewModel ChangeProfileDialogViewModel = new()
+    {
+        Title = "Change Profile",
+        Text = "Profileを変更しますか？\n\n現在のパラメーターはすべて上書きされます\nあとでバックアップから復元できます",
+        OkButtonContent = "Change",
+    };
+    
     private string _outputText = "";
     
     
@@ -25,6 +33,7 @@ public class ProfileWindowViewModel : ViewModelBase
     }
     
     public ICommand ChangeProfileCommand { get; }
+    public ICommand ChangeProfileByLocalFolderCommand { get; }
     public ICommand RestoreBackupCommand { get; }
     
     public ProfileWindowViewModel()
@@ -36,6 +45,14 @@ public class ProfileWindowViewModel : ViewModelBase
             if (obj is string url)
             {
                 ChangeProfile(url);
+            }
+        });
+        
+        ChangeProfileByLocalFolderCommand = new DelegateCommand(obj =>
+        {
+            if (obj is string folderPath)
+            {
+                ChangeProfileByLocalFolder(folderPath);
             }
         });
 
@@ -80,16 +97,13 @@ public class ProfileWindowViewModel : ViewModelBase
 
     private async void ChangeProfile(string targetUrl)
     {
-        var labelDialogViewModel = new LabelDialogViewModel()
-        {
-            Title = "Change Profile",
-            Text = "Profileを変更しますか？\n\n現在のパラメーターはすべて上書きされます\nあとでバックアップから復元できます",
-            OkButtonContent = "Change",
-        };
-        
-        await ChangeProfile(labelDialogViewModel, () => Profile.ChangeProfileByUrl(targetUrl, AddMessage));
+        await ChangeProfile(ChangeProfileDialogViewModel, () => Profile.ChangeProfileByUrl(targetUrl, AddMessage));
     }
 
+    public async void ChangeProfileByLocalFolder(string folderPath)
+    {
+        await ChangeProfile(ChangeProfileDialogViewModel, () => Profile.ChangeProfileByFolder(folderPath, AddMessage, useSymbolicLink:true));
+    }
     
     private async void RestoreBackup()
     {

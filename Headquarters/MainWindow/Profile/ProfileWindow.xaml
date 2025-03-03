@@ -120,7 +120,7 @@
 
                     <Separator />
                     
-                    <!-- Script Folder -->
+                    <!-- Local Folder -->
                     <Grid DataContext="{Binding ChangeScriptFolderViewModel}"
                           Margin="0 8">
 
@@ -134,13 +134,9 @@
 
                         <local:TextBoxWithOpenFileButton Grid.Column="1" />
                         
-                        <!-- <TextBox Grid.Column="1" -->
-                        <!--          Text="{Binding ScriptFolder}" -->
-                        <!--          VerticalAlignment="Center" -->
-                        <!--          Margin="8 0" /> -->
-                        <!-- -->
                         <Button Grid.Column="2"
-                                Command="{Binding ChangeScriptFolderCommand}"
+                                Command="{Binding DataContext.ChangeProfileByLocalFolderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                CommandParameter="{Binding Value}"
                                 Style="{StaticResource ChangeProfileButtonStyle}">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="Autorenew"

@@ -22,24 +22,8 @@ public static class Profile
     private const string TempPath = $"{PathSetting.DataPath}\\Temp";
     private const string DefaultScriptsFolderPath = $"{DefaultPath}\\{ScriptsFolderName}";
 
-    public static string CurrentScriptsFolderPath { get; private set; } = DefaultScriptsFolderPath;
+    public static string CurrentScriptsFolderPath { get;  } = DefaultScriptsFolderPath;
 
-    private static void ResetCurrentScriptsFolderPath()
-    {
-        CurrentScriptsFolderPath = DefaultScriptsFolderPath;
-    }
-    
-    public static bool ChangeCurrentScriptsFolderPath(string path)
-    {
-        if (CurrentScriptsFolderPath == path || !Directory.Exists(path))
-        {
-            return false;
-        }
-
-        CurrentScriptsFolderPath = path;
-        return true;
-    }
-    
     public static async Task<bool> ChangeProfileByUrl(string url, Action<string>? addMessage = null)
     {
         var folderPath = GetTemporallyPath();
@@ -67,7 +51,7 @@ public static class Profile
         }
     }
 
-    private static async Task<bool> ChangeProfileByFolder(string newProfileSourcePath, Action<string>? addMessage = null)
+    public static async Task<bool> ChangeProfileByFolder(string newProfileSourcePath, Action<string>? outputMessage = null, bool useSymbolicLink = false)
     {
         try
         {
@@ -79,11 +63,11 @@ public static class Profile
                     ? $"{folderName} はフォルダではありません"
                     : $"{folderName} フォルダが見つかりません";
 
-                addMessage?.Invoke(message);
+                outputMessage?.Invoke(message);
                 return false;
             }
 
-            var (isValid, hasScriptsFolder) = ValidateFolderContentsAsProfile(newProfileSourcePath, addMessage);
+            var (isValid, hasScriptsFolder) = ValidateFolderContentsAsProfile(newProfileSourcePath, outputMessage);
             if (!isValid)
             {
                 return false;
@@ -99,24 +83,36 @@ public static class Profile
                 // 現在のProfileをBackupフォルダに移動する
                 MoveCurrentProfileToBackup();
                 
-                ResetCurrentScriptsFolderPath();
-
                 // Profileフォルダを作成し、新しいProfileを移動する
                 // .gitフォルダは隠しファイルでコピーされない。これは都合が良い
                 if (hasScriptsFolder)
                 {
-                    Directory.Move(newProfileSourcePath, DefaultPath);
+                    if (useSymbolicLink)
+                    {
+                        SymbolicLinkService.CreateSymbolicLink(DefaultPath, newProfileSourcePath);
+                    }
+                    else
+                    {
+                        Directory.Move(newProfileSourcePath, DefaultPath);
+                    }
                 }
                 else
                 {
                     Directory.CreateDirectory(DefaultPath);
-                    Directory.Move(newProfileSourcePath, DefaultScriptsFolderPath);
+                    if(useSymbolicLink)
+                    {
+                        SymbolicLinkService.CreateSymbolicLink(DefaultScriptsFolderPath, newProfileSourcePath);
+                    }
+                    else
+                    {
+                        Directory.Move(newProfileSourcePath, DefaultScriptsFolderPath);
+                    }
                 }
             });
         }
         catch (Exception e)
         {
-            addMessage?.Invoke(e.Message);
+            outputMessage?.Invoke(e.Message);
             return false;
         }
         finally
