@@ -70,7 +70,18 @@
                                              Text="{Binding Url}"
                                              IsReadOnly="{Binding IsReadOnly}"
                                              VerticalAlignment="Center"
-                                             Margin="8 0" />
+                                             Margin="8 0" >
+                                        <TextBox.Style>
+                                            <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                                <Setter Property="Opacity" Value="1" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsReadOnly}" Value="True">
+                                                        <Setter Property="Opacity" Value="0.7" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBox.Style>
+                                    </TextBox>
 
                                     <Button Grid.Column="2"
                                             Command="{Binding DataContext.ChangeProfileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"

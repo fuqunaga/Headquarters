@@ -1,9 +1,9 @@
 {
   "ProfileSources": [
     {
-      "Name": "Default",
+      "Name": "デフォルト",
       "Url": "https://github.com/fuqunaga/Headquarters.git?path=Headquarters/Scripts",
-      "Description": "デフォルトのプロファイル"
+      "Description": "Headquarters同梱プロファイル"
     }
   ]
 }
