@@ -9,7 +9,7 @@
         Style="{StaticResource MaterialDesignWindow}"
         mc:Ignorable="d"
         Title="Headquarters"
-        Width="1200"
+        Width="1400"
         Height="800"
         d:DataContext="{d:DesignInstance local:MainWindowViewModel}">
     
