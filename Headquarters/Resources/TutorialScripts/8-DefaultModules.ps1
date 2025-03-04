@@ -1,8 +1,10 @@
 ﻿<#
 .SYNOPSIS
-HeadquartersData\Modules のテストスクリプト
+Headquartersに同梱されているPowerShellモジュールについて
 
 .DESCRIPTION
+HeadquartersData\Modulesのモジュールの説明とテストのスクリプト
+
 Test-PathExistence:
 指定されたパスが存在するかどうかを確認しまファイルの存在を確認し、存在しない場合はエラーをスローします
 主に引数のValidateScript属性でエラーメッセージがわかりやすくなります
@@ -22,7 +24,7 @@ Install-ModuleIfNotYet:
 インターネットに接続された環境でのみ有効です
 
 7Zip:
-指定したセッションで7Zip4Powershellを使用可能な状態にするラッパー
+指定したセッションで7Zip4Powershellを使用可能にするラッパー
 
 .PARAMETER Path
 Test-PathExistenceのテスト対象パス
