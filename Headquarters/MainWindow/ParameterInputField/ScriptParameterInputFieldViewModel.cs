@@ -60,6 +60,11 @@ namespace Headquarters
             
             if (parameterDefinition.IsBool())
             {
+                if (string.IsNullOrWhiteSpace(stringValue))
+                {
+                    return false;
+                }
+                
                 if ( bool.TryParse(stringValue, out var boolValue))
                 {
                     return boolValue;
