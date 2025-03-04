@@ -84,9 +84,7 @@ public class IpListViewModel : ViewModelBase
             MessageBox.Show($"{filePath}が不正です。", "ipList error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        DataGridViewModel.Items = dataTable;
-        // DataGridViewModel.RefreshDataGrid();
-        
+        SetItems(dataTable);
         _lastImportedFilePath = filePath;
     }
 
@@ -123,5 +121,11 @@ public class IpListViewModel : ViewModelBase
         var fileInfo = new FileInfo(filePath);
         fileInfo.Directory?.Create();
         File.WriteAllText(filePath, csv);
+    }
+
+    public void SetItems(DataTable dataTable)
+    {
+        DataGridViewModel.Items = dataTable;
+        DataGridViewModel.AddRowIfNoItems();
     }
 }

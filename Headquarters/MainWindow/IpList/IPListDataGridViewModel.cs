@@ -141,4 +141,12 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
             RefreshDataGrid();
         }
     }
+    
+    public void AddRowIfNoItems()
+    {
+        if (Items.Rows.Count == 0)
+        {
+            AddRowCommand.Execute(null);
+        }
+    }
 }

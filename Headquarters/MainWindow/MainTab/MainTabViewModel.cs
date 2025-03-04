@@ -63,7 +63,7 @@ public class MainTabViewModel : ViewModelBase, IDisposable
         ToggleLockCommand = new DelegateCommand(_ => IsLocked = !IsLocked);
         CloseTabCommand = new DelegateCommand(_ => ConfirmAndCloseTab(), _ => !IsLocked);
         
-        IpListViewModel.DataGridViewModel.Items = data.CreateIpListDataTable();
+        IpListViewModel.SetItems(data.CreateIpListDataTable());
         
         ScriptChainPageViewModel = new ScriptChainPageViewModel(IpListViewModel, data.ScriptChainData);
         ScriptChainPageViewModel.PropertyChanged += (_, args) =>
