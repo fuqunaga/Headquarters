@@ -27,8 +27,8 @@ public class IpListViewModel : ViewModelBase
 
     public IpListDataGridViewModel DataGridViewModel { get; } = new();
     
-    public ICommand ExportCommand { get; protected set; }
-    public ICommand ImportCommand { get; protected set; }
+    public ICommand ExportCommand { get; }
+    public ICommand ImportCommand { get; }
     
     public IpListViewModel()
     {

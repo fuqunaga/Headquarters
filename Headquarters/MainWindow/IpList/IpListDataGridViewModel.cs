@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
@@ -42,11 +41,9 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
 
     public IpListDataGridViewModel()
     {
-        // CS4014: Because this call is not awaited, execution of the current method continues before the call is completed.
-        // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/cs4014?redirectedfrom=MSDN
-        AddColumnCommand = new DelegateCommand(_ => {var suppressWarning = AddColumn();}, _ => !IsLocked);
-        RenameColumnCommand = new DelegateCommand(o => {var suppressWarning = RenameColumn(o); }, (obj) => !IsLocked && IsColumnNameEditable(obj));
-        DeleteColumnCommand = new DelegateCommand(o => {var suppressWarning = DeleteColumn(o); }, (obj) => !IsLocked && IsColumnNameEditable(obj));
+        AddColumnCommand = new DelegateCommand(_ =>  AddColumn(), _ => !IsLocked);
+        RenameColumnCommand = new DelegateCommand(RenameColumn, (obj) => !IsLocked && IsColumnNameEditable(obj));
+        DeleteColumnCommand = new DelegateCommand(DeleteColumn, (obj) => !IsLocked && IsColumnNameEditable(obj));
     }
 
     private static bool IsColumnNameEditable(object? obj)
@@ -71,7 +68,7 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
             ?? Array.Empty<string>();
     }
 
-    private async Task AddColumn()
+    private async void AddColumn()
     {
         var viewModel = new ComboBoxDialogViewModel()
         {
@@ -93,7 +90,7 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
         RefreshDataGrid();
     }
 
-    private async Task RenameColumn(object? obj)
+    private async void RenameColumn(object? obj)
     {
         var name = GetColumnNameFromMenuItem(obj);
         
@@ -122,7 +119,7 @@ public class IpListDataGridViewModel : SelectableDataGridViewModel
         }
     }
 
-    private async Task DeleteColumn(object? obj)
+    private async void DeleteColumn(object? obj)
     {
         var name = GetColumnNameFromMenuItem(obj);
 
