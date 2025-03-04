@@ -41,16 +41,13 @@
             <Grid>
                 <TextBox IsEnabled="False"
                          Text="IP Listの値を参照します"
-                         VerticalAlignment="Center"
-                         Padding="0"
-                         />
+                         Padding="0" />
             </Grid>
         </DataTemplate>
 
         <DataTemplate x:Key="Field-TextBox" DataType="{x:Type local:ParameterInputFieldViewModel}">
             <Grid>
                 <TextBox x:Name="PART_TextBox"
-                         VerticalAlignment="Center"
                          IsTabStop="True"
                          materialDesignInternal:InternalTextFieldAssist.IsMouseOver="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=IsMouseOver}">
                     <TextBox.Style>
@@ -70,7 +67,6 @@
 
                 <Button Command="{Binding OpenFileCommand}"
                         HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
                         Focusable="False"
                         Width="24"
                         Height="24"
@@ -83,7 +79,6 @@
         <DataTemplate x:Key="Field-ComboBox" DataType="{x:Type local:ParameterInputFieldViewModel}">
             <ComboBox  ItemsSource="{Binding ComboBoxItems}"
                        SelectedValue="{Binding Value}"
-                       VerticalAlignment="Center"
                        materialDesign:TextFieldAssist.OutlinedBorderActiveThickness="0"
                        Style="{StaticResource MaterialDesignFloatingHintComboBox}"
                        Padding="0"
@@ -182,7 +177,10 @@
                 Style="{StaticResource LockableStyle}">
             
             <Grid>
-                <ContentControl Style="{StaticResource InputField}" Content="{Binding }" IsTabStop="False"/>
+                <ContentControl Content="{Binding }" 
+                                Style="{StaticResource InputField}"
+                                VerticalAlignment="Center"
+                                IsTabStop="False"/>
             </Grid>
         </Border>
     </Grid>
