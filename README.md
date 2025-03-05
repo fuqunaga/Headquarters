@@ -8,6 +8,9 @@ HQ is a GUI tool for remotely operating multiple windows PCs using PowerShell.
 
 
 # QuickStart
+
+## Preparation
+
 ### Remote PC
 1. Run PowerShell as an administrator, execute the following command.
 
@@ -15,7 +18,6 @@ HQ is a GUI tool for remotely operating multiple windows PCs using PowerShell.
 Enable-PSRemoting
 ```  
 
-<img src="Documents/psadmin.jpg" height="300px"/>
 <img src="Documents/EnablePSRemoting.png" height="200px"/>
 
 
@@ -30,81 +32,67 @@ Set-Item WSMan:\localhost\Client\TrustedHosts -Value *
 
 1. Download HQ from [Release](https://github.com/fuqunaga/Headquaters/releases) page.
 1. Extract and start HQ (requires administrator authority)
-1. Enter user name and password of remote PC.
-1. Click on the script to use from the Scripts panel.
-1. Input parameters if the script requires.
-1. Enter the IP of the target PC in the IP List and check.
+1.  If the user on the local PC is different from the one on the remote PC, enter the remote PC's account information:
+    1.  Click the gear icon （⚙） in the top right.
+    1.  In the Settings window that opens, enter the UserName and UserPassword.
+1. Select the script to use from the Scripts menu and click it.
+1. If the script requires parameters, enter them.
+1. Enter the IP addresses of the target PCs in the IP List table and check them.
 1. Click run button(▶).
-1. Output is displayed in the frame at the bottom.  
- On normal termination it will be displayed as `☑ [IP address]:` 
+1. Execute the script by clicking the execute button （▶）.
+1. The output will be displayed in the frame at the bottom of the screen.
 
 ![alt throuth](Documents/throuth.gif)
   
-# Script
-File path:
-```
-.\*.ps1
-.\Scripts\*.ps1
-```
-
- * You can add your own script by putting the file in the above place.
- * A script is called for each IP on th IP List.
- * A script can receive PSSession of remote PC with `$session`.
- * Variables specified with `param()` are displayed on HQ and can be edited.
-
-## Examples:
-#### CopyItem.ps1
- ```
-param($session,$localPath,$remotePath)
-
-Copy-Item -ToSession $session -Path $localPath -Destination $remotePath
-```
-
-
-#### StopProcess.ps1
-```
-param($session, $process)
-
-Invoke-Command $session -ScriptBlock {
-    param($process)
-     Stop-Process -Name $process
-} -ArgumentList ($process)
-```
-
   
 # IP List
-IP address and parameter table for each PC.  
-Editable on HQ.
+A table of IP addresses of target PCs and parameters for each target.  
+The script will be executed for each selected IP address.
 
 ![alt editIPList](Documents/editIPList.gif)
 
-* saved in `.\ipList.csv`
-* The first row is the parameter name.
-* IP can be a range([IPAddressRange](https://github.com/jsakamoto/ipaddressrange/)).
-  * `192.168.10.10-20`
-  * `192.168.0.10 - 192.168.10.2`
-  
+* IP ranges can be specified using IPAddressRange.
+  *  `192.168.10.10-20`
+  *  `192.168.0.10 - 192.168.10.2`
+* You can import and export CSV files from the three-dot menu in the top right.
+  * The first row is the parameter name.
 
+
+
+# Scripts
+Location:
+```
+.\HeadquartersData\Profile\Scripts\*.ps1
+```
+*  You can add your own scripts by placing script files in the above location.
+*  For more details, see the wiki.
 
 # Parameter
-* Parameters that are not in the IP List are saved in `.\param.json`.
-* User name and password are also saved.
+The state of HQ is saved in the following file:
+```
+.\HeadquartersData\Profile\setting.json
+```
 
 
-# TIPS
-### ⚠No Security
-The password is saved in plaintext.  
-Be careful with handling param.json and ipList.csv.
+# Tips
 
-### Accounts are different for each PC
-If you prepare parameters`UserName`, `UserPassword` in IPList, it will be used.
+### Different account for each PC
+If you prepare parameters called `UserName` and `UserPassword` in the IP List, they will be reflected.
 
-### Avoiding System.OutOfMemoryException
-If multiple IPs are in the IPList, this may be avoided by limiting the number of tasks executed simultaneously.
-Please try to be smaller than IPList the MaxTaskNum that next to run button(▶).
+### ⚠ Be cautious of security
+Please note that all entered values, including `UserPassword`, are saved in plain text.
+
+### System.OutOfMemoryException Occurs
+If you specify multiple IPs in the IP List, you may be able to avoid this by limiting the number of tasks executed simultaneously.  
+This can be set from the menu next to the execute button (▶).
+
 
 # Libraries:
-* https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit - MaterialDesignInXamlToolkit
-* https://github.com/jsakamoto/ipaddressrange - IPAddressRange 
-* https://www.newtonsoft.com/json - Json<span />.NET
-* https://github.com/Fody/Costura - Costura.Fody
+* [MaterialDesignInXamlToolkit](https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit)
+* [Dragablz](https://dragablz.net/)
+* [IPAddressRange](https://github.com/jsakamoto/ipaddressrange)
+* [Json<span />.NET](https://www.newtonsoft.com/json)
+* [Costura.Fody](https://github.com/Fody/Costura)
+* [Gu.Wpf.NumericInput](https://github.com/GuOrg/Gu.Wpf.NumericInput)
+* [MinVer](https://github.com/adamralph/minver)
+* [PowerShell Standard.Library](https://github.com/PowerShell/PowerShellStandard)
