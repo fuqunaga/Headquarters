@@ -37,6 +37,7 @@
     <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="PowerShellStandard.Library" Version="5.1.1" />
+    <PackageReference Remove="Nerdbank.GitVersioning" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="NameDialog\NameDialog.xaml">
