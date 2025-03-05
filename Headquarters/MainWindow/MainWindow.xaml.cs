@@ -1,9 +1,7 @@
-﻿using System.Diagnostics;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using Dragablz;
 
 namespace Headquarters
@@ -16,7 +14,15 @@ namespace Headquarters
         public MainWindow()
         {
             InitializeComponent();
-            var version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
+            var assembly = Assembly.GetExecutingAssembly();
+            
+            // InformationalVersionは0.0.0[-alpha.0][+<commit hash>]の形式
+            // ビルドメタデータ（+<commit hash>の部分）だけ省いて表示
+            // > Build metadata is only included in the assembly informational version.
+            // https://github.com/adamralph/minver#versionin
+            var version = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                .InformationalVersion
+                .Split('+').First();
             Title = $"Headquarters {version}";
 
             var viewModel = new MainWindowViewModel(this)
