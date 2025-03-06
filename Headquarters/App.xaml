@@ -1,16 +1,52 @@
 ﻿<Application x:Class="Headquarters.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:Headquarters"
-             StartupUri="MainWindow.xaml">
+             StartupUri="MainWindow/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Dark.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.DeepPurple.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
+                <!-- This is the current way to setup your app's initial theme -->
+                <materialDesign:BundledTheme BaseTheme="Dark"
+                                             ColorAdjustment="{materialDesign:ColorAdjustment}"
+                                             PrimaryColor="DeepPurple"
+                                             SecondaryColor="Lime" />
+                
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
+                
+                <!-- Include the Dragablz Material Design style -->
+                <ResourceDictionary Source="UIUtility/CustomDragablz/CustomDragablzMaterialDesign.xaml" />                
             </ResourceDictionary.MergedDictionaries>
+            
+            <local:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+            <local:EnumToIntConverter x:Key="EnumToIntConverter" />
+            <local:NullToDependencyPropertyUnsetConverter x:Key="NullToDependencyPropertyUnsetConverter" />
+            <materialDesign:BooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" TrueValue="Collapsed" FalseValue="Visible" />
+
+            <system:String x:Key="LockedControlToolTip">操作するにはタブのロックを解除してください</system:String>
+            
+            <Style x:Key="LockableStyle" TargetType="{x:Type FrameworkElement}">
+                <Setter Property="IsEnabled" Value="{Binding (local:LockAssist.IsUnlocked), RelativeSource={RelativeSource AncestorType={x:Type local:MainTab}}}" />
+                <Setter Property="ToolTip" Value="{StaticResource LockedControlToolTip}" />
+                <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
+                <Setter Property="ToolTipService.Placement" Value="Mouse" />
+                <Setter Property="ToolTipService.IsEnabled" Value="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InvertBooleanConverter}}" />
+            </Style>
+            
+            <Style x:Key="LockableMenuItemStyle" TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                <Setter Property="ToolTip" Value="{StaticResource LockedControlToolTip}" />
+                <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
+                <Setter Property="ToolTipService.Placement" Value="Mouse" />
+                <Setter Property="ToolTipService.IsEnabled" Value="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InvertBooleanConverter}}" />
+            </Style>
+            
+            <!-- ComboBoxアクティブ時に枠が表示されるのを防ぐ -->
+            <Style TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignComboBox}">
+                <Setter Property="materialDesign:TextFieldAssist.OutlinedBorderActiveThickness" Value="0" />
+            </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

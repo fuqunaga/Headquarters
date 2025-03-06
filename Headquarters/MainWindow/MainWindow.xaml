@@ -1,0 +1,113 @@
+﻿<Window x:Class="Headquarters.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:dragablz="clr-namespace:Dragablz;assembly=Dragablz"
+        xmlns:local="clr-namespace:Headquarters"
+        Style="{StaticResource MaterialDesignWindow}"
+        mc:Ignorable="d"
+        Title="Headquarters"
+        Width="1400"
+        Height="800"
+        d:DataContext="{d:DesignInstance local:MainWindowViewModel}">
+    
+    <Window.Resources>
+        <ResourceDictionary>
+            <DataTemplate DataType="{x:Type local:MainTabViewModel}">
+                <local:MainTabHeader />
+            </DataTemplate>
+            
+            <Style x:Key="LockMenuItemStyle" TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}" 
+                   d:DataContext="{d:DesignInstance local:MainTabViewModel}">
+                <Setter Property="Header" Value="Lock" />
+                <Setter Property="Icon" Value="{materialDesign:PackIcon Kind=Lock}" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                        <Setter Property="Header" Value="Unlock"/>
+                        <Setter Property="Icon" Value="{materialDesign:PackIcon Kind=LockOpenVariant}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            
+            <ContextMenu x:Key="TabItemContextMenu"
+                         DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                         d:DataContext="{d:DesignInstance local:MainTabViewModel}">
+                <MenuItem Header="New tab to the right" Command="{Binding NewTabCommand}" />
+                <MenuItem Header="Duplicate" Command="{Binding DuplicateTabCommand}" />
+                <Separator />
+                <MenuItem Header="Rename" Command="{Binding RenameTabCommand}" />
+                <Separator />
+                <MenuItem Command="{Binding ToggleLockCommand}" Style="{StaticResource LockMenuItemStyle}"/>
+                <Separator />
+                <MenuItem Header="Close" Command="{Binding CloseTabCommand}"
+                          Style="{StaticResource LockableMenuItemStyle}" />
+            </ContextMenu>
+
+            <Style x:Key="TabItemStyle" TargetType="{x:Type dragablz:DragablzItem}" BasedOn="{StaticResource CustomMaterialDesignDragableTabItemStyle}">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="ContextMenu" Value="{StaticResource TabItemContextMenu}" />
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="#10FFFFFF" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <materialDesign:DialogHost Identifier="RootDialog">
+        <Grid>
+            <dragablz:TabablzControl x:Name="MainTabControl" Loaded="TabablzControl_Loaded"
+                                     ItemsSource="{Binding TabItems, Mode=OneWay}"
+                                     NewItemFactory="{x:Static local:MainTabViewModel.Factory}"
+                                     ItemContainerStyle="{StaticResource  TabItemStyle}"
+                                     SelectedIndex="{Binding SelectedTabIndex}">
+
+                <TabControl.ContentTemplate>
+                    <DataTemplate DataType="{x:Type local:MainTabViewModel}">
+                        <local:MainTab
+                            local:LockAssist.IsUnlocked="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"/>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+
+                <dragablz:TabablzControl.HeaderSuffixContent>
+                    <Grid MinWidth="64">
+                        <!-- Add new tab button -->
+                        <Button HorizontalAlignment="Left"
+                                Command="{x:Static dragablz:TabablzControl.AddItemCommand}"
+                                Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                materialDesign:RippleAssist.IsDisabled="True"
+                                Width="24"
+                                Height="24">
+                        
+                            <materialDesign:PackIcon Kind="Plus"
+                                                     Width="18"
+                                                     Height="18" />
+                        
+                        </Button>
+
+                        <!-- Setting button -->
+                        <Button HorizontalAlignment="Right"
+                                Content="{materialDesign:PackIcon Kind=Settings}"
+                                Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
+                                DataContext="{Binding SettingPageViewModel}"
+                                Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                Width="32"
+                                Height="32"
+                                Margin="8 0">
+                            <Button.CommandParameter>
+                                <local:SettingPage />
+                            </Button.CommandParameter>
+                        </Button>
+                    </Grid>
+                </dragablz:TabablzControl.HeaderSuffixContent>
+
+            </dragablz:TabablzControl>
+
+        </Grid>
+
+    </materialDesign:DialogHost>
+</Window>

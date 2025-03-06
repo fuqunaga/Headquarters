@@ -1,0 +1,62 @@
+﻿<UserControl x:Class="Headquarters.TextBoxWithOpenFileButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Headquarters"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:materialDesignInternal="clr-namespace:MaterialDesignThemes.Wpf.Internal;assembly=MaterialDesignThemes.Wpf"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300"
+             d:DataContext="{d:DesignInstance local:ITextBoxWithOpenFileButtonViewModel}"
+             >
+    
+    <UserControl.Resources>
+        <Style x:Key="FolderOpenIconButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
+            <Setter Property="Foreground" Value="{Binding ElementName=PartTextBox, Path=Foreground}" />
+            <Setter Property="Opacity" Value="0.7" />
+            <Setter Property="Visibility" Value="{Binding ShowOpenFileButton, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}" />
+                    <Setter Property="Opacity" Value="1" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.5" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    
+    
+    <Grid>
+        <TextBox x:Name="PartTextBox"
+                 Text="{Binding Value}"
+                 VerticalAlignment="Center"
+                 IsTabStop="True"
+                 materialDesignInternal:InternalTextFieldAssist.IsMouseOver="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=IsMouseOver}">
+            <TextBox.Style>
+                <Style TargetType="{x:Type TextBox}"
+                       BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
+                    <Setter Property="Padding" Value="0" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ShowOpenFileButton}" Value="True">
+                            <Setter Property="Padding" Value="0 0 32 0" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+
+            </TextBox.Style>
+        </TextBox>
+
+        <Button Command="{Binding OpenFileCommand}"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Focusable="False"
+                Width="24"
+                Height="24"
+                Style="{StaticResource FolderOpenIconButtonStyle}">
+            <materialDesign:PackIcon Kind="FolderOpen" Width="16" Height="16"/>
+        </Button>
+    </Grid>
+</UserControl>

@@ -1,0 +1,238 @@
+﻿<UserControl x:Class="Headquarters.ScriptChainPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:Headquarters"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:ScriptChainPageViewModel}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <ContextMenu x:Key="ScriptChainButtonContextMenu"
+                     DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                     d:DataContext="{d:DesignInstance local:ScriptChainHeaderViewModel}">
+            <MenuItem Header="New script page to the right" Command="{Binding NewRightCommand}" />
+            <MenuItem Header="Duplicate" Command="{Binding DuplicateCommand}" />
+            <Separator />
+            <MenuItem Header="Move left" Command="{Binding MoveLeftCommand}" />
+            <MenuItem Header="Move right" Command="{Binding MoveRightCommand}" />
+            <Separator />
+            <MenuItem Header="Close" Command="{Binding CloseCommand}" />
+        </ContextMenu>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <materialDesign:ColorZone Grid.Row="0"
+                                  Mode="PrimaryDark"
+                                  Padding="8">
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0"
+                            Orientation="Horizontal">
+                    
+                    <!-- Return button -->
+                    <Button
+                        Command="{Binding ReturnPageCommand}"
+                        Content="{materialDesign:PackIcon Kind=ArrowLeft, Size=20}"
+                        Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
+                        Style="{StaticResource MaterialDesignToolButton}" />
+
+
+                    <!-- Script icon -->
+                    <materialDesign:PackIcon Kind="ScriptText"
+                                             Margin="8 0 0 0"
+                                             VerticalAlignment="Center" />
+
+                    <!-- Script chain list -->
+                    <!-- ListBoxだとアイテム選択の機能があるのがよいが、アイテム間にマージンを設けてそこにアイコンを表示するのがむずかしい -->
+                    <!-- ItemsControlでボタンを並べる形式にする -->
+                    <ItemsControl ItemsSource="{Binding HeaderViewModels}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:ScriptChainHeaderViewModel}">
+                                <StackPanel Orientation="Horizontal">
+                                    <!-- Separator icon -->
+                                    <materialDesign:PackIcon x:Name="SeparatorIcon"
+                                                             Kind="ChevronRight"
+                                                             VerticalAlignment="Center"
+                                                             Visibility="{Binding IsMostLeft, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                             Opacity="0.8" />
+
+                                    <!-- Button -->
+                                    <!-- 選択中は濃くするがボタンは押せない -->
+                                    <Button Content="{Binding ScriptPageViewModel.HeaderText, Mode=OneWay}"
+                                            Command="{Binding DataContext.SelectScriptPageCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            ContextMenu="{StaticResource ScriptChainButtonContextMenu}"
+                                            ContextMenuService.ShowOnDisabled="True"
+                                            materialDesign:ButtonProgressAssist.IsIndicatorVisible="{Binding IsRunning}"
+                                            materialDesign:ButtonProgressAssist.IsIndeterminate="True"
+                                            Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
+                                            Padding="8 4">
+                                        <Button.Style>
+                                            <Style TargetType="Button"
+                                                   BasedOn="{StaticResource MaterialDesignFlatButton}">
+                                                <Setter Property="Opacity" Value="0.38" />
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter Property="Opacity" Value="1" />
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    
+                    <Button Command="{Binding AddScriptPageCommand}"
+                            Content="{materialDesign:PackIcon Kind=Plus, Size=20}"
+                            Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
+                            Style="{StaticResource MaterialDesignIconButton}" 
+                            Width="24"
+                            Height="24"/>
+                </StackPanel>
+
+                
+                <!-- Right side -->
+                <Grid Grid.Column="1" >
+                    <!-- Prepare Running -->
+                    <StackPanel HorizontalAlignment="Right" 
+                                Orientation="Horizontal">
+
+                        <materialDesign:ColorZone  CornerRadius="5"
+                                                   Padding="8 0"
+                                                   Margin="8 0"
+                                                   >
+                            
+                            <StackPanel Orientation="Horizontal">
+
+                                <!-- Select Run mode -->
+                                <ComboBox
+                                    ItemsSource="{Binding Source={x:Static local:ScriptChainPageViewModel.RunModeAndDescriptions}}"
+                                    SelectedValue="{Binding RunMode, Mode=TwoWay}"
+                                    SelectedValuePath="RunMode"
+                                    DisplayMemberPath="Description"
+                                    Visibility="{Binding CanRunScriptChain, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"
+                                    BorderThickness="0"
+                                    Margin="0 0 8 0" />
+
+                                <!-- Run button -->
+                                <Button Command="{Binding RunCommand}"
+                                        Visibility="{Binding IsRunning, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                        ToolTip="{Binding RunButtonToolTip}"
+                                        ToolTipService.IsEnabled="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InvertBooleanConverter}}"
+                                        ToolTipService.ShowOnDisabled="True"
+                                        Style="{StaticResource MaterialDesignIconButton}"
+                                        Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"
+                                        Width="32"
+                                        Height="32">
+                                    
+                                    <materialDesign:PackIcon Width="24" Height="24">
+                                        <materialDesign:PackIcon.Style>
+                                            <Style TargetType="materialDesign:PackIcon">
+                                                <Setter Property="Kind" Value="Play" />
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding CanRunScriptChain}" Value="True" />
+                                                            <Condition Binding="{Binding RunMode}" Value="ScriptChain" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Kind" Value="FastForward" />
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </materialDesign:PackIcon.Style>
+                                    </materialDesign:PackIcon>
+                                </Button>
+                                
+                                <!-- Stop button -->
+                                <Button Command="{Binding StopCommand}"
+                                        Content="{materialDesign:PackIcon Kind=Stop}"
+                                        Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                        Style="{StaticResource MaterialDesignIconButton}"
+                                        Foreground="#b54747"
+                                        Width="32"
+                                        Height="32" />
+                                    
+                            </StackPanel>
+                        </materialDesign:ColorZone>
+
+                        <!-- Popup -->
+                        <materialDesign:PopupBox StaysOpen="True">
+                            
+                            <StackPanel Grid.IsSharedSizeScope="True"
+                                        Margin="0 8">
+                                
+                                <!-- IsStopOnError -->
+                                <!-- "HeaderGroup"はMenuItemのスタイルで使用しているShaderSizeGroupと同名 -->
+                                <Grid Style="{StaticResource LockableStyle}"
+                                      Margin="24 4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition SharedSizeGroup="HeaderGroup" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Label Grid.Column="0"
+                                           Content="エラー時にすべてのタスクを停止する"
+                                           Margin="0 0 16 0" />
+
+                                    <CheckBox Grid.Column="1"
+                                              IsChecked="{Binding IsStopOnError, Mode=TwoWay}" />
+                                </Grid>
+                                
+                                <!-- MaxTaskCount -->
+                                <Grid Style="{StaticResource LockableStyle}"
+                                      Margin="24 4" >
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition SharedSizeGroup="HeaderGroup" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <Label Grid.Column="0"
+                                           Content="並列実行するタスクの最大数" 
+                                           Margin="0 0 16 0" />
+
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding MaxTaskCount, Mode=TwoWay}"
+                                             MinWidth="50" />
+
+                                </Grid>
+
+                                <Separator />
+
+                                <MenuItem Header="スクリプトファイルのフォルダを開く" Command="{Binding OpenScriptFolderCommand}" />
+                                <MenuItem Header="スクリプトファイルを開く" Command="{Binding OpenScriptFileCommand}"/>
+
+
+                            </StackPanel>
+                        </materialDesign:PopupBox>
+                    </StackPanel>
+                    
+                    
+                </Grid>
+            </Grid>
+        </materialDesign:ColorZone>
+
+        <local:ScriptPage Grid.Row="1"
+                          DataContext="{Binding CurrentScriptPageViewModel}" />
+    </Grid>
+</UserControl>

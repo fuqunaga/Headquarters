@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="Headquarters.IpListDataGrid"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Headquarters"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:IpListDataGridViewModel, IsDesignTimeCreatable=True}"
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <Style x:Key="LockableWithAnotherToolTipMenuItemStyle" TargetType="MenuItem" BasedOn="{StaticResource LockableMenuItemStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsLocked}" Value="False">
+                    <Setter Property="ToolTip" Value="この列は変更できません" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <ContextMenu x:Key="HeaderContextMenu"
+                     DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}"
+                     d:DataContext="{d:DesignInstance local:IpListDataGridViewModel}">
+            <MenuItem Header="Add"
+                      Command="{Binding AddColumnCommand}"
+                      Style="{StaticResource LockableMenuItemStyle}"/>
+            <MenuItem Header="Rename" Command="{Binding RenameColumnCommand}"
+                      CommandParameter="{Binding PlacementTarget, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}}" 
+                      Style="{StaticResource LockableWithAnotherToolTipMenuItemStyle}"/>
+            <MenuItem Header="Delete" Command="{Binding DeleteColumnCommand}"
+                      CommandParameter="{Binding PlacementTarget, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}}"
+                      Style="{StaticResource LockableWithAnotherToolTipMenuItemStyle}"/>
+        </ContextMenu>
+
+        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+            <Setter Property="ContextMenu" Value="{StaticResource HeaderContextMenu}" />
+            <Setter Property="Background" Value="#22000000" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+
+        <Style TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
+            <Setter Property="GridLinesVisibility" Value="All" />
+            <Setter Property="CanUserDeleteRows" Value="{Binding (local:LockAssist.IsUnlocked), RelativeSource={RelativeSource AncestorType=local:SelectableDataGrid}}" />
+        </Style>
+
+        <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+            <Setter Property="IsEnabled" Value="{Binding (local:LockAssist.IsUnlocked), RelativeSource={RelativeSource AncestorType=local:SelectableDataGrid}}" />
+            <!-- IsEnabled==false のときForegroundとOpacity両方変化して必要以上に暗くなるのでForegroudは固定 -->
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Foreground}" />
+            <!-- Tooltip on Lock -->
+            <Setter Property="ToolTip" Value="{StaticResource LockedControlToolTip}" />
+            <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
+            <Setter Property="ToolTipService.Placement" Value="Mouse" />
+            <Setter Property="ToolTipService.IsEnabled" Value="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InvertBooleanConverter}}" />
+        </Style>
+    </UserControl.Resources>
+
+    <local:SelectableDataGrid DataContext="{Binding}"
+                              d:DataContext="{d:DesignInstance local:IpListDataGridViewModel}"
+                              IsEnabled="{Binding IsEnabled}"
+                              local:LockAssist.IsUnlocked="{Binding IsLocked, Converter={StaticResource InvertBooleanConverter}}"
+                              ToolTip="スクリプト連続実行中は変更できません"
+                              ToolTipService.Placement="Mouse"
+                              ToolTipService.ShowOnDisabled="True"
+                              ToolTipService.IsEnabled="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource InvertBooleanConverter}}" />
+</UserControl>

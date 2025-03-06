@@ -1,0 +1,89 @@
+﻿<UserControl x:Class="Headquarters.ScriptPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:Headquarters"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:ScriptPageViewModel}"
+             d:DesignHeight="500">
+
+    <materialDesign:Transitioner SelectedIndex="{Binding Path=CurrentPage, Converter={StaticResource EnumToIntConverter}}">
+        <materialDesign:TransitionerSlide>
+            <materialDesign:TransitionerSlide.ForwardWipe>
+                <local:CustomFadeWipe />
+            </materialDesign:TransitionerSlide.ForwardWipe>
+
+            <!-- Select script -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button
+                                Command="{Binding SelectCommand}"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                Height="{x:Static system:Double.NaN}"
+                                FontWeight="Light"
+                                Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
+                                HorizontalContentAlignment="Stretch">
+                                <Grid Margin="16 8 0 4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                        <TextBlock
+                                            Text="{Binding Name}" />
+                                        <TextBlock Text="{Binding Synopsis}"
+                                                   FontSize="14"
+                                                   Opacity="0.5">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger
+                                                            Binding="{Binding Text, RelativeSource={RelativeSource Self}}"
+                                                            Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <TextBlock Text="スクリプトパース時にエラーが発生しました"
+                                                   Foreground="Crimson"
+                                                   Visibility="{Binding Converter={StaticResource BooleanToVisibilityConverter}, Path=HasError}" />
+                                    </StackPanel>
+
+
+                                    <materialDesign:PackIcon Grid.Column="1"
+                                                             Kind="ChevronRight"
+                                                             Width="28"
+                                                             Height="28"
+                                                             Opacity="0.5"
+                                                             VerticalAlignment="Center"
+                                                             HorizontalAlignment="Right" />
+                                </Grid>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+            </ScrollViewer>
+
+        </materialDesign:TransitionerSlide>
+
+        <materialDesign:TransitionerSlide OpeningEffect="{materialDesign:TransitionEffect SlideInFromRight}">
+            <materialDesign:TransitionerSlide.BackwardWipe>
+                <local:CustomFadeWipe />
+            </materialDesign:TransitionerSlide.BackwardWipe>
+
+            <local:ScriptRunPage DataContext="{Binding CurrentScriptRunViewModel}" />
+
+        </materialDesign:TransitionerSlide>
+    </materialDesign:Transitioner>
+
+</UserControl>

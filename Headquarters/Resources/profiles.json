@@ -1,0 +1,14 @@
+{
+  "ProfileSources": [
+    {
+      "Name": "デフォルト",
+      "Url": "https://github.com/fuqunaga/Headquarters.git?path=Headquarters/Resources/Scripts",
+      "Description": "Headquarters同梱プロファイル"
+    },
+    {
+      "Name": "チュートリアルスクリプト",
+      "Url": "https://github.com/fuqunaga/Headquarters.git?path=Headquarters/Resources/TutorialScripts",
+      "Description": "スクリプト作成者向けのチュートリアルスクリプト"
+    }
+  ]
+}

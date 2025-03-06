@@ -1,0 +1,338 @@
+﻿<UserControl x:Class="Headquarters.ScriptRunPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:Headquarters"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:ScriptRunViewModel}"
+             d:DesignWidth="800"
+             d:DesignHeight="500">
+
+    <UserControl.Resources>
+        <Style x:Key="HorizontalDividerBorder" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignDivider}" />
+            <Setter Property="Height" Value="1" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+        </Style>
+        
+        <!-- MaterialDesignToolのListBoxItemのスタイルを参考にシンプル化したもの
+             Rippleや選択時のアニメーションなどを削除
+             WPFデフォルトのマウスオーバー色が反映されてしまうのを修正 -->
+        <Style x:Key="OutputResultListBoxItemStyle" TargetType="ListBoxItem">
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocusWithin" Value="true">
+                    <Setter Property="IsSelected" Value="true" />
+                </Trigger>
+            </Style.Triggers>
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="materialDesign:ListBoxItemAssist.HoverBackground"
+                    Value="{Binding Foreground, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushOpacityConverter}, ConverterParameter=0.1}" />
+            <Setter Property="materialDesign:ListBoxItemAssist.SelectedFocusedBackground"
+                    Value="{Binding Foreground, RelativeSource={RelativeSource Self}, Converter={StaticResource BrushOpacityConverter}, ConverterParameter=0.18}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!-- マウスオーバー時のトリガーを設定 -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background"
+                                        Value="{Binding Path=(materialDesign:ListBoxItemAssist.HoverBackground), RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Trigger>
+                            <!-- 選択時のトリガーを設定 -->
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background"
+                                        Value="{Binding Path=(materialDesign:ListBoxItemAssist.SelectedFocusedBackground), RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <Style x:Key="HelpTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        
+        <ControlTemplate x:Key="HelpHeader">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="TextBox" Margin="8 0" />
+                <TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                            <Setter Property="Text" Value="{Binding Synopsis}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Synopsis}" Value="">
+                                    <Setter Property="Text" Value="Description" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+        </ControlTemplate>
+        
+        <DataTemplate x:Key="IconSmall" DataType="{x:Type local:OutputIcon}">
+            <materialDesign:PackIcon FontSize="12">
+                <materialDesign:PackIcon.Style>
+                    <Style TargetType="materialDesign:PackIcon">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding }" Value="{x:Static local:OutputIcon.Information}">
+                                <Setter Property="Kind" Value="InformationVariant" />
+                                <Setter Property="Foreground" Value="#0288D1" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding }" Value="{x:Static local:OutputIcon.NotStarted}">
+                                <Setter Property="Kind" Value="TimerSandEmpty" />
+                                <Setter Property="Foreground" Value="#B0BEC5" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding }" Value="{x:Static local:OutputIcon.Running}">
+                                <Setter Property="Kind" Value="Sync" />
+                                <Setter Property="Foreground" Value="#42A5F5" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding }" Value="{x:Static local:OutputIcon.Success}">
+                                <Setter Property="Kind" Value="CheckBold" />
+                                <Setter Property="Foreground" Value="#66BB6A" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding }" Value="{x:Static local:OutputIcon.Failure}">
+                                <Setter Property="Kind" Value="CloseThick" />
+                                <Setter Property="Foreground" Value="#E57373" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </materialDesign:PackIcon.Style>
+            </materialDesign:PackIcon>
+        </DataTemplate>
+    </UserControl.Resources>
+
+
+    <Grid x:Name="MainGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition x:Name="RowDef0" Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition x:Name="RowDef2" Height="*" />
+        </Grid.RowDefinitions>
+
+
+        <ScrollViewer Grid.Row="0"
+                      x:Name="ParametersRow"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto">
+
+            <StackPanel>
+
+                <!-- Synopsys -->
+                <!-- Descriptionがなければ表示 -->
+                <ContentControl Template="{StaticResource HelpHeader}"
+                                Margin="24 12">
+                    <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding HasSynopsis}" Value="True" />
+                                        <Condition Binding="{Binding HasDescription}" Value="False" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                </ContentControl>
+      
+                <!-- Description -->
+                <Expander HorizontalAlignment="Stretch"
+                          Visibility="{Binding HasDescription, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Expander.Header>
+                        <ContentControl Template="{StaticResource HelpHeader}" />
+                    </Expander.Header>
+                    
+                    <TextBlock Text="{Binding Description}"
+                               Style="{StaticResource HelpTextBlockStyle}"
+                               Margin="48 0 16 16"
+                               Opacity="0.7"/>
+                </Expander>
+                
+                <Border Style="{StaticResource HorizontalDividerBorder}" />
+
+
+                <!-- Parameters -->
+                <ItemsControl DockPanel.Dock="Top" Grid.IsSharedSizeScope="True"
+                          ItemsSource="{Binding Parameters}"
+                          Margin="0,16"
+                          KeyboardNavigation.TabNavigation="Continue">
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <local:ParameterInputField />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+
+        <GridSplitter Grid.Row="1"
+                      x:Name="Splitter"
+                      HorizontalAlignment="Stretch"
+                      Height="5" Cursor="SizeNS" 
+                      />
+        
+        <!-- Output Field -->
+        <Border Grid.Row="2"
+                DataContext="{Binding OutputFieldViewModel}"
+                BorderBrush="{DynamicResource MaterialDesign.Brush.TextBox.OutlineBorder}"
+                BorderThickness="{x:Static materialDesign:Constants.DefaultOutlinedBorderInactiveThickness}"
+                CornerRadius="4"
+                Margin="4 4 4 4">
+
+            <!-- 中のコンテンツが丸角でもクリッピングされるトリック
+                 https://stackoverflow.com/a/28344788/2015881 -->
+            <!-- Inner Border for Content clipping -->
+            <Border CornerRadius="{Binding CornerRadius, RelativeSource={RelativeSource AncestorType=Border}}" >
+                <!--OpacityMask for clipping the content inside the inner border-->
+                <Border.OpacityMask>
+                    <VisualBrush>
+                        <VisualBrush.Visual>
+                            <Border Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Border}}"
+                                       Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Border}}"
+                                       CornerRadius="{Binding CornerRadius, RelativeSource={RelativeSource AncestorType=Border}}"
+                                       Background="Black"/>
+                        </VisualBrush.Visual>
+                    </VisualBrush>
+                </Border.OpacityMask>
+
+                
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    
+                    <!-- Top Bar -->
+                    <Grid Grid.Row="0"
+                          Background="{DynamicResource MaterialDesign.Brush.ToolBar.Background}">
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Search field -->
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding SearchText, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}"
+                                     HorizontalAlignment="Left"
+                                     materialDesign:TextFieldAssist.HasClearButton="True"
+                                     materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                                     materialDesign:TextFieldAssist.LeadingIcon="Search"
+                                     materialDesign:TextFieldAssist.TextFieldCornerRadius="0"
+                                     materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"
+                                     Style="{StaticResource MaterialDesignFilledTextBox}"
+                                     BorderThickness="0"
+                                     MinWidth="200"
+                                     Height="20"
+                                     Padding="4 0"
+                                     Margin="2" />
+
+                            <!-- Filter Buttons -->
+                            <ListBox Grid.Column="1"
+                                     ItemsSource="{Binding FilterButtonViewModels}"
+                                     SelectionMode="Multiple"
+                                     materialDesign:ListBoxAssist.CanUserToggleSelectedItem="True"
+                                     Style="{StaticResource MaterialDesignToolToggleFlatListBox}"
+                                     HorizontalAlignment="Right"
+                                     Height="24"
+                                     Padding="2 0">
+
+                                <ListBox.Resources>
+                                    <Style x:Key="FilterTextBlock" TargetType="{x:Type TextBlock}"
+                                           BasedOn="{StaticResource {x:Type TextBlock}}">
+                                        <Setter Property="MinWidth" Value="24" />
+                                        <Setter Property="Padding" Value="2 1 0 0" />
+                                    </Style>
+                                </ListBox.Resources>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                        <Setter Property="Margin" Value="0 1" />
+                                        <Setter Property="Padding" Value="4 0" />
+                                        <Setter Property="IsSelected" Value="{Binding IsOutputVisible, Mode=TwoWay}" />
+                                        <Setter Property="ToolTip" Value="{Binding IconDescription}" />
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                           <ContentControl Content="{Binding Icon}" ContentTemplate="{StaticResource IconSmall}"
+                                                           HorizontalAlignment="Center"
+                                                           />
+                                            <TextBlock Text="{Binding Count}"
+                                                       d:Text="123"
+                                                       Style="{StaticResource FilterTextBlock}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Grid>
+
+                    <!-- OutputUnits -->
+                    <ListBox Grid.Row="1"
+                             ItemsSource="{Binding OutputUnitsViewSource.View}"
+                             VirtualizingStackPanel.VirtualizationMode="Recycling"
+                             VirtualizingStackPanel.ScrollUnit="Pixel"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ItemContainerStyle="{StaticResource OutputResultListBoxItemStyle}">
+
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:OutputUnitViewModel}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <ContentControl Grid.Column="0"
+                                                    Content="{Binding Icon}" ContentTemplate="{StaticResource IconSmall}" />
+                                    
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding Text, Mode=OneWay}"
+                                             Style="{StaticResource MaterialDesignTextBoxBase}"
+                                             IsReadOnly="True"
+                                             HorizontalScrollBarVisibility="Disabled"
+                                             VerticalScrollBarVisibility="Disabled"
+                                             TextWrapping="Wrap"
+                                             BorderThickness="0"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed">
+                                        
+                                        <!-- ForegroundとBindingで設定するが、nullの場合はデフォルト値を使用する -->
+                                        <!-- Foregroundはスタイルで定義されているでnullのときはMaterialDesignTextBoxBaseの定義をBind -->
+                                        <TextBox.Foreground>
+                                            <PriorityBinding>
+                                                <Binding Path="TextColor" Converter="{StaticResource NullToDependencyPropertyUnsetConverter}" />
+                                                <Binding Path="(TextElement.Foreground)" RelativeSource="{RelativeSource AncestorType={x:Type FrameworkElement}}" />
+                                            </PriorityBinding>
+                                        </TextBox.Foreground>
+                                    </TextBox>
+                                </Grid>
+                            </DataTemplate>
+
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+        </Border>
+    </Grid>
+</UserControl>
