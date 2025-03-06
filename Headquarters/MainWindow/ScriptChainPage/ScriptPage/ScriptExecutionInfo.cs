@@ -8,14 +8,45 @@ namespace Headquarters;
 
 public class ScriptExecutionInfo
 {
+    #region Type Definitions
+    
+    // ResultStringの構成要素
+    // 単純なstringかProgressRecordかを示す
+    public class OutputStringUnit
+    {
+        public string text = "";
+        public ProgressRecord? progressRecord;
+        
+        public bool IsText => !IsProgress;
+        public bool IsProgress => progressRecord is not null;
+
+        public override string ToString()
+        {
+            if ( progressRecord is not null)
+            {
+                var percent = progressRecord.PercentComplete < 0 ? "" : $"{progressRecord.PercentComplete}%";
+                return $"{progressRecord.Activity} {percent}";
+            }
+
+            return text;
+        }
+
+        public static implicit operator OutputStringUnit(string text) => new() { text = text };
+        public static implicit operator OutputStringUnit(ProgressRecord progressRecord) => new() { progressRecord = progressRecord };
+    }
+    
+    #endregion
+    
+    
     public event Action? onPropertyChanged;
 
     private readonly string _name;
     private PSInvocationStateInfo? _info;
     private PowerShellRunner.Result? _result;
     private string _customState = "";
-    private string _outputString = "";
-    private readonly Dictionary<int, ProgressRecord> _progressRecords = [];
+    
+    
+    private readonly List<OutputStringUnit> _outputStringUnits = [];
 
     public PowerShellEventSubscriber EventSubscriber { get; }
     
@@ -39,7 +70,7 @@ public class ScriptExecutionInfo
         }
     }
 
-    public string CustomState
+    private string CustomState
     {
         get => _customState;
         set
@@ -49,7 +80,7 @@ public class ScriptExecutionInfo
         }
     }
     
-    public string Label => $"{_name}: {Info?.State.ToString() ?? _customState}";
+    public string Label => $"{_name}: {Info?.State.ToString() ?? CustomState}";
 
     public ScriptExecutionInfo(string name)
     {
@@ -70,45 +101,12 @@ public class ScriptExecutionInfo
     
     public string GetResultString()
     {
-        return StringJoinWithoutNullOrEmpty("\n", _outputString, GetProgressString());
-    }
-    
-    private string GetProgressString()
-    {
-        lock (_progressRecords)
+        lock (_outputStringUnits)
         {
-            if (_progressRecords.Count == 0)
-            {
-                return "";
-            }
-
-            var removeIds = _progressRecords
-                .Where(kv => kv.Value.RecordType == ProgressRecordType.Completed)
-                .Select(kv => kv.Key)
-                .ToList();
-
-            foreach (var id in removeIds)
-            {
-                _progressRecords.Remove(id);
-            }
-
-            var progressStrings = _progressRecords.Values.Select(record =>
-            {
-                var percent = record.PercentComplete < 0 ? "" : $"{record.PercentComplete}%";
-                return $"{record.Activity} {percent}";
-            });
-            return StringJoinWithoutNullOrEmpty("\n", progressStrings);
+            return string.Join("\n", _outputStringUnits.Select(unit => unit.ToString()));
         }
     }
-    
-    private static string StringJoinWithoutNullOrEmpty(string separator, params string[] strings)
-        => StringJoinWithoutNullOrEmpty(separator, strings.AsEnumerable());
-    
-    private static string StringJoinWithoutNullOrEmpty(string separator, IEnumerable<string> strings)
-    {
-        return string.Join(separator, strings.Where(str => !string.IsNullOrEmpty(str)));
-    }
-    
+ 
     private PowerShellEventSubscriber CreateEventSubscriber()
     {
         var subscriber = new PowerShellEventSubscriber();
@@ -124,9 +122,9 @@ public class ScriptExecutionInfo
             AddToOutputString(str);
         };
         
-        subscriber.onDebugAdded +=  record => AddRecordToOutputString("Debug", record);;
+        subscriber.onDebugAdded +=  record => AddRecordToOutputString("Debug", record);
         subscriber.onInformationAdded +=  record => AddToOutputString(record.ToString());
-        subscriber.onVerboseAdded += record => AddRecordToOutputString("Verbose", record);;
+        subscriber.onVerboseAdded += record => AddRecordToOutputString("Verbose", record);
         
         subscriber.onWarningAdded += record => AddRecordToOutputString("Warning", record);
         subscriber.onErrorAdded += (record) => AddToOutputStringWithTag("Error",
@@ -134,16 +132,7 @@ public class ScriptExecutionInfo
             record.InvocationInfo?.PositionMessage ?? ""
         );
     
-        
-        subscriber.onProgressAdded += (progressRecord) =>
-        {
-            lock (_progressRecords)
-            {
-                _progressRecords[progressRecord.ActivityId] = progressRecord;
-            }
-
-            onPropertyChanged?.Invoke();
-        };
+        subscriber.onProgressAdded += AddProgressRecord;
         
         return subscriber;
         
@@ -164,19 +153,62 @@ public class ScriptExecutionInfo
         
         void AddToOutputString(string text)
         {
-            lock (subscriber)
+            lock (_outputStringUnits)
             {
-                if (string.IsNullOrEmpty(_outputString))
+                var last = _outputStringUnits.LastOrDefault();
+                if (last is { IsText: true })
                 {
-                    _outputString = text;
+                    last.text += $"\n{text}";
                 }
                 else
                 {
-                    _outputString += $"\n{text}";
+                    _outputStringUnits.Add(text);
                 }
-
-                onPropertyChanged?.Invoke();
             }
+            
+            onPropertyChanged?.Invoke();
+        }
+        
+        void AddProgressRecord(ProgressRecord progressRecord)
+        {
+            lock (_outputStringUnits)
+            {
+                var index = _outputStringUnits.FindIndex(unit => unit.IsProgress
+                                                                 && unit.progressRecord?.ActivityId == progressRecord.ActivityId);
+
+                // Completedなら削除
+                if (progressRecord.RecordType == ProgressRecordType.Completed)
+                {
+                    if(index < 0)
+                    {
+                        return;
+                    }
+                    
+                    _outputStringUnits.RemoveAt(index);
+
+                    // 前後があり、かつ両方がテキストなら結合
+                    if (0 < index && index < _outputStringUnits.Count)
+                    {
+                        var prev = _outputStringUnits[index - 1];
+                        var next = _outputStringUnits[index];
+                        if (prev.IsText && next.IsText)
+                        {
+                            prev.text += $"\n{next.text}";
+                            _outputStringUnits.RemoveAt(index);
+                        }
+                    }
+                }
+                else if (index >= 0)
+                {
+                    _outputStringUnits[index] = progressRecord;
+                }
+                else
+                {
+                    _outputStringUnits.Add(progressRecord);
+                }
+            }
+            
+            onPropertyChanged?.Invoke();
         }
     }
 }
