@@ -17,8 +17,7 @@
                    Visibility="{Binding HelpDetail, Converter={StaticResource StringIsEmptyVisibilityConverter}}"
                    Opacity="0.7"
                    TextWrapping="Wrap"
-                   FontSize="12"
-                   MaxWidth="400" />
+                   FontSize="12"/>
 
     </StackPanel>
 </UserControl>
