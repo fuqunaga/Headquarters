@@ -65,7 +65,7 @@ Location:
 .\HeadquartersData\Profile\Scripts\*.ps1
 ```
 *  You can add your own scripts by placing script files in the above location.
-*  For more details, see the wiki.
+*  For more details, see the [wiki](https://github.com/fuqunaga/Headquarters/wiki/Script).
 
 # Parameter
 The state of HQ is saved in the following file:
