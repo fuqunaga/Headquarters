@@ -5,11 +5,10 @@
 .DESCRIPTION
 パラメーターのAttributeなどでUIの表示を変更することができます
 UIはヘルプ記述順になります
-ヘルプに記述のないパラメーターはヘルプにあるパラメーターの後に表示されます
+ヘルプに記述のないパラメーターは記述のあるパラメーターの後に表示されます
 
 .PARAMETER DefaultValueParameter
 デフォルト値
-以下のような書式でデフォルト値を指定できます
 param(
     $DefaultValueParameter = "Default Value"
 )
