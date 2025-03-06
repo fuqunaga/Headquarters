@@ -16,9 +16,8 @@ public static class GlobalParameter
     public const string UserNameAndPasswordDescription = """
                                                          リモートPCのアカウント
                                                          不要な場合は空欄にしてください
-                                                         複数のリモートPCで別々のアカウントを指定する場合は
-                                                         IP Listに"UserName","UserPassword"という列を追加して指定ください
-                                                         平文で"./setting.json"に保存されます。取扱いにご注意ください
+                                                         複数のリモートPCで別々のアカウントを指定する場合はIP Listに"UserName","UserPassword"という列を追加して指定ください
+                                                         平文で".\HeadquartersData/setting.json"に保存されます。取扱いにご注意ください
                                                          """;
 
 
