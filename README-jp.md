@@ -61,7 +61,7 @@ Set-Item WSMan:\localhost\Client\TrustedHosts -Value *
 ```
 
  * 上記場所にスクリプトファイルを置くことでユーザ独自のスクリプトを追加できます
- * 詳しくはwiki
+ * 詳しくは[wiki](https://github.com/fuqunaga/Headquarters/wiki/Script)を参照ください
 
 
 # パラメーター
