@@ -25,10 +25,9 @@ public class ChangeScriptFolderViewModel : ViewModelBase, IHelpTextBlockViewMode
 
     private void OnOpenFile()
     {
-        var dialog = new OpenFileOrFolderDialog();
-        if (dialog.ShowDialog())
+        if (OpenFileOrFolderDialog.ShowDialog(Value) is { } path)
         {
-            Value = dialog.FileOrFolderName;
+            Value = path;
         }
     }
 }

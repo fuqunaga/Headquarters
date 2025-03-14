@@ -170,7 +170,8 @@
         </Grid.ColumnDefinitions>
 
         <!-- Help -->
-        <local:HelpTextBlock Grid.Column="0" />
+        <local:HelpTextBlock Grid.Column="0" 
+                             MaxWidth="450"/>
                              
         <!-- Input Field -->
         <Border Grid.Column="1"

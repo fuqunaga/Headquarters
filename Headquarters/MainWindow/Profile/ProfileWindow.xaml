@@ -38,7 +38,7 @@
 
                     <TextBlock Opacity="0.7"
                                Margin="40 16">
-                        ProfileとはPowerShellスクリプト群と設定をまとめたものです<LineBreak />
+                        ProfileとはPowerShellスクリプト群と設定をまとめたフォルダです<LineBreak />
                         Profileを切り替えることでHeadquartersを特定用途向けの状態に切り替えることができます<LineBreak />
                         PowerShellスクリプトを含むフォルダ（Scriptsフォルダ）、<LineBreak />
                         もしくは、Scriptsフォルダを含む親フォルダを指定できます<LineBreak />
@@ -98,37 +98,6 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
-                    <!-- Backup Field -->
-                    <Grid DataContext="{Binding BackupProfileSource}"
-                          Visibility="{Binding HasBackup, Converter={StaticResource BooleanToVisibilityConverter}}"
-                          Margin="0 8">
-
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="AUTO" SharedSizeGroup="HeaderWidth" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <local:HelpTextBlock Grid.Column="0" />
-
-                        <!-- 初回で最初のアイテムが選択されるようにSelectedIndex=0を指定 -->
-                        <ComboBox Grid.Column="1"
-                                  ItemsSource="{Binding BackupNames}"
-                                  SelectedItem="{Binding SelectedBackupName, Mode=TwoWay}"
-                                  IsSynchronizedWithCurrentItem="True"
-                                  Margin="8 0" />
-
-                        <Button Grid.Column="2"
-                                Command="{Binding DataContext.RestoreBackupCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                Style="{StaticResource ChangeProfileButtonStyle}">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Restore"
-                                                         VerticalAlignment="Center" />
-                                <TextBlock Text="元に戻す" />
-                            </StackPanel>
-                        </Button>
-                    </Grid>
-
                     <Separator />
                     
                     <!-- Local Folder -->
@@ -143,7 +112,8 @@
 
                         <local:HelpTextBlock Grid.Column="0" />
 
-                        <local:TextBoxWithOpenFileButton Grid.Column="1" />
+                        <local:TextBoxWithOpenFileButton Grid.Column="1"
+                                                         Margin="8 0"/>
                         
                         <Button Grid.Column="2"
                                 Command="{Binding DataContext.ChangeProfileByLocalFolderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -156,7 +126,42 @@
                             </StackPanel>
                         </Button>
                     </Grid>
-                    
+
+                    <!-- Backup Field -->
+                    <StackPanel DataContext="{Binding BackupProfileSource}"
+                          Visibility="{Binding HasBackup, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        
+                        <Separator />
+                        
+                        <Grid Margin="0 8">
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="AUTO" SharedSizeGroup="HeaderWidth" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <local:HelpTextBlock Grid.Column="0" />
+
+                            <!-- 初回で最初のアイテムが選択されるようにSelectedIndex=0を指定 -->
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding BackupNames}"
+                                      SelectedItem="{Binding SelectedBackupName, Mode=TwoWay}"
+                                      IsSynchronizedWithCurrentItem="True"
+                                      Margin="8 0" />
+
+                            <Button Grid.Column="2"
+                                    Command="{Binding DataContext.RestoreBackupCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    Style="{StaticResource ChangeProfileButtonStyle}">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Restore"
+                                                             VerticalAlignment="Center" />
+                                    <TextBlock Text="元に戻す" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+
                 </StackPanel>
 
                 <Separator />
